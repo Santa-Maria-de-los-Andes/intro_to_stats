@@ -116,15 +116,14 @@ Cada DataFrame que uses en este curso va a vivir en una variable como `df_games`
 """))
 
 s1.append(code("nb1s1-setup", """\
-# Autograder (aun no publicado -- ver nota al pie de build_nb1.py)
-!wget -q https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/CS1---Grader/main/autograder_nb1_semana1.py
+# Autograder y dataset (repo: Santa-Maria-de-los-Andes/intro_to_stats)
+!wget -q https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/autograder_nb1_semana1.py
+!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/Weeks%201-2/vgsales_es.csv"
 from autograder_nb1_semana1 import Autograder
 grader = Autograder()
 
 import pandas as pd  # pd.algo() = "usa la funcion algo de la libreria pandas"
 
-# Si estas en Colab y el archivo aun no esta hospedado, subelo a la sesion
-# (icono de carpeta a la izquierda) antes de correr esta celda.
 df_games = pd.read_csv('vgsales_es.csv')
 
 print("Dataset cargado.")"""))
@@ -436,15 +435,16 @@ La semana pasada aterrizaste y resumiste con honestidad un dataset de videojuego
 {LEYENDA_ICONOS}"""))
 
 s2.append(code("nb1s2-setup", """\
-# Autograder (aun no publicado -- ver nota al pie de build_nb1.py)
-!wget -q https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/CS1---Grader/main/autograder_nb1_semana2.py
+# Autograder (aun no publicado -- ver nota al pie de build_nb1.py) y datasets
+# (repo: Santa-Maria-de-los-Andes/intro_to_stats)
+!wget -q https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/autograder_nb1_semana2.py
+!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/Weeks%201-2/vgsales_es.csv"
+!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/Weeks%201-2/athlete_events_es.csv"
 from autograder_nb1_semana2 import Autograder
 grader = Autograder()
 
 import pandas as pd
 
-# Si estas en Colab y los archivos aun no estan hospedados, subelos a la sesion
-# (icono de carpeta a la izquierda) antes de correr esta celda.
 df_games = pd.read_csv('vgsales_es.csv')       # se vuelve a usar en la Integracion (tarea)
 df_athletes = pd.read_csv('athlete_events_es.csv')
 
