@@ -68,9 +68,6 @@ datos para tomar decisiones informadas y entender el mundo.
 | **Predictiva** | ¿Qué es probable que pase? | Semana 6 (regresión lineal) |
 | **Prescriptiva** | ¿Qué deberíamos hacer al respecto? | Se nombra por completitud (ejemplos de medicina/negocios); **este curso no construye una herramienta prescriptiva** |
 
-> ⚠️ Nota de precisión estadística (GAUSS): el agrupamiento (k-means, Semana 7) es
-> **descriptivo/exploratorio** — agrupa lo que ya existe — **no es predictivo**. Es un error común
-> confundirlo con predicción; el material debe evitarlo explícitamente.
 
 ### 1.3 Media, Mediana y Moda — definidas formalmente
 
@@ -85,12 +82,6 @@ datos para tomar decisiones informadas y entender el mundo.
 ruido** — indica que la distribución está sesgada (hay valores extremos jalando la media). No
 se enseña "la mediana es más correcta"; se enseña que **cuál usar depende de qué se quiere
 describir con honestidad**.
-
-### 1.4 Dispersión (adelanto conceptual para la Sección B)
-
-Además de "dónde está el centro" (media/mediana/moda), una pregunta igual de importante es
-"qué tan dispersos están los datos" — introducida formalmente como **desviación estándar** en
-la Sección B: en lenguaje simple, "en promedio, qué tan lejos está cada dato del centro."
 
 ---
 
