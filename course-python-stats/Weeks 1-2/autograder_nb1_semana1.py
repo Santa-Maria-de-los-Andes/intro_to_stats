@@ -907,22 +907,22 @@ async function agRegister() {{
         self._header("EJERCICIO 2 — Escaneo de Datos ⚠️", icon="🔴", pts=8)
         checks = []
         col = _get("columna_con_mas_nulos")
-        EXP = "anio"  # 16327 non-null vs Editor 16540 non-null (271 vs 58 faltantes)
+        EXP = ("ano", "anio")  # "Año" normaliza a "ano"; se acepta tambien la grafia ASCII "anio"
 
         if col is None:
             checks.append((False, "columna_con_mas_nulos",
                            "No definida — mira el Non-Null Count más bajo en .info()"))
         elif not isinstance(col, str):
             checks.append((False, "columna_con_mas_nulos", f"Debe ser str, recibí {type(col).__name__}"))
-        elif _norm(col) == EXP:
-            checks.append((True, "columna_con_mas_nulos == 'Anio'",
-                           "✓  Anio tiene 16327/16598 valores (271 faltantes) — más que Editor (58 faltantes)"))
+        elif _norm(col) in EXP:
+            checks.append((True, "columna_con_mas_nulos == 'Año'",
+                           "✓  Año tiene 16327/16598 valores (271 faltantes) — más que Editor (58 faltantes)"))
         elif _norm(col) == "editor":
             checks.append((False, "columna_con_mas_nulos",
-                           "Editor sí tiene nulos (58), pero Anio tiene más (271). Revisa .info() con cuidado"))
+                           "Editor sí tiene nulos (58), pero Año tiene más (271). Revisa .info() con cuidado"))
         else:
             checks.append((False, "columna_con_mas_nulos",
-                           f"Debe ser 'Anio', obtuve '{col}'. Busca el Non-Null Count más bajo"))
+                           f"Debe ser 'Año', obtuve '{col}'. Busca el Non-Null Count más bajo"))
 
         return self._award("ex2", checks, 8)
 
@@ -1154,8 +1154,33 @@ async function agRegister() {{
         ),
     }
 
+    def _show_teoria_locked(self, n):
+        """Pregunta ya respondida -- no se permite una segunda respuesta."""
+        spec = self._TEORIA[int(n)]
+        pts, max_pts = self._scores[f"t{int(n)}"]
+        ok = pts == max_pts
+        color = "#4caf50" if ok else "#ee1515"
+        estado = (f"✅ Ya respondiste correctamente ({pts}/{max_pts} pts)" if ok
+                  else f"❌ Ya respondiste esta pregunta ({pts}/{max_pts} pts)")
+        display(HTML(
+            f'<div style="max-width:840px;margin:10px 0;background:#0d0d1a;'
+            f'border:2px solid {color};border-radius:4px;padding:14px 18px;'
+            f'font-family:\'Segoe UI\',Roboto,sans-serif;">'
+            f'<div style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
+            f'color:#8888bb;letter-spacing:1px;margin-bottom:8px;">'
+            f'🔒 {spec["title"]} — YA RESPONDIDA</div>'
+            f'<div style="color:{color};font-size:13px;">{estado}</div>'
+            f'<div style="color:#8888bb;font-size:12px;margin-top:6px;">'
+            f'Esta pregunta admite una sola respuesta. Volver a ejecutar la celda no '
+            f'genera un nuevo intento.</div></div>'
+        ))
+
     def _grade_teoria(self, n, letter):
         spec = self._TEORIA[int(n)]
+        key = f"t{int(n)}"
+        if key in self._scores:
+            self._show_teoria_locked(n)
+            return
         letter = (letter or "").strip().lower()
         ok = letter == spec["correct"]
         self._header(f"❓ {spec['title']}", icon="❓", pts=spec["pts"])
@@ -1170,6 +1195,9 @@ async function agRegister() {{
 
     def _ask_teoria(self, n):
         spec = self._TEORIA[n]
+        if f"t{n}" in self._scores:
+            self._show_teoria_locked(n)
+            return
         try:
             from google.colab import output as _out  # noqa: F401  (solo para confirmar entorno Colab)
             import random as _r

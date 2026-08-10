@@ -117,8 +117,8 @@ Cada DataFrame que uses en este curso va a vivir en una variable como `df_games`
 
 s1.append(code("nb1s1-setup", """\
 # Autograder y dataset (repo: Santa-Maria-de-los-Andes/intro_to_stats)
-!wget -q https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/autograder_nb1_semana1.py
-!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/Weeks%201-2/vgsales_es.csv"
+!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/course-python-stats/Weeks%201-2/autograder_nb1_semana1.py"
+!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/course-python-stats/Weeks%201-2/vgsales_es.csv"
 from autograder_nb1_semana1 import Autograder
 grader = Autograder()
 
@@ -238,7 +238,7 @@ numericas y cuales son texto?
 """))
 s1.append(code("nb1-a-ex2-predice", """\
 # 🔮 PREDICE (no se califica, es solo para ti)
-mi_prediccion = "___"  # ej: "Anio y las columnas de Ventas son numericas"""))
+mi_prediccion = "___"  # ej: "Año y las columnas de Ventas son numericas"""))
 s1.append(code("nb1-a-ex2-guiado", """\
 # 👀 OBSERVA
 df_games.info()"""))
@@ -437,9 +437,9 @@ La semana pasada aterrizaste y resumiste con honestidad un dataset de videojuego
 s2.append(code("nb1s2-setup", """\
 # Autograder (aun no publicado -- ver nota al pie de build_nb1.py) y datasets
 # (repo: Santa-Maria-de-los-Andes/intro_to_stats)
-!wget -q https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/autograder_nb1_semana2.py
-!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/Weeks%201-2/vgsales_es.csv"
-!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/Weeks%201-2/athlete_events_es.csv"
+!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/course-python-stats/Weeks%201-2/autograder_nb1_semana2.py"
+!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/course-python-stats/Weeks%201-2/vgsales_es.csv"
+!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/course-python-stats/Weeks%201-2/athlete_events_es.csv"
 from autograder_nb1_semana2 import Autograder
 grader = Autograder()
 
@@ -785,7 +785,7 @@ promedio? ¿cual es la dispersion? ¿quien es un atipico?
 s2.append(md("nb1-intex1-md", """\
 #### ✅ Integracion 1 -- Videojuegos (8 pts)
 
-🔨 Elige un genero (`Genero`), filtra `df_games`, agrupa por `Plataforma` y calcula el
+🔨 Elige un genero (`Género`), filtra `df_games`, agrupa por `Plataforma` y calcula el
 promedio de `Ventas_Globales`. Escribe una frase con tu hallazgo.
 
 Variables que espera el autograder: `df_genero`, `ventas_por_plataforma`,

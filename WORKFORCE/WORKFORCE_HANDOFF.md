@@ -279,11 +279,17 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 
 ## Accepted Risks / Scope Cuts
 
-- **Files kept at repo root, not moved into `WORKFORCE/`.** `COURSE_TEMPLATE.md` documents the
-  path as `WORKFORCE/01_SOFIA.md` etc., but the actual files live at repo root while
-  `ORCHESTRATOR.md` lives in `WORKFORCE/ORCHESTRATOR/`. Accepted as-is on 2026-07-20 (user chose
-  "content refresh only," no file reorg). Revisit if the path mismatch causes real confusion for
-  a future agent following `COURSE_TEMPLATE.md` literally.
+- ~~**Files kept at repo root, not moved into `WORKFORCE/`.**~~ **Resolved 2026-08-08.** Full
+  repo reorg: `01_SOFIA.md`, `02_PIXEL.md`, `03_ATLAS.md`, `04_GAUSS.md`,
+  `WORKFORCE_CONTRACT.md`, and `WORKFORCE_HANDOFF.md` (this file) moved into `WORKFORCE/`,
+  matching the path `COURSE_TEMPLATE.md` already documented. `COURSE_TEMPLATE.md` and
+  `supabase_schema.sql` moved to `shared/`; each course's guide, official unit-plan docx, and
+  `Weeks N-M` folder now nest under `course-python-stats/` or `course-sheets-stats/`;
+  `autograder_nb1_semana1.py` moved next to `build_nb1.py` in
+  `course-python-stats/Weeks 1-2/`. The prerequisite-course grader (`autograder_nb2.py`, God of
+  War theme, unrelated to either stats course) moved to `reference/legacy-CS1/`. Notebook `!wget`
+  URLs and `nb1.html`'s logo `<img src>` were updated to match the new paths — see root
+  `README.md` for the full map.
 - **No fourth agent added for capstone/rubric grading.** ATLAS's existing mandate was extended
   instead (see Done Log). Revisit only if rubric-grading work turns out to need dedicated bandwidth
   ATLAS can't reasonably absorb alongside autograder validation.

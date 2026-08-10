@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intro to Stats · Hub · I.E. Santa María de los Andes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #07070f;
+      color: #e8e8ff;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* scanlines */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent 0px, transparent 3px,
+        rgba(0,0,0,.04) 3px, rgba(0,0,0,.04) 4px
+      );
+      pointer-events: none; z-index: 1000;
+    }
+
+    .px { font-family: 'Press Start 2P', monospace; }
+
+    /* ── Keyframes ── */
+    @keyframes glow-gold {
+      0%,100% { text-shadow: 0 0 14px rgba(255,215,0,.8), 2px 2px 0 #7a5500; }
+      50%      { text-shadow: 0 0 36px rgba(255,215,0,1), 0 0 70px rgba(255,140,0,.5), 2px 2px 0 #7a5500; }
+    }
+    @keyframes float   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    @keyframes shimmer { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
+    @keyframes blink   { 50% { opacity: 0; } }
+    @keyframes pulse-gold {
+      0%   { box-shadow: 0 0 0 0 rgba(255,215,0,.4), 0 8px 32px rgba(0,0,0,.7); }
+      70%  { box-shadow: 0 0 0 10px rgba(255,215,0,0), 0 8px 32px rgba(0,0,0,.7); }
+      100% { box-shadow: 0 0 0 0 rgba(255,215,0,0), 0 8px 32px rgba(0,0,0,.7); }
+    }
+    @keyframes spin-dot { to { transform: rotate(360deg); } }
+    @keyframes ticker   { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+    @keyframes slide-up { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+    @keyframes lock-float { 0%,100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-4px) rotate(5deg); } }
+
+    /* ── School banner ── */
+    .school-banner {
+      width: 100%; background: #04040c;
+      border-bottom: 1px solid #ffd70028;
+      padding: 0 20px; height: 38px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .school-left  { display: flex; align-items: center; gap: 10px; }
+    .school-emblem {
+      width: 28px; height: 28px; border-radius: 50%; overflow: hidden;
+      filter: drop-shadow(0 0 4px rgba(255,215,0,.35));
+    }
+    .school-emblem img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .school-name-text {
+      font-family: 'Segoe UI', Georgia, serif;
+      font-size: clamp(10px,1.8vw,13px); color: #c8c8e8;
+      letter-spacing: .5px; font-style: italic;
+    }
+    .school-name-text strong { font-style: normal; color: #e8e8ff; font-weight: 600; }
+    .school-right {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px; color: #ffd70050; letter-spacing: 1px;
+    }
+
+    /* ── Page wrapper ── */
+    .page { max-width: 1040px; margin: 0 auto; padding: 0 16px 60px; }
+
+    /* ── Hero header ── */
+    .hero {
+      text-align: center; padding: 48px 16px 32px;
+      border-bottom: 2px solid #ffd70030; margin-bottom: 36px;
+    }
+    .hero-title {
+      font-size: clamp(14px, 3.4vw, 24px); color: #ffd700;
+      animation: glow-gold 2.5s ease-in-out infinite;
+      letter-spacing: 3px; margin-bottom: 12px;
+    }
+    .hero-sub { font-size: 8px; color: #9d4edd; letter-spacing: 2px; margin-bottom: 20px; }
+    .hero-prompt {
+      font-size: 8px; color: #6666aa; letter-spacing: 2px;
+      animation: blink 1.4s step-end infinite;
+    }
+
+    /* ── Live ticker ── */
+    .ticker-wrap {
+      overflow: hidden; background: #09091a;
+      border: 1px solid #ffd70030; border-radius: 2px;
+      height: 28px; display: flex; align-items: center; margin-bottom: 44px;
+    }
+    .ticker-label {
+      flex-shrink: 0; background: #ffd700; color: #0d0d1a;
+      font-size: 7px; padding: 0 10px; height: 100%;
+      display: flex; align-items: center; letter-spacing: 1px;
+    }
+    .ticker-inner {
+      white-space: nowrap; animation: ticker 30s linear infinite;
+      font-size: 8px; color: #ffd700; padding: 0 40px;
+    }
+
+    /* ── Track ── */
+    .track { margin-bottom: 48px; }
+    .track-header {
+      display: flex; align-items: baseline; flex-wrap: wrap;
+      gap: 8px 14px; margin-bottom: 18px; padding-bottom: 14px;
+      border-bottom: 2px solid var(--accent-dim);
+    }
+    .track-title {
+      font-size: clamp(10px, 2.2vw, 14px); letter-spacing: 2px;
+      color: var(--accent);
+    }
+    .track-subtitle { font-size: 8px; color: #6666aa; letter-spacing: 1px; }
+    .track-badge {
+      margin-left: auto; font-size: 7px; padding: 5px 10px; border-radius: 2px;
+      letter-spacing: 1px; white-space: nowrap;
+      background: var(--accent-bg); border: 1px solid var(--accent-dim); color: var(--accent);
+    }
+    .track-python { --accent: #ffd700; --accent-dim: #ffd70030; --accent-bg: rgba(255,215,0,.08); }
+    .track-sheets { --accent: #e0a458; --accent-dim: #e0a45830; --accent-bg: rgba(224,164,88,.08); }
+
+    /* ── Quest grid ── */
+    .quest-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 18px;
+    }
+
+    /* ── Quest card base ── */
+    .quest-card {
+      border-radius: 8px; padding: 22px 18px;
+      display: flex; flex-direction: column; gap: 12px;
+      position: relative; overflow: hidden;
+      text-decoration: none; color: inherit;
+      transition: transform .18s, border-color .18s;
+    }
+    .quest-card:not(.locked):hover { transform: translateY(-4px); }
+
+    /* Live card — gold */
+    .quest-card.live {
+      background: linear-gradient(145deg, #110e00, #1e1800);
+      border: 2px solid #ffd700;
+      box-shadow: 0 0 32px rgba(255,215,0,.18), 0 8px 32px rgba(0,0,0,.7);
+      animation: pulse-gold 3s ease-in-out infinite;
+    }
+    .quest-card.live:hover { border-color: #ffe060; }
+    .quest-card.live::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 60px; height: 60px; border-radius: 0 0 100% 0; opacity: .35;
+      background: radial-gradient(circle at top left, #ffd700, transparent 70%);
+    }
+
+    /* Locked */
+    .quest-card.locked {
+      background: linear-gradient(145deg, #0a0a12, #0e0e18);
+      border: 2px solid #2a2a3a;
+      box-shadow: 0 4px 20px rgba(0,0,0,.6);
+      cursor: not-allowed;
+    }
+
+    /* ── Card internals ── */
+    .card-nb-tag { font-size: 7px; letter-spacing: 2px; margin-bottom: 2px; }
+    .live .card-nb-tag   { color: #ffd700; }
+    .locked .card-nb-tag { color: #333355; }
+
+    .card-title { font-size: clamp(9px, 1.8vw, 12px); letter-spacing: 1px; line-height: 1.7; }
+    .live .card-title   { color: #ffe580; }
+    .locked .card-title { color: #2a2a44; }
+
+    .card-desc { font-size: 11px; color: #6666aa; line-height: 1.6; }
+    .locked .card-desc { color: #1e1e30; }
+
+    /* mini stats */
+    .card-stats { display: flex; gap: 10px; flex-wrap: wrap; }
+    .stat-pill {
+      font-size: 7px; padding: 4px 9px; border-radius: 2px;
+      white-space: nowrap; letter-spacing: 1px;
+    }
+    .live .stat-pill {
+      background: rgba(255,215,0,.08); border: 1px solid #ffd70040; color: #ccaa00;
+    }
+    .stat-pill.live::before {
+      content: '● '; color: #39ff14;
+      animation: blink .9s step-end infinite;
+    }
+
+    /* CTA button */
+    .card-btn {
+      display: inline-block; align-self: flex-start;
+      font-size: 8px; letter-spacing: 1px;
+      padding: 9px 16px; border-radius: 3px;
+      text-decoration: none; transition: opacity .18s;
+    }
+    .live .card-btn {
+      background: rgba(255,215,0,.18); border: 1px solid #ffd70070; color: #ffd700;
+    }
+    .quest-card:not(.locked):hover .card-btn { opacity: .75; }
+
+    /* spinner */
+    .spin-dot {
+      width: 10px; height: 10px;
+      border: 2px solid #ffd70030; border-top-color: #ffd700;
+      border-radius: 50%; display: inline-block;
+      animation: spin-dot .8s linear infinite; vertical-align: middle;
+    }
+
+    /* lock overlay */
+    .lock-overlay {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px; padding: 6px 0;
+    }
+    .lock-icon {
+      font-size: 32px;
+      animation: lock-float 3s ease-in-out infinite;
+      filter: grayscale(1) opacity(.25);
+    }
+    .lock-text {
+      font-size: 8px; color: #2a2a44; letter-spacing: 2px;
+      text-align: center; line-height: 2;
+    }
+    .lock-badge {
+      font-size: 7px; padding: 5px 12px; border-radius: 2px;
+      background: rgba(42,42,58,.5); border: 1px solid #2a2a3a;
+      color: #333355; letter-spacing: 1px;
+    }
+
+    /* ── Teacher link ── */
+    .teacher-link {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; margin-bottom: 40px; padding: 14px 20px;
+      background: #08080f; border: 1px solid #1e1e3a; border-radius: 6px;
+      text-decoration: none; color: #5a5a8a;
+      font-size: 8px; letter-spacing: 1px;
+      transition: border-color .2s, color .2s;
+    }
+    .teacher-link:hover { border-color: #4361ee50; color: #7b9eff; }
+
+    /* ── Footer ── */
+    .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #1a1a3a; }
+    .footer-logo {
+      display: inline-flex; flex-direction: column; align-items: center; gap: 10px;
+      background: #0a0a14; border: 2px solid #ffd700; border-radius: 6px; padding: 18px 32px;
+      box-shadow: 0 0 28px rgba(255,215,0,.18), 0 0 60px rgba(255,215,0,.06);
+    }
+    .footer-logo-img {
+      width: 72px; height: 72px; object-fit: contain;
+      filter: drop-shadow(0 0 10px rgba(255,215,0,.4));
+      animation: float 4s ease-in-out infinite;
+    }
+    .footer-logo-label {
+      font-family: 'Press Start 2P', monospace; font-size: 10px;
+      background: linear-gradient(135deg, #ffd700, #ff6b35, #ffd700);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-size: 200%; animation: shimmer 3s linear infinite; letter-spacing: 3px;
+    }
+    .footer-sub { font-size: 7px; color: #2a2a4a; margin-top: 10px; letter-spacing: 1px; }
+
+    /* slide-in stagger */
+    .quest-card { animation: slide-up .4s ease both; }
+    .quest-card:nth-child(1) { animation-delay: .05s; }
+    .quest-card:nth-child(2) { animation-delay: .1s; }
+    .quest-card:nth-child(3) { animation-delay: .15s; }
+    .quest-card:nth-child(4) { animation-delay: .2s; }
+    .quest-card:nth-child(5) { animation-delay: .25s; }
+    .quest-card:nth-child(6) { animation-delay: .3s; }
+    .quest-card:nth-child(7) { animation-delay: .35s; }
+
+    @media (max-width: 480px) {
+      .school-right { display: none; }
+      .hero-title { font-size: 13px; }
+      .track-badge { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="school-banner">
+  <div class="school-left">
+    <div class="school-emblem"><img src="shared/icono%20SMA.png" alt="SMA"></div>
+    <span class="school-name-text"><strong>I.E. Santa María de los Andes</strong></span>
+  </div>
+  <div class="school-right px">BIMESTRE 3 · ESTADÍSTICA · 2026</div>
+</div>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="px hero-title">📊 UNIDAD 3 · ESTADÍSTICA 📊</div>
+    <div class="px hero-sub">ELIGE TU RUTA DE APRENDIZAJE</div>
+    <div class="px hero-prompt">▶ SELECCIONA UNA MISIÓN PARA CONTINUAR…</div>
+  </div>
+
+  <div class="ticker-wrap">
+    <div class="px ticker-label">LIVE</div>
+    <div class="px ticker-inner" id="ticker">Cargando estadísticas…</div>
+  </div>
+
+  <!-- ═══ TRACK: PYTHON ═══ -->
+  <div class="track">
+    <div class="track-header track-python">
+      <div class="px track-title">🐍 ESTADÍSTICA EN PYTHON</div>
+      <div class="track-subtitle">"Pensando con Datos" · Jupyter / Colab</div>
+      <div class="px track-badge">3° – 5° SECUNDARIA</div>
+    </div>
+
+    <div class="quest-grid">
+
+      <!-- Semanas 1-2: live -->
+      <a href="course-python-stats/nb1.html" class="quest-card live">
+        <div class="px card-nb-tag">MISIÓN 1 · SEMANAS 1-2</div>
+        <div class="px card-title">🔍 RECUPERACIÓN DE DATOS</div>
+        <div class="card-desc">Carga, explora y filtra datasets reales con pandas. Estabiliza los datos antes de interrogarlos.</div>
+        <div class="card-stats" id="stats-nb1">
+          <span class="px stat-pill"><span class="spin-dot"></span></span>
+        </div>
+        <span class="px card-btn">▶ VER RANKING</span>
+      </a>
+
+      <!-- Semanas 3-4 -->
+      <div class="quest-card locked">
+        <div class="px card-nb-tag">MISIÓN 2 · SEMANAS 3-4</div>
+        <div class="px card-title">📈 CORRELACIÓN</div>
+        <div class="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="px lock-text">AÚN NO<br>DESBLOQUEADO</div>
+          <div class="px lock-badge">PRÓXIMAMENTE</div>
+        </div>
+      </div>
+
+      <!-- Semana 5 -->
+      <div class="quest-card locked">
+        <div class="px card-nb-tag">MISIÓN 3 · SEMANA 5</div>
+        <div class="px card-title">⚠️ CORRELACIÓN ≠ CAUSALIDAD</div>
+        <div class="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="px lock-text">AÚN NO<br>DESBLOQUEADO</div>
+          <div class="px lock-badge">PRÓXIMAMENTE</div>
+        </div>
+      </div>
+
+      <!-- Semana 6 -->
+      <div class="quest-card locked">
+        <div class="px card-nb-tag">MISIÓN 4 · SEMANA 6</div>
+        <div class="px card-title">📉 REGRESIÓN LINEAL</div>
+        <div class="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="px lock-text">AÚN NO<br>DESBLOQUEADO</div>
+          <div class="px lock-badge">PRÓXIMAMENTE</div>
+        </div>
+      </div>
+
+      <!-- Semana 7 -->
+      <div class="quest-card locked">
+        <div class="px card-nb-tag">MISIÓN 5 · SEMANA 7</div>
+        <div class="px card-title">🧩 K-MEANS CLUSTERING</div>
+        <div class="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="px lock-text">AÚN NO<br>DESBLOQUEADO</div>
+          <div class="px lock-badge">PRÓXIMAMENTE</div>
+        </div>
+      </div>
+
+      <!-- Semana 8 -->
+      <div class="quest-card locked">
+        <div class="px card-nb-tag">SEMANA 8</div>
+        <div class="px card-title">🏁 EXAMEN FINAL</div>
+        <div class="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="px lock-text">AÚN NO<br>DESBLOQUEADO</div>
+          <div class="px lock-badge">PRÓXIMAMENTE</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ TRACK: SHEETS ═══ -->
+  <div class="track">
+    <div class="track-header track-sheets">
+      <div class="px track-title">🕵️ ESTADÍSTICA EN SHEETS</div>
+      <div class="track-subtitle">"El Caso de los Datos" · Google Sheets</div>
+      <div class="px track-badge">1° – 2° SECUNDARIA</div>
+    </div>
+
+    <div class="quest-grid">
+
+      <!-- Semanas 1-2 -->
+      <div class="quest-card locked">
+        <div class="px card-nb-tag">CASO 1 · SEMANAS 1-2</div>
+        <div class="px card-title">🗂️ ABRIENDO EL CASO</div>
+        <div class="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="px lock-text">AÚN NO<br>DESBLOQUEADO</div>
+          <div class="px lock-badge">PRÓXIMAMENTE</div>
+        </div>
+      </div>
+
+      <!-- Semana 3 -->
+      <div class="quest-card locked">
+        <div class="px card-nb-tag">CASO 2 · SEMANA 3</div>
+        <div class="px card-title">🔎 EL SOSPECHOSO PROMEDIO</div>
+        <div class="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="px lock-text">AÚN NO<br>DESBLOQUEADO</div>
+          <div class="px lock-badge">PRÓXIMAMENTE</div>
+        </div>
+      </div>
+
+      <!-- Semana 4 -->
+      <div class="quest-card locked">
+        <div class="px card-nb-tag">CASO 3 · SEMANA 4</div>
+        <div class="px card-title">⚖️ LA MEDIANA NO MIENTE</div>
+        <div class="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="px lock-text">AÚN NO<br>DESBLOQUEADO</div>
+          <div class="px lock-badge">PRÓXIMAMENTE</div>
+        </div>
+      </div>
+
+      <!-- Semana 5 -->
+      <div class="quest-card locked">
+        <div class="px card-nb-tag">CASO 4 · SEMANA 5</div>
+        <div class="px card-title">🎯 EL PATRÓN MÁS COMÚN</div>
+        <div class="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="px lock-text">AÚN NO<br>DESBLOQUEADO</div>
+          <div class="px lock-badge">PRÓXIMAMENTE</div>
+        </div>
+      </div>
+
+      <!-- Semana 6 -->
+      <div class="quest-card locked">
+        <div class="px card-nb-tag">CASO 5 · SEMANA 6</div>
+        <div class="px card-title">🕳️ CUIDADO CON LAS TRAMPAS</div>
+        <div class="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="px lock-text">AÚN NO<br>DESBLOQUEADO</div>
+          <div class="px lock-badge">PRÓXIMAMENTE</div>
+        </div>
+      </div>
+
+      <!-- Semana 7 -->
+      <div class="quest-card locked">
+        <div class="px card-nb-tag">CASO 6 · SEMANA 7</div>
+        <div class="px card-title">🖼️ EL INFORME VISUAL</div>
+        <div class="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="px lock-text">AÚN NO<br>DESBLOQUEADO</div>
+          <div class="px lock-badge">PRÓXIMAMENTE</div>
+        </div>
+      </div>
+
+      <!-- Semana 8 -->
+      <div class="quest-card locked">
+        <div class="px card-nb-tag">SEMANA 8</div>
+        <div class="px card-title">📁 CIERRE DEL CASO</div>
+        <div class="lock-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="px lock-text">AÚN NO<br>DESBLOQUEADO</div>
+          <div class="px lock-badge">PRÓXIMAMENTE</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <a href="dashboard.html" class="teacher-link px">
+    <span>⚙</span>
+    <span>DASHBOARD DOCENTE</span>
+    <span>→</span>
+  </a>
+
+  <div class="footer">
+    <div class="footer-logo">
+      <img class="footer-logo-img" src="shared/icono%20SMA.png" alt="I.E. Santa María de los Andes">
+      <span class="footer-logo-label px">SMA</span>
+    </div>
+    <div class="px footer-sub" style="margin-top:14px;">ESTADÍSTICA · BIMESTRE 3 · 2026</div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL      = 'https://uwykikwutjtkpffwmdiq.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_aBG6GD4wn9CgpSE-47fagQ_sNhnzznu';
+
+// Debe coincidir con CURSO_ID / NOTEBOOK_ID en autograder_nb1_semana1.py y
+// course-python-stats/nb1.html. Consulta directa a `submissions` (no la RPC
+// get_best_submissions: todavía no filtra por `curso`, ver WORKFORCE_HANDOFF
+// ticket #6) para no mezclar filas de otro curso que reuse el mismo notebook id.
+const CURSO_ID    = 'STAT_2026';
+const NOTEBOOK_ID = 'nb1_semana1';
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+});
+
+function dedupBest(rows) {
+  const best = {};
+  for (const row of rows) {
+    const key = row.dni || row.email;
+    if (!best[key] || row.pct > best[key].pct) best[key] = row;
+  }
+  return Object.values(best).sort((a, b) => b.pct - a.pct);
+}
+
+async function loadStats() {
+  const statsEl = document.getElementById('stats-nb1');
+
+  try {
+    const { data, error } = await db
+      .from('submissions')
+      .select('dni,email,nombre,pct,submitted_at')
+      .eq('curso',    CURSO_ID)
+      .eq('notebook', NOTEBOOK_ID);
+
+    if (error) throw error;
+
+    const players = dedupBest(data || []);
+
+    if (!players.length) {
+      statsEl.innerHTML = `<span class="px stat-pill">Sin datos aún</span>`;
+      return;
+    }
+
+    const top     = players[0].pct;
+    const avg     = Math.round(players.reduce((s, p) => s + p.pct, 0) / players.length);
+    const topName = players[0].nombre || (players[0].email || 'Analista').split('@')[0];
+
+    statsEl.innerHTML = `
+      <span class="px stat-pill live">${players.length} ANALISTAS</span>
+      <span class="px stat-pill">TOP ${top}%</span>
+      <span class="px stat-pill">AVG ${avg}%</span>
+    `;
+
+    document.getElementById('ticker').textContent =
+      `PYTHON · SEMANAS 1-2 · LÍDER: ${topName} · ${top}%   ⚔   ${players.length} ANALISTAS EN RUTA   ⚔   PROMEDIO ${avg}%`;
+  } catch (e) {
+    statsEl.innerHTML = `<span class="px stat-pill">Sin datos aún</span>`;
+  }
+}
+
+loadStats();
+</script>
+</body>
+</html>
