@@ -17,7 +17,9 @@ Fuente de contenido:
     decision de division en 2 archivos)
 
 Datasets: vgsales_es.csv (Semana 1, Secciones A-B), athlete_events_es.csv (Semana 2,
-Secciones C-D). Semana 2 tambien recarga df_games porque intex1 (tarea) lo usa.
+Secciones C-D + Integracion). Semana 2 usa UNICAMENTE df_atletas -- ya no recarga
+df_games/vgsales (decision del usuario, 2026-08-11: Semana 2 es una tarea nueva y
+autocontenida, no una continuacion de la mision de videojuegos).
 Tema visual: placeholder neutro -- pendiente PIXEL (ticket #2, WORKFORCE_HANDOFF.md).
 
 Convenciones:
@@ -26,17 +28,29 @@ Convenciones:
   - check_exN etiquetados 🔨 CONSTRUYE: el notebook NO trae la solucion escrita, solo
     instrucciones + un bloque "Tu codigo aqui" en blanco.
   - check_exN etiquetados 🧩 COMPLETA: mantienen el patron de blancos `___`.
-  - La numeracion de check_exN/check_debugN/check_tN es GLOBAL a la Mision 1 (no se
-    reinicia en Semana 2) para que el progreso se pueda rastrear como una sola mision
-    aunque viva en dos archivos.
+  - La numeracion de check_exN/check_debugN/check_tN es GLOBAL a la Mision 1 dentro de
+    Semana 1 (no cambia). **Semana 2 tiene su PROPIA numeracion independiente,
+    reiniciada en 0** (check_ex0, check_debug0, check_t0...) -- decision del usuario,
+    2026-08-11: Semana 2 se trata como una tarea nueva y separada, no una continuacion
+    numerica de Semana 1. Esto es seguro de hacer ahora porque ningun autograder de
+    Semana 2 existe todavia (ticket #10) -- ver nota para ATLAS abajo.
 
 Nota para ATLAS (ticket #10, WORKFORCE_HANDOFF.md): esto implica DOS autograders
 separados -- autograder_nb1_semana1.py (check_ex1-5, debug1, t1-9, mini_a, mini_b,
-resumen) y autograder_nb1_semana2.py (check_ex6-11, debug2-5, t10-12, mini_c, mini_d,
-intex1-2, reto1, resumen) -- no un autograder compartido entre archivos. Cada uno
-necesita su propio `notebook` id en el payload de Supabase (sugerido:
-"nb1_semana1" / "nb1_semana2") para que el lookup de "tu mejor puntaje previo" en el
-formulario de registro no mezcle las dos sesiones.
+resumen) y autograder_nb1_semana2.py (check_ex0-6, debug0-3, t0-4, mini_c, mini_d,
+intex0-4, reto1, resumen) -- no un autograder compartido entre archivos, y con
+numeracion que NO continua la de Semana 1. Cada uno necesita su propio `notebook` id
+en el payload de Supabase (sugerido: "nb1_semana1" / "nb1_semana2") para que el
+lookup de "tu mejor puntaje previo" en el formulario de registro no mezcle las dos
+sesiones.
+
+Semana 2 `check_tN` -- de donde sale el contenido: t0-t2 reutilizan (verbatim) las
+preguntas t10-t12 de Preguntas_Teoricas_Semanas1-2.md bajo su nuevo numero local
+(ver el argumento `banco=` en cada llamada a `teoria_check` mas abajo, y el
+"Bloque 5" agregado a ese archivo con la referencia completa). t3 y t4 son preguntas
+NUEVAS, escritas para esta reestructuracion (no estaban en el banco original) --
+su enunciado completo tambien vive en el "Bloque 5" de Preguntas_Teoricas_Semanas1-2.md
+para que ATLAS no tenga que extraerlo del codigo generado.
 """
 import json
 
@@ -47,10 +61,16 @@ def code(cell_id, source):
     return {"cell_type": "code", "id": cell_id, "metadata": {}, "source": source,
             "outputs": [], "execution_count": None}
 
-def teoria_check(cell_id, n):
-    """Celda unica para una pregunta de teoria: el HTML lo renderiza el autograder."""
+def teoria_check(cell_id, n, banco=None):
+    """Celda unica para una pregunta de teoria: el HTML lo renderiza el autograder.
+
+    `banco`: si la pregunta reutiliza contenido de Preguntas_Teoricas_Semanas1-2.md bajo
+    otro numero (p.ej. la numeracion independiente de Semana 2, ver build_nb1.py docstring),
+    referencia ese numero original aqui para que quede trazable.
+    """
+    banco_nota = f" (banco: t{banco})" if banco is not None else ""
     return code(cell_id, f"""\
-# ❓ Pregunta t{n} -- ejecuta esta celda para verla y responder
+# ❓ Pregunta t{n}{banco_nota} -- ejecuta esta celda para verla y responder
 grader.check_t{n}()""")
 
 LEYENDA_ICONOS = """\
@@ -428,37 +448,81 @@ s1.append(code("nb1s1-resumen", "grader.resumen()"))
 
 s2.append(md("nb1s2-titulo", f"""\
 # Mision 1: Recuperacion de Datos
-### Semana 2 -- continuacion
+### Semana 2 -- Tarea Nueva
 
 La semana pasada aterrizaste y resumiste con honestidad un dataset de videojuegos.
+Esta semana es una **tarea nueva y separada**: otro dataset (`df_atletas`), y tus
+propios ejercicios -- empiezan otra vez desde el Ejercicio 0.
 
 {LEYENDA_ICONOS}"""))
 
 s2.append(code("nb1s2-setup", """\
-# Autograder (aun no publicado -- ver nota al pie de build_nb1.py) y datasets
+# Autograder (aun no publicado -- ver nota al pie de build_nb1.py) y dataset
 # (repo: Santa-Maria-de-los-Andes/intro_to_stats)
 !wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/course-python-stats/Weeks%201-2/autograder_nb1_semana2.py"
-!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/course-python-stats/Weeks%201-2/vgsales_es.csv"
 !wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/course-python-stats/Weeks%201-2/athlete_events_es.csv"
 from autograder_nb1_semana2 import Autograder
 grader = Autograder()
 
 import pandas as pd
 
-df_games = pd.read_csv('vgsales_es.csv')       # se vuelve a usar en la Integracion (tarea)
-df_athletes = pd.read_csv('athlete_events_es.csv')
+df_atletas = pd.read_csv('athlete_events_es.csv')
 
-print("Datasets cargados.")"""))
+print("Dataset cargado.")"""))
 
 s2.append(md("nb1-c-pivot", """\
-## 🌐 Segundo Paquete de Datos
+## 🌐 Un Dataset Nuevo, Mucho Mas Grande
 
-El primer paquete esta estabilizado. Llega un segundo paquete, mucho mas grande:
-271,116 registros de atletas olimpicos (1896-2016). Demasiado grande para leerlo fila
-por fila -- necesitas **hacerle preguntas especificas**.
+Esta semana trabajas con `df_atletas`: 271,116 registros de atletas olimpicos
+(1896-2016). Es demasiado grande para leerlo fila por fila -- necesitas **hacerle
+preguntas especificas**.
+
+De aqui en adelante, todo lo que hagas en este notebook usa **unicamente**
+`df_atletas`. No vuelves a tocar el dataset de videojuegos de la semana pasada.
 """))
 
+s2.append(md("nb1-repaso-header", """\
+---
+## 🧮 Antes de Filtrar -- Repaso de tus Herramientas de Resumen
+
+Ya usaste `.mean()`, `.median()` y `.std()` la semana pasada sobre otro dataset. Aqui
+repites exactamente los mismos metodos, ahora sobre `df_atletas`, antes de aprender a
+filtrar (Seccion C) y agrupar (Seccion D).
+
+| Metodo | Que calcula | Cuando usarlo |
+|---|---|---|
+| `.mean()` | La **media** -- suma de todos los valores dividida entre la cantidad de valores | "El promedio," cuando no hay valores extremos que lo distorsionen |
+| `.median()` | La **mediana** -- el valor central de los datos ordenados de menor a mayor | Cuando hay valores extremos (atipicos) que pueden arrastrar la media |
+| `.std()` | La **desviacion estandar** -- en promedio, que tan lejos esta cada dato del centro | Para medir que tan dispersos (o concentrados) estan los datos |
+
+Los tres se llaman igual: `df['columna'].metodo()` -- solo cambia la columna y el
+metodo, el patron no cambia.
+"""))
+
+s2.append(code("nb1-repaso-guiado", """\
+# 👀 OBSERVA: los tres metodos, sobre la columna Peso de TODOS los atletas
+print("Media de Peso:", df_atletas['Peso'].mean().round(1))               # promedio -- sensible a valores extremos
+print("Mediana de Peso:", df_atletas['Peso'].median())                     # centro real, resistente a extremos
+print("Desviacion estandar de Peso:", df_atletas['Peso'].std().round(1))   # que tan dispersos estan los pesos"""))
+
+s2.append(md("nb1-ex0-md", """\
+#### ✅ Ejercicio 0 -- Repite el patron: mean, median, std (10 pts)
+
+🔨 Igual que arriba, pero sobre la columna `Altura` en vez de `Peso`.
+
+Variables que espera el autograder: `media_altura`, `mediana_altura`, `desviacion_altura`.
+"""))
+s2.append(code("nb1-ex0-code", """\
+# ============================
+#      Tu codigo aqui
+# ============================
+
+
+print(f"Media: {media_altura:.1f} | Mediana: {mediana_altura} | Desviacion: {desviacion_altura:.1f}")"""))
+s2.append(code("nb1-ex0-check", "grader.check_ex0()"))
+
 s2.append(md("nb1-c-header", """\
+---
 ## 🎯 Seccion C -- Filtra el Ruido
 
 Filtrar es **hacerle una pregunta especifica a los datos** ("muestrame solo los
@@ -477,7 +541,7 @@ columna de `True`/`False`, una por cada fila, segun si esa fila cumple la condic
 Eso se llama una **mascara booleana**.
 
 ```python
-df_athletes['Edad'] > 20
+df_atletas['Edad'] > 20
 # 0      True
 # 1      False
 # 2      True
@@ -488,7 +552,7 @@ Cuando pones esa mascara dentro de `df[...]`, pandas te devuelve **solo las fila
 donde la mascara es `True`**:
 
 ```python
-df_athletes[df_athletes['Edad'] > 20]
+df_atletas[df_atletas['Edad'] > 20]
 ```
 
 El dataset original **no cambia** -- esto crea una vista nueva con el subconjunto que
@@ -497,9 +561,9 @@ cumple tu pregunta. El patron general es siempre: `df[df['columna'] operador val
 
 s2.append(code("nb1-c-mascara-guiado", """\
 # 👀 OBSERVA: la mascara booleana, antes de filtrar
-mascara = df_athletes['Edad'] > 20
-print(mascara.head())        # True/False por fila
-print(mascara.sum(), "filas cumplen la condicion")"""))
+mascara = df_atletas['Edad'] > 20   # compara CADA fila: True si Edad > 20, False si no -- no filtra nada todavia
+print(mascara.head())                # confirma visualmente que es una columna de True/False, no un numero
+print(mascara.sum(), "filas cumplen la condicion")   # .sum() cuenta los True (True=1, False=0 al sumar)"""))
 
 s2.append(md("nb1-c-repeticion-md", """\
 ### 🔁 Practica repetida: mismo patron, distintos datos
@@ -511,78 +575,89 @@ otro valor.
 
 s2.append(md("nb1-c-ejemplo1-md", "**Ejemplo guiado 1 -- filtro numerico + estadisticas sobre el subconjunto:**"))
 s2.append(code("nb1-c-ejemplo1-code", """\
-# 👀 OBSERVA
-df_mayores20 = df_athletes[df_athletes['Edad'] > 20]
+# 👀 OBSERVA: filtrar crea un DataFrame NUEVO -- no un resumen, no un numero
+df_mayores20 = df_atletas[df_atletas['Edad'] > 20]   # aplica la mascara: solo sobreviven las filas con Edad > 20
 
-print("Media de edad (mayores de 20):", df_mayores20['Edad'].mean().round(1))
-print("Mediana de edad (mayores de 20):", df_mayores20['Edad'].median())
-df_mayores20.info()"""))
+print(df_mayores20.head())      # las primeras 5 filas del SUBCONJUNTO -- es una tabla real, se puede explorar
+print("Media de edad (mayores de 20):", df_mayores20['Edad'].mean().round(1))   # .mean() sobre el subconjunto
+print("Mediana de edad (mayores de 20):", df_mayores20['Edad'].median())        # .median() sobre el mismo subconjunto
+df_mayores20.info()              # .info() confirma cuantas filas quedaron y que columnas conserva"""))
 
-s2.append(md("nb1-c-ex6-md", """\
-#### ✅ Ejercicio 6 -- Repite el patron (numerico) (10 pts)
+s2.append(md("nb1-c-leverage-md", """\
+☝️ **`df_mayores20` es un DataFrame completo**, no un resumen ni un numero suelto.
+Lo puedes seguir usando exactamente igual que `df_atletas`: filtrarlo de nuevo,
+agruparlo (Seccion D), graficarlo, o pasarlo a otra funcion. Filtrar nunca "gasta" el
+dato -- solo crea una vista nueva que puedes seguir aprovechando.
+"""))
 
-🔨 Igual que el ejemplo guiado, pero con **Edad > 25**. Calcula la media y la mediana
-de `Edad` sobre ese subconjunto, y ejecuta `.info()` sobre el resultado.
+s2.append(md("nb1-ex1-md", """\
+#### ✅ Ejercicio 1 -- Repite el patron (numerico) (10 pts)
+
+🔨 Igual que el ejemplo guiado, pero con **Edad > 25**. Guarda el resultado en
+`df_mayores25`, muestra sus primeras filas con `.head()`, y calcula la media y la
+mediana de `Edad` sobre ese subconjunto.
 
 Variables que espera el autograder: `df_mayores25`, `media_c1`, `mediana_c1`.
 """))
-s2.append(code("nb1-c-ex6-code", """\
+s2.append(code("nb1-ex1-code", """\
 # ============================
 #      Tu codigo aqui
 # ============================
 
 
 """))
-s2.append(code("nb1-c-ex6-check", "grader.check_ex6()"))
+s2.append(code("nb1-ex1-check", "grader.check_ex1()"))
 
 s2.append(md("nb1-c-ejemplo2-md", "**Ejemplo guiado 2 -- filtro categorico + estadisticas sobre el subconjunto:**"))
 s2.append(code("nb1-c-ejemplo2-code", """\
-# 👀 OBSERVA
-df_basket = df_athletes[df_athletes['Deporte'] == 'Baloncesto']
+# 👀 OBSERVA: mismo patron, ahora con una columna de TEXTO (categorica) en vez de numerica
+df_basket = df_atletas[df_atletas['Deporte'] == 'Baloncesto']   # == compara texto exacto, no un rango
 
+print(df_basket.head())    # otra vez: un DataFrame completo que puedes seguir usando
 print("Edad promedio (Baloncesto):", df_basket['Edad'].mean().round(1))
 print("Altura promedio (Baloncesto):", df_basket['Altura'].mean().round(1))"""))
 
-s2.append(md("nb1-c-ex7-md", """\
-#### ✅ Ejercicio 7 -- Repite el patron (categorico) (10 pts)
+s2.append(md("nb1-ex2-md", """\
+#### ✅ Ejercicio 2 -- Repite el patron (categorico) (10 pts)
 
-🔨 Igual que el ejemplo guiado, pero con **Deporte == 'Natacion'**. Calcula la edad
-promedio y el peso promedio de ese subconjunto.
+🔨 Igual que el ejemplo guiado, pero con **Deporte == 'Natacion'**. Guarda el
+resultado en `df_natacion`, muestra sus primeras filas con `.head()`, y calcula la
+edad promedio y el peso promedio de ese subconjunto.
 
 Variables que espera el autograder: `df_natacion`, `edad_promedio_natacion`,
 `peso_promedio_natacion`.
 """))
-s2.append(code("nb1-c-ex7-code", """\
+s2.append(code("nb1-ex2-code", """\
 # ============================
 #      Tu codigo aqui
 # ============================
 
 
 """))
-s2.append(code("nb1-c-ex7-check", "grader.check_ex7()"))
+s2.append(code("nb1-ex2-check", "grader.check_ex2()"))
 
 s2.append(md("nb1-c-outlier-md", """\
 ### ⚠️ Un aviso importante antes de seguir
 
 Un **valor atipico (outlier)** es una observacion inusual, **no** es automaticamente un
-error o "dato malo." En `df_athletes` hay un jugador de baloncesto de 226 cm de altura
+error o "dato malo." En `df_atletas` hay un jugador de baloncesto de 226 cm de altura
 (Yao Ming) y una gimnasta de 127 cm (Rosario Briones) -- ambos son datos reales y
 validos, no errores de registro.
 """))
 
-s2.append(teoria_check("nb1-t10-check", 10))
-s2.append(teoria_check("nb1-t11-check", 11))
+s2.append(teoria_check("nb1-t0-check", 0, banco=10))
+s2.append(teoria_check("nb1-t1-check", 1, banco=11))
 
-s2.append(md("nb1-c-debug1-md", """\
-#### ✅ Debug 2 -- Corrige el error (10 pts)
+s2.append(md("nb1-c-debug0-md", """\
+#### ✅ Debug 0 -- Corrige el error (10 pts)
 
 🔧 Este codigo deberia filtrar solo a las mujeres, pero tiene un error.
 """))
-s2.append(code("nb1-c-debug1-code", """\
-# 🔧 DEBUG: un solo signo "=" no compara -- asigna. ¿Que operador falta?
-df_mujeres = df_athletes[df_athletes['Sexo'] = 'F']
+s2.append(code("nb1-c-debug0-code", """\
+# 🔧 DEBUG: ejecuta, lee el mensaje completo, e identifica que tipo de error es antes de corregirlo
+df_mujeres = df_atletas[df_atletas['Sexo'] = 'F']
 print(len(df_mujeres))"""))
-s2.append(code("nb1-c-debug1-check", "grader.check_debug2()"))
+s2.append(code("nb1-c-debug0-check", "grader.check_debug0()"))
 
 s2.append(md("nb1-c-teoria-combinar", """\
 ### 🔗 Combinando condiciones: `&` y `|`
@@ -599,15 +674,18 @@ Puedes hacerle preguntas mas especificas a los datos combinando condiciones:
 
 s2.append(code("nb1-c-combinar-guiado", """\
 # 👀 OBSERVA: filtro combinado -- mayores de 20 años que juegan Voleibol
-df_voley_mayores = df_athletes[
-    (df_athletes['Edad'] > 20) & (df_athletes['Deporte'] == 'Voleibol')
+df_voley_mayores = df_atletas[
+    (df_atletas['Edad'] > 20) & (df_atletas['Deporte'] == 'Voleibol')   # ambas condiciones entre parentesis, unidas con &
 ]
 
+print(df_voley_mayores.head())    # sigue siendo un DataFrame completo, ahora con dos condiciones aplicadas
 print(f"{len(df_voley_mayores)} registros")
 print("Altura promedio:", df_voley_mayores['Altura'].mean().round(1))"""))
 
-s2.append(md("nb1-c-ex8-md", """\
-#### ✅ Ejercicio 8 -- Repite el patron (combinado) (12 pts)
+s2.append(teoria_check("nb1-t2-check", 2))
+
+s2.append(md("nb1-ex3-md", """\
+#### ✅ Ejercicio 3 -- Repite el patron (combinado) (12 pts)
 
 🔨 Igual que el ejemplo guiado, pero con **Edad > 25 Y Deporte == 'Baloncesto'**.
 Reporta cuantos hay y su altura promedio.
@@ -615,26 +693,26 @@ Reporta cuantos hay y su altura promedio.
 Variables que espera el autograder: `df_basket_mayores25`, `cantidad_c3`,
 `altura_promedio_c3`.
 """))
-s2.append(code("nb1-c-ex8-code", """\
+s2.append(code("nb1-ex3-code", """\
 # ============================
 #      Tu codigo aqui
 # ============================
 
 
 """))
-s2.append(code("nb1-c-ex8-check", "grader.check_ex8()"))
+s2.append(code("nb1-ex3-check", "grader.check_ex3()"))
 
-s2.append(md("nb1-c-debug2-md", """\
-#### ✅ Debug 3 -- Corrige el error (10 pts)
+s2.append(md("nb1-c-debug1-md", """\
+#### ✅ Debug 1 -- Corrige el error (10 pts)
 
 🔧 Este codigo deberia filtrar a los mayores de 20 años que juegan Voleibol, pero tiene
 un error -- ejecutalo, lee el mensaje, y recuerda la regla de arriba.
 """))
-s2.append(code("nb1-c-debug2-code", """\
+s2.append(code("nb1-c-debug1-code", """\
 # 🔧 DEBUG: "and" no funciona sobre columnas de pandas -- ¿que simbolo va en su lugar?
-df_resultado = df_athletes[df_athletes['Edad'] > 20 and df_athletes['Deporte'] == 'Voleibol']
+df_resultado = df_atletas[df_atletas['Edad'] > 20 and df_atletas['Deporte'] == 'Voleibol']
 print(len(df_resultado))"""))
-s2.append(code("nb1-c-debug2-check", "grader.check_debug3()"))
+s2.append(code("nb1-c-debug1-check", "grader.check_debug1()"))
 
 s2.append(code("nb1-c-checkpoint", "grader.check_mini_c()"))
 
@@ -651,6 +729,33 @@ general puede esconder lo que realmente pasa dentro de cada grupo.
 > una explicacion. (La Semana 5 esta dedicada por completo a esta distincion.)
 """))
 
+s2.append(md("nb1-d-teoria-groupby", """\
+### 🔍 ¿Como funciona `groupby()`?
+
+`.groupby('columna')` no calcula nada por si solo -- **separa** las filas de tu
+DataFrame en grupos segun los valores de esa columna (un grupo por cada deporte, por
+ejemplo). Para obtener un resultado todavia necesitas decir **que columna resumir** y
+**con que metodo**:
+
+```python
+df_atletas.groupby('Deporte')['Altura'].mean()
+#          1. separa en grupos   2. elige la columna   3. resume CADA grupo
+```
+
+Los mismos metodos que ya conoces -- `.mean()`, `.median()`, `.std()` -- funcionan
+igual aqui, solo que ahora se aplican **por grupo** en vez de sobre toda la columna a
+la vez.
+"""))
+
+s2.append(code("nb1-d-groupby-guiado", """\
+# 👀 OBSERVA: groupby() separa en grupos -- el resumen es un paso APARTE
+grupos = df_atletas.groupby('Deporte')['Altura']   # solo agrupa: todavia no hay ningun numero calculado
+print(type(grupos))                                  # confirma que esto NO es un DataFrame ni un numero todavia
+
+print(grupos.mean().head())    # ahora si: .mean() calcula el promedio DENTRO de cada grupo"""))
+
+s2.append(teoria_check("nb1-t3-check", 3))
+
 s2.append(md("nb1-d-repeticion-md", """\
 ### 🔁 Practica repetida: mismo patron, distintos datos
 
@@ -661,61 +766,62 @@ el mismo patron con otra columna.
 s2.append(md("nb1-d-ejemplo1-md", "**Ejemplo guiado 1 -- agrupar por una columna categorica:**"))
 s2.append(code("nb1-d-guiado", """\
 # 👀 OBSERVA: altura promedio por deporte (los 5 deportes con mas registros)
-deportes_top = df_athletes['Deporte'].value_counts().head(5).index
-df_athletes[df_athletes['Deporte'].isin(deportes_top)].groupby('Deporte')['Altura'].mean().round(1)"""))
+deportes_top = df_atletas['Deporte'].value_counts().head(5).index   # .value_counts() cuenta filas por deporte; .head(5) se queda con los 5 mas frecuentes
+df_atletas[df_atletas['Deporte'].isin(deportes_top)] \\
+    .groupby('Deporte')['Altura'].mean().round(1)   # .isin() filtra solo esos 5 deportes ANTES de agrupar y promediar"""))
 
-s2.append(md("nb1-d-ex9-md", """\
-#### ✅ Ejercicio 9 -- Repite el patron (12 pts)
+s2.append(md("nb1-ex4-md", """\
+#### ✅ Ejercicio 4 -- Repite el patron (12 pts)
 
 🔨 Compara el **peso** promedio entre los mismos 5 deportes (`deportes_top`, ya
 definido arriba).
 
 Variable que espera el autograder: `peso_por_deporte`.
 """))
-s2.append(code("nb1-d-ex9-code", """\
+s2.append(code("nb1-ex4-code", """\
 # ============================
 #      Tu codigo aqui
 # ============================
 
 
 print(peso_por_deporte.sort_values(ascending=False))"""))
-s2.append(code("nb1-d-ex9-check", "grader.check_ex9()"))
+s2.append(code("nb1-ex4-check", "grader.check_ex4()"))
 
-s2.append(teoria_check("nb1-t12-check", 12))
-
-s2.append(md("nb1-d-debug1-md", """\
-#### ✅ Debug 4 -- Corrige el error (10 pts)
+s2.append(md("nb1-d-debug2-md", """\
+#### ✅ Debug 2 -- Corrige el error (10 pts)
 
 🔧 Este codigo deberia agrupar por deporte y promediar la edad, pero tiene un error.
 Ejecutalo, lee el mensaje completo, e identifica que tipo de error es antes de
 corregirlo.
 """))
-s2.append(code("nb1-d-debug1-code", """\
+s2.append(code("nb1-d-debug2-code", """\
 # 🔧 DEBUG
-edad_por_deporte = df_athletes.groupby('Deporte')['Edd'].mean()
+edad_por_deporte = df_atletas.groupby('Deporte')['Edd'].mean()
 print(edad_por_deporte.head())"""))
-s2.append(code("nb1-d-debug1-check", "grader.check_debug4()"))
+s2.append(code("nb1-d-debug2-check", "grader.check_debug2()"))
 
 s2.append(md("nb1-d-ejemplo2-md", "**Ejemplo guiado 2 -- agrupar por otra columna categorica:**"))
 s2.append(code("nb1-d-ejemplo2-code", """\
-# 👀 OBSERVA: edad promedio por sexo
-df_athletes.groupby('Sexo')['Edad'].mean().round(1)"""))
+# 👀 OBSERVA: mismo patron -- agrupar() + mean(), ahora por Sexo en vez de Deporte
+df_atletas.groupby('Sexo')['Edad'].mean().round(1)"""))
 
-s2.append(md("nb1-d-ex10-md", """\
-#### ✅ Ejercicio 10 -- Repite el patron (11 pts)
+s2.append(md("nb1-ex5-md", """\
+#### ✅ Ejercicio 5 -- Repite el patron (11 pts)
 
 🔨 Compara la edad promedio entre **Verano** e **Invierno** (columna `Temporada`).
 
 Variable que espera el autograder: `edad_por_temporada`.
 """))
-s2.append(code("nb1-d-ex10-code", """\
+s2.append(code("nb1-ex5-code", """\
 # ============================
 #      Tu codigo aqui
 # ============================
 
 
 print(edad_por_temporada)"""))
-s2.append(code("nb1-d-ex10-check", "grader.check_ex10()"))
+s2.append(code("nb1-ex5-check", "grader.check_ex5()"))
+
+s2.append(teoria_check("nb1-t4-check", 4, banco=12))
 
 s2.append(md("nb1-d-teoria-combinar", """\
 ### 🔗 Combina lo que ya sabes
@@ -726,41 +832,42 @@ filtras a un subconjunto, despues agrupas *ese* subconjunto.
 
 s2.append(md("nb1-d-ejemplo3-md", "**Ejemplo guiado 3 -- filtrar y despues agrupar:**"))
 s2.append(code("nb1-d-ejemplo3-code", """\
-# 👀 OBSERVA: solo temporada de Verano, edad promedio por deporte
-df_verano = df_athletes[df_athletes['Temporada'] == 'Verano']
-deportes_verano_top = df_verano['Deporte'].value_counts().head(5).index
+# 👀 OBSERVA: primero filtra (Seccion C), despues agrupa (esta seccion) -- el mismo df_verano se reutiliza en las dos lineas
+df_verano = df_atletas[df_atletas['Temporada'] == 'Verano']              # 1. filtra: solo temporada de Verano
+deportes_verano_top = df_verano['Deporte'].value_counts().head(5).index  # 2. de ESE subconjunto, los 5 deportes mas frecuentes
 
-df_verano[df_verano['Deporte'].isin(deportes_verano_top)].groupby('Deporte')['Edad'].mean().round(1)"""))
+df_verano[df_verano['Deporte'].isin(deportes_verano_top)] \\
+    .groupby('Deporte')['Edad'].mean().round(1)   # 3. agrupa y promedia, todo sobre el subconjunto ya filtrado"""))
 
-s2.append(md("nb1-d-ex11-md", """\
-#### ✅ Ejercicio 11 -- Repite el patron (combinado) (12 pts)
+s2.append(md("nb1-ex6-md", """\
+#### ✅ Ejercicio 6 -- Repite el patron (combinado) (12 pts)
 
 🔨 Filtra a las **mujeres** (`Sexo == 'F'`), y calcula la **altura** promedio por
 deporte entre los 5 deportes con mas registros dentro de ese subconjunto.
 
 Variables que espera el autograder: `df_mujeres`, `altura_por_deporte_mujeres`.
 """))
-s2.append(code("nb1-d-ex11-code", """\
+s2.append(code("nb1-ex6-code", """\
 # ============================
 #      Tu codigo aqui
 # ============================
 
 
 print(altura_por_deporte_mujeres.sort_values(ascending=False))"""))
-s2.append(code("nb1-d-ex11-check", "grader.check_ex11()"))
+s2.append(code("nb1-ex6-check", "grader.check_ex6()"))
 
-s2.append(md("nb1-d-debug2-md", """\
-#### ✅ Debug 5 -- Corrige el error (10 pts)
+s2.append(md("nb1-d-debug3-md", """\
+#### ✅ Debug 3 -- Corrige el error (10 pts)
 
 🔧 Este codigo deberia agrupar por pais (`CON`) y promediar la edad, pero tiene un
 error. Ejecutalo, lee el mensaje completo, e identifica que tipo de error es antes de
 corregirlo.
 """))
-s2.append(code("nb1-d-debug2-code", """\
+s2.append(code("nb1-d-debug3-code", """\
 # 🔧 DEBUG
-edad_por_pais = df_athletes.groupby('CON')['Edad'].means()
+edad_por_pais = df_atletas.groupby('CON')['Edad'].means()
 print(edad_por_pais.head())"""))
-s2.append(code("nb1-d-debug2-check", "grader.check_debug5()"))
+s2.append(code("nb1-d-debug3-check", "grader.check_debug3()"))
 
 s2.append(code("nb1-d-checkpoint", "grader.check_mini_d()"))
 
@@ -778,18 +885,39 @@ s2.append(md("nb1-intex-header", """\
 ## 🧬 Integracion -- Pipeline Completo (Tarea)
 
 Ya no son ejercicios aislados: aqui usas **cargar → filtrar → agrupar → interpretar**
-en un solo flujo, sobre cada dataset completo. Responde en cada uno: ¿cual es el
-promedio? ¿cual es la dispersion? ¿quien es un atipico?
+en un solo flujo, siempre sobre `df_atletas`. En cada uno, responde: ¿cual es el
+promedio? ¿cual es la dispersion? ¿que dice -- y que NO dice -- el resultado?
 """))
 
+s2.append(md("nb1-intex0-md", """\
+#### ✅ Integracion 0 -- ¿Que tan alto es un jugador olimpico de Baloncesto? (8 pts)
+
+🔨 Filtra `df_atletas` a `Deporte == 'Baloncesto'`. Calcula la altura promedio y la
+desviacion estandar de la altura de ese subconjunto. Escribe una frase con tu
+hallazgo.
+
+Variables que espera el autograder: `df_basket`, `altura_promedio_basket`,
+`desviacion_altura_basket`, `interpretacion_intex0` (string).
+"""))
+s2.append(code("nb1-intex0-code", """\
+# ============================
+#      Tu codigo aqui
+# ============================
+
+
+
+interpretacion_intex0 = "___"  # una frase: ¿que encontraste?"""))
+s2.append(code("nb1-intex0-check", "grader.check_intex0()"))
+
 s2.append(md("nb1-intex1-md", """\
-#### ✅ Integracion 1 -- Videojuegos (8 pts)
+#### ✅ Integracion 1 -- ¿Quienes son mas jovenes: Baloncesto o Gimnasia? (8 pts)
 
-🔨 Elige un genero (`Género`), filtra `df_games`, agrupa por `Plataforma` y calcula el
-promedio de `Ventas_Globales`. Escribe una frase con tu hallazgo.
+🔨 Calcula la edad promedio de los atletas de `Baloncesto` y, por separado, de
+`Gimnasia`. Resta ambos promedios para obtener la diferencia. Escribe una frase con tu
+hallazgo: ¿cual de los dos deportes tiene, en promedio, atletas mas jovenes?
 
-Variables que espera el autograder: `df_genero`, `ventas_por_plataforma`,
-`interpretacion_intex1` (string).
+Variables que espera el autograder: `edad_promedio_basket`, `edad_promedio_gimnasia`,
+`diferencia_edad_basket_gimnasia`, `interpretacion_intex1` (string).
 """))
 s2.append(code("nb1-intex1-code", """\
 # ============================
@@ -802,9 +930,9 @@ interpretacion_intex1 = "___"  # una frase: ¿que encontraste?"""))
 s2.append(code("nb1-intex1-check", "grader.check_intex1()"))
 
 s2.append(md("nb1-intex2-md", """\
-#### ✅ Integracion 2 -- Atletas (7 pts)
+#### ✅ Integracion 2 -- Peru en los Juegos Olimpicos (7 pts)
 
-🔨 Filtra `df_athletes` a Peru (`CON == 'PER'`), cuenta cuantos registros hay por
+🔨 Filtra `df_atletas` a Peru (`CON == 'PER'`), cuenta cuantos registros hay por
 `Deporte`. Escribe una frase con tu hallazgo.
 
 Variables que espera el autograder: `df_peru`, `deportes_peru`,
@@ -820,13 +948,46 @@ s2.append(code("nb1-intex2-code", """\
 interpretacion_intex2 = "___"  # una frase: ¿que encontraste?"""))
 s2.append(code("nb1-intex2-check", "grader.check_intex2()"))
 
+s2.append(md("nb1-intex3-md", """\
+#### ❓ Integracion 3 -- Opcion multiple sobre tu propio hallazgo (5 pts)
+
+En Integracion 1 encontraste una diferencia de edad promedio entre Baloncesto y
+Gimnasia. Ejecuta la celda para ver la pregunta y responder: ¿que se puede concluir
+correctamente de esa diferencia?
+"""))
+s2.append(code("nb1-intex3-check", """\
+# ❓ Integracion 3 -- pregunta de opcion multiple sobre tu hallazgo de Integracion 1
+grader.check_intex3()"""))
+
+s2.append(md("nb1-intex4-md", """\
+#### ✅ Integracion 4 -- ¿Que deporte tiene la altura MAS variable? (7 pts)
+
+🔨 Entre los 5 deportes con mas registros (`deportes_top`, calculado en la Seccion D),
+agrupa por `Deporte` y calcula la **desviacion estandar** de `Altura` para cada uno --
+no el promedio esta vez. ¿Cual deporte tiene la altura mas dispersa (menos uniforme)?
+Escribe una frase con tu hallazgo.
+
+Variables que espera el autograder: `desviacion_altura_por_deporte`,
+`interpretacion_intex4` (string).
+"""))
+s2.append(code("nb1-intex4-code", """\
+# ============================
+#      Tu codigo aqui
+# ============================
+
+
+
+interpretacion_intex4 = "___"  # una frase: ¿que encontraste?
+print(desviacion_altura_por_deporte.sort_values(ascending=False))"""))
+s2.append(code("nb1-intex4-check", "grader.check_intex4()"))
+
 # ─── Bonus ────────────────────────────────────────────────────────────
 s2.append(md("nb1-reto-md", """\
 ---
 ## 🏆 Reto Bonus (opcional)
 
-🔨 Elige tu propia combinacion de filtro + `.groupby()` en cualquiera de los dos
-datasets. Encuentra algo que te parezca interesante y escribe una frase explicandolo.
+🔨 Elige tu propia combinacion de filtro + `.groupby()` sobre `df_atletas`. Encuentra
+algo que te parezca interesante y escribe una frase explicandolo.
 """))
 s2.append(code("nb1-reto-code", """\
 # ============================

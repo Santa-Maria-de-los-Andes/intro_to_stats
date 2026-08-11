@@ -163,6 +163,78 @@ es tema protegido de la Semana 5; esta pregunta siembra la barrera sin adelantar
 
 ---
 
+## Bloque 5 — Semana 2 independiente (numeración propia, reiniciada en 0)
+
+**Contexto (2026-08-11):** por decisión del usuario, Semana 2 dejó de continuar la
+numeración global de Semana 1 — ahora tiene su propia secuencia `check_t0`–`check_t4`
+dentro de `autograder_nb1_semana2.py` (ticket #10, no escrito todavía). Las tres
+primeras reutilizan preguntas ya existentes de este banco bajo su nuevo número local;
+las dos últimas son **nuevas**, escritas para esta reestructuración y documentadas
+aquí por primera vez.
+
+| Nº local (Semana 2) | Contenido | Fuente |
+|---|---|---|
+| `check_t0` | Valores atípicos | = `check_t10` de este banco, verbatim |
+| `check_t1` | Filtrado booleano | = `check_t11` de este banco, verbatim |
+| `check_t2` | Equivalencia de un filtro combinado | **Nueva**, ver abajo |
+| `check_t3` | Qué devuelve `groupby()` antes de agregar | **Nueva**, ver abajo |
+| `check_t4` | Límite de comparar grupos | = `check_t12` de este banco, verbatim |
+
+### check_t2 (Semana 2) — Equivalencia de un filtro combinado
+**Pregunta:** Quieres los atletas mayores de 20 años que juegan Vóleibol. ¿Cuál de estas
+opciones te da EXACTAMENTE el mismo resultado que
+`df_atletas[(df_atletas['Edad'] > 20) & (df_atletas['Deporte'] == 'Voleibol')]`?
+a) `df_atletas[df_atletas['Edad'] > 20 and df_atletas['Deporte'] == 'Voleibol']`
+b) `df_atletas[df_atletas['Edad'] > 20][df_atletas['Deporte'] == 'Voleibol']` — filtrar
+   dos veces seguidas, primero por edad y después por deporte sobre el resultado
+c) `df_atletas[df_atletas['Edad'] > 20 | df_atletas['Deporte'] == 'Voleibol']`
+d) `df_atletas['Edad'] > 20 & df_atletas['Deporte'] == 'Voleibol']` (sin el corchete
+   externo `df_atletas[...]`)
+**Respuesta correcta:** b)
+**Por qué:** filtrar dos veces seguidas (primero por Edad, después por Deporte sobre lo
+que quedó) equivale exactamente a combinar ambas condiciones con `&`, porque en los dos
+casos una fila sobrevive solo si cumple las dos condiciones a la vez. a) usa `and` de
+Python, que falla sobre columnas de pandas (el mismo error de Debug 1). c) usa `|` (O)
+en vez de `&` (Y), lo que cambia el significado por completo — se queda con filas que
+cumplen cualquiera de las dos, no ambas. d) tiene un error de sintaxis (falta el
+corchete externo y los paréntesis).
+**Distractor clave:** c) — apunta al error conceptual de confundir "Y" con "O" al
+combinar condiciones, no solo al error de sintaxis de `and`/`or`.
+
+### check_t3 (Semana 2) — Qué devuelve `groupby()` antes de agregar
+**Pregunta:** Después de escribir `grupos = df_atletas.groupby('Deporte')['Altura']`
+(sin agregar `.mean()` ni ningún otro método todavía), ¿qué tiene guardado la variable
+`grupos`?
+a) Un DataFrame con la altura promedio de cada deporte, ya calculada
+b) Un solo número: la altura promedio de todos los deportes juntos
+c) Los datos ya separados por deporte, pero SIN ningún resumen calculado todavía —
+   falta aplicar `.mean()`, `.median()`, `.std()`, etc.
+d) Una lista con los nombres de los deportes, sin ningún dato numérico
+**Respuesta correcta:** c)
+**Por qué:** `.groupby()` por sí solo solo organiza las filas en grupos — es el paso de
+"agrupar." El resumen (media, mediana, conteo...) es un paso aparte que se aplica
+después, sobre cada grupo. Previene el error común de tratar `.groupby()` como si ya
+calculara algo por sí mismo.
+
+### check_intex3 (Semana 2) — Interpretación del propio hallazgo de Integración 1
+**Pregunta:** En Integración 1 calculaste que la edad promedio en Baloncesto y en
+Gimnasia es diferente. ¿Qué se puede concluir correctamente de ese resultado?
+a) Que jugar Baloncesto hace que un atleta envejezca más rápido que la Gimnasia
+b) Que existe una diferencia observada entre los dos grupos en este dataset — pero el
+   dataset por sí solo no explica POR QUÉ existe esa diferencia
+c) Que el cálculo debe estar mal, porque todos los deportes deberían tener la misma
+   edad promedio
+d) Que hay que eliminar uno de los dos deportes del dataset porque no son comparables
+**Respuesta correcta:** b)
+**Por qué:** mismo principio que `check_t12`/`check_t4` (Semana 2), aplicado ahora al
+hallazgo propio del estudiante en vez de a un ejemplo genérico — comparar grupos
+muestra *qué* es diferente, no *por qué*.
+**Nota:** vive en `check_intex3`, no en la secuencia `check_tN`, porque está anclada al
+resultado que el propio estudiante calculó en Integración 1, no a un ejemplo fijo del
+banco.
+
+---
+
 ## Resumen para ATLAS (puntaje)
 
 | # | Tema | Sección que evalúa |
@@ -175,9 +247,13 @@ es tema protegido de la Semana 5; esta pregunta siembra la barrera sin adelantar
 | t11 | Filtrado booleano | Sección C — Filtra el Ruido |
 | t12 | Límite de comparar grupos | Sección D — Compara Grupos |
 
-12 preguntas totales. Sugerido: repartir dentro del presupuesto de ~150 XP ya fijado por
+12 preguntas totales para Semana 1 (numeración global `check_t1`–`check_t12`, sin
+cambios). **Semana 2 usa su propia numeración independiente, `check_t0`–`check_t4`
+(Bloque 5 arriba) + `check_intex3`** — no continúa esta tabla; ver Bloque 5 para el
+mapeo completo. Sugerido: repartir dentro del presupuesto de ~150 XP ya fijado por
 sección en `WORKFORCE_CONTRACT.md` §2, sin que el total de `check_tN` desplace el peso de los
-`check_exN` de código — ATLAS confirma el desglose exacto antes de fijar `_CORE_MAX`.
+`check_exN` de código — ATLAS confirma el desglose exacto antes de fijar `_CORE_MAX`
+(ver también ticket #10 y #11 en `WORKFORCE_HANDOFF.md` para el estado de Semana 2).
 
 ---
 

@@ -10,20 +10,102 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 
 | # | Ticket | Owner | Notes |
 |---|---|---|---|
-| 2 | Finalize themed narrative arc across all 8 weeks (single storyline vs. mission-per-week; continue TLOU/GoW or new theme) | PIXEL + User | Blocks Theme Brief. See PIXEL's Project Context note in `02_PIXEL.md`. |
-| 3 | Decide whether Week 8 capstone requires regression/clustering or makes it optional | SOFIA + ATLAS + User | Blocks finalizing the capstone rubric's conditional row (`WORKFORCE_CONTRACT.md` §4) and the scoring arithmetic around it. |
-| 4 | Set checkpoint mastery threshold for this module (80%, consistent with rest of curriculum?) | SOFIA | From `Bimestre3_Statistics_Python_Module_Guide.md` open questions. |
-| 6 | Pull and commit the live `get_best_submissions` Supabase RPC definition, extended for a `course`/module filter | ATLAS | Known gap carried over from `COURSE_TEMPLATE.md` §8 — applies to this module too if it shares the Supabase project. |
+
 | 7 | Statistically vet Weeks 3–4, 6, 7 candidate datasets and Week 5 debunk material once SOFIA drafts them | GAUSS | Weeks 1–2 datasets vetted and approved 2026-08-05 (see Done log). Blocks nothing yet for the remaining weeks — no content drafted. |
 | 8 | Draft statistically defensible model answers for the capstone's "descriptive analysis with interpretation" and "correlation analysis with causation critique" criteria (20 pts each) | GAUSS + ATLAS | Needed before ATLAS's Rubric Validation Report can sign off those two criteria as more than a point value. |
-| 10 | Write `autograder_nb1_semana2.py` (check_ex6-11, debug2-5, t10-12, mini_c, mini_d, intex1-2, reto1, resumen) — the Semana 2 half of the two-file split, see `Weeks 1-2/build_nb1.py` docstring | ATLAS | **Semana 1 half done** — `autograder_nb1_semana1.py` written 2026-08-05, Pokémon theme, `_CORE_MAX=101`, syntax-checked and smoke-tested against real `vgsales_es.csv` values (see Done log). Semana 2 still not built — 18 `grader.check_*` calls in that file have no grader yet. Each file needs its own `notebook` id in the Supabase payload (`autograder_nb1_semana1.py` uses `"nb1_semana1"`) so the registration form's "your best prior score" lookup doesn't conflate the two sessions — Semana 2 should follow the same pattern with `"nb1_semana2"`. |
-| 11 | Resolve the Weeks 1–2 XP budget overage: `ex`+`debug` suggested points alone now sum to **163** (up from 153 — see 2026-08-05 Done log entries; the later one added a new graded `ex4` at the user's explicit request, over this ticket's own prior flag), before any of the 12 `check_tN` theory questions are priced — `WORKFORCE_CONTRACT.md` §2 budgets ~150 total for this unit | SOFIA + ATLAS | **Resolved for Semana 1** (2026-08-05): raised the ceiling rather than cutting content, per this ticket's own note that raising "increasingly looks like the right call." `autograder_nb1_semana1.py` declares `_CORE_MAX=101` (56 pts ex1-5+debug1, fixed by the point values already printed in the notebook's own markdown, + 45 pts from 9 theory questions × 5 pts each — ATLAS's own call, since `check_tN` point values were never fixed by the notebook text). **Still open for Semana 2**: same call needs to be made for `ex6-11`/`debug2-5` (107 pts already), `t10-12`, and `intex1-2` once `autograder_nb1_semana2.py` (ticket #10) is written — expect a similarly-raised `_CORE_MAX` there (rough estimate ~135-140), not the original ~150 split evenly across both files. |
-| 12 | Rewrite `debug2`–`debug5` hint comments so they prompt investigation ("read the error, identify the type") rather than naming the bug directly — currently 3 of 5 debug cells hand over the diagnosis in the comment, undercutting the "build error-reading skill" purpose of `check_debugN` (`COURSE_TEMPLATE.md` §4) | SOFIA | Raised in SOFIA's Mode 3 review 2026-08-05 (see Done log). Low-cost fix, not yet applied. |
+| 12 | Rewrite debug-cell hint comments so they prompt investigation ("read the error, identify the type") rather than naming the bug directly — currently several debug cells hand over the diagnosis in the comment, undercutting the "build error-reading skill" purpose of `check_debugN` (`COURSE_TEMPLATE.md` §4) | SOFIA | Raised in SOFIA's Mode 3 review 2026-08-05 (see Done log), still not fully applied. **Partial incidental progress 2026-08-11**: while renumbering Semana 2's debug cells (see that Done log entry), `debug0` (Seccion C, the `=` vs `==` bug, old `debug2`) had its hint de-scaffolded from naming the bug outright to "ejecuta, lee el mensaje completo, e identifica que tipo de error es" — a side effect of the renumbering pass, not a deliberate sweep. Semana 2's `debug1` (Seccion C, `and`/`or`, old `debug3`) and Semana 1's `debug1` still hand over the diagnosis; not touched. |
 
 ---
 
 ## Done Log
 
+- 2026-08-11 — **`autograder_nb1_semana2.py` written, closing ticket #10 and resolving
+  ticket #11 for Semana 2.** Juegos Olímpicos theme (user-directed, sports/Olympics per the
+  Semana 1→Semana 2 Pokémon→Olympics arc): dark navy background (same house palette as
+  `autograder_nb1_semana1.py`) with Olympic gold/blue/red accents, 6 levels Novato en la
+  Villa Olímpica → Récord Olímpico, achievement rarities renamed to Bronce/Plata/Oro/Récord
+  medal tiers, same visual engine (registration form, XP card, level-up banner, checkpoint
+  summary, Supabase submit) reskinned rather than rebuilt — presentation-only changes, no
+  change to the underlying grading engine's structure. Covers `check_ex0`–`ex6` (77 pts),
+  `check_debug0`–`3` (40 pts: SyntaxError, ValueError, KeyError, AttributeError — one each,
+  confirmed by inspection of the buggy code against real pandas behavior), `check_t0`–`t4`
+  (25 pts, interactive HTML multiple-choice, same click→`invokeFunction`→`_grade_teoria`
+  pipeline as Semana 1; question text pulled verbatim from `Preguntas_Teoricas_Semanas1-2.md`
+  Bloque 5 — `t0`/`t1`/`t4` reuse `t10`/`t11`/`t12`, `t2`/`t3` are the new ones), `check_intex0`–`4`
+  (35 pts; `intex3` is its own opinion-multiple item with a dedicated
+  `_ag_intex3_answer` callback since it's anchored to the student's own `intex1` result, not
+  a bank question), `check_reto1` (bonus, `_BONUS_MAX=10`, graded on effort/non-triviality of
+  the free-text `hallazgo_reto1` since the exercise is genuinely open-ended), `check_mini_c`/
+  `mini_d` checkpoints, `resumen()`. `_CORE_MAX=177` (77+40+35+25 — resolves ticket #11 for
+  this file; see that ticket's former text, now folded in here). `NOTEBOOK_ID="nb1_semana2"`
+  in the Supabase payload (distinct from Semana 1's `"nb1_semana1"`) so the registration
+  form's "best prior score" lookup doesn't conflate the two sessions.
+  **Expected values for every numeric check computed directly against the real
+  `athlete_events_es.csv`** (271116 rows × 15 cols), not estimated — e.g. `Altura`
+  mean/median/std ≈175.339/175.0/10.518; `Edad>25` n=110801; `Natacion` n=23195;
+  `Edad>25 & Baloncesto` n=1938; `peso_por_deporte`/`altura_por_deporte_mujeres`/
+  `desviacion_altura_por_deporte` per-deporte values for the real top-5 (`Atletismo`,
+  `Gimnasia`, `Natacion`, `Tiro`, `Ciclismo`); `Sexo=='F'` n=74522; `CON=='PER'` n=532 across
+  26 deportes; the notebook's own claims about Yao Ming (226cm, Baloncesto) and Rosario
+  Briones (127cm, Gimnasia) confirmed present in the data. Two ATLAS spec-validation calls
+  worth flagging: (1) `check_intex1`'s `diferencia_edad_basket_gimnasia` accepts either sign
+  (`abs()` compared to the expected magnitude) since the exercise text ("resta ambos
+  promedios") doesn't fix subtraction order, and rejecting a correctly-computed reversed-sign
+  answer would be a false negative per this agent's own "don't reject a correct answer over
+  spec ambiguity" constraint; (2) `_DEADLINE_UTC` is set to 2026-08-24 04:59 UTC, one week
+  after Semana 1's, as a placeholder assuming weekly class cadence — not a confirmed Clase 2
+  date, flagged in the file's own docstring for whoever schedules the actual class.
+  Validated: `py_compile` clean; smoke-tested every `check_*` two ways — (a) full happy path
+  with every variable set to the real correct-solution value, confirming the sum of all core
+  checks equals `_CORE_MAX` exactly (177/177) and the bonus check awards 10/10; (b) every
+  check individually fed `None`, wrong types, hardcoded/lazy constants, a plausible-but-wrong
+  Series missing a category, and a reversed filter (men instead of women) — all correctly
+  score 0, including a partial-credit case (`ex3` with a non-integer `cantidad_c3` still
+  scores 8/12 for the two checks that do pass, not a false full-credit or false zero). Test
+  scaffolding was scratch-only (`_test_semana2.py`, `_compute_expected*.py`), removed after
+  the run — not committed.
+- 2026-08-11 — **Semana 2 (`nb1_semana2_recuperacion_datos.ipynb`) restructured into a
+  standalone tarea per user request**, decoupled from Semana 1 rather than continuing its
+  mission/numbering. Changes, via `build_nb1.py`: (1) **`df_games`/`vgsales_es.csv` removed
+  entirely** — the setup cell no longer downloads or loads it, and Integracion (previously
+  `intex1`, videojuegos) was rewritten to use only `df_atletas`; (2) **`df_athletes` renamed
+  to `df_atletas`** everywhere in the file; (3) **all numbering restarted independently at 0**
+  for this file only — `check_ex0-6` (was `ex6-11`), `check_debug0-3` (was `debug2-5`),
+  `check_t0-4` (was `t10-12` + 2 new), `check_intex0-4` (was `intex1-2` + 3 new) — Semana 1's
+  own numbering is untouched; (4) every guided filter example now prints `.head()` of the
+  filtered result plus a markdown callout ("`df_mayores20` es un DataFrame completo...") so
+  it's explicit that filtering produces a reusable table, not a summary — same treatment for
+  the boolean-mask and combined-filter examples; (5) every 👀 OBSERVA code cell got per-line
+  comments explaining what each method call does and why (previously several had none); (6) a
+  new "Antes de Filtrar" recap block (with a new graded `check_ex0`) drills `.mean()`/
+  `.median()`/`.std()` again on `df_atletas` before Seccion C, and a new "¿Como funciona
+  groupby()?" theory block + guided cell precedes Seccion D's first example, showing the
+  intermediate `SeriesGroupBy` object explicitly (ties into new `check_t3`); (7) Integracion
+  expanded from 2 items to 5 (`intex0`-`intex4`): basketball average height, a Baloncesto-vs-
+  Gimnasia age-gap comparison, the pre-existing Peru/deportes count, a new opinion-multiple
+  item (`intex3`) that asks the student to correctly interpret their *own* `intex1` finding
+  (correlation vs. causation, same principle as `check_t12`), and a dispersion-focused finding
+  (`std()` + `groupby()`, which deporte has the most variable height). Two new theory
+  questions (`t2` precedence/equivalence of a combined filter, `t3` what `groupby()` returns
+  before aggregating) and the `intex3` prompt are documented in full — question, options,
+  correct answer, distractor rationale — in a new "Bloque 5" section of
+  `Preguntas_Teoricas_Semanas1-2.md`, alongside a mapping table showing which of `t0`/`t1`/`t4`
+  reuse `t10`/`t11`/`t12` verbatim under their new local numbers. **Safe to renumber now for
+  the same reason as the 2026-08-05 Semana 1 renumbering**: `autograder_nb1_semana2.py`
+  (ticket #10) still doesn't exist, so no live grader had to be migrated — tickets #10-#12
+  updated to reflect the new numbering and point totals. All real (`grader.check_*`-free) code
+  cells re-verified two ways against real `athlete_events_es.csv` values: a syntax compile of
+  every non-debug cell, and a full front-to-back execution with correct solutions substituted
+  into every stub exercise (0 errors; every debug cell raises exactly its intended error and
+  nothing else does). **Semana 1 notebook explicitly left untouched**: `build_nb1.py`'s own
+  `s1` generator output has drifted from the committed `nb1_semana1_recuperacion_datos.ipynb`
+  (someone hand-edited the delivered notebook after generation, in commit `def6abb`, without
+  updating the generator) — running `build_nb1.py` regenerates both files, so the Semana 1
+  output was reverted via `git checkout` after generation to avoid silently clobbering that
+  hand-edit with stale generator output. Flagging as a new, not-yet-ticketed finding: `build_nb1.py`
+  and the committed Semana 1 notebook are out of sync and someone should reconcile them
+  (either port the hand-edits back into the generator, or accept the generator is no longer
+  the source of truth for Semana 1).
 - 2026-08-07 — **Fixed `nb1.html`: it was pointed at the wrong data.** User confirmed the live
   Supabase migration (curso column + backfill + courses table, entries below) has been applied,
   then asked to verify the autograder posts correctly and that `nb1.html` links to it. The
