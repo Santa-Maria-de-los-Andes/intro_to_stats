@@ -1136,7 +1136,7 @@ async function agRegister() {{
             "t0": ("T0 — Valores atípicos", 5),
             "t1": ("T1 — Qué hace un filtro", 5),
             "debug0": ("Debug 0 – Falso Arranque", 10),
-            "t2": ("T2 — Equivalencia de filtro combinado", 5),
+            "t2": ("T2 — Observaciones vs. variables", 5),
             "ex3": ("Ejercicio 3 – Doble Carril", 12),
             "debug1": ("Debug 1 – Choque en la Pista", 10),
         }
@@ -1258,7 +1258,7 @@ async function agRegister() {{
                 '🎖️ LOGRO: Doble Podio — Ambos checkpoints superados</div>'
             ))
         seccion = {
-            "t3": ("T3 — Qué devuelve groupby() antes de agregar", 5),
+            "t3": ("T3 — Agrupar, ¿descriptivo o predictivo?", 5),
             "ex4": ("Ejercicio 4 – Ranking de Peso por Disciplina", 12),
             "debug2": ("Debug 2 – Nombre Mal Escrito", 10),
             "ex5": ("Ejercicio 5 – Verano vs. Invierno", 11),
@@ -1299,34 +1299,29 @@ async function agRegister() {{
             pts=5,
         ),
         2: dict(
-            title="T2 — Equivalencia de un filtro combinado",
-            q=("Quieres los atletas mayores de 20 años que juegan Vóleibol. ¿Cuál de estas opciones te da "
-               "EXACTAMENTE el mismo resultado que "
-               "<code>df_atletas[(df_atletas['Edad'] &gt; 20) &amp; (df_atletas['Deporte'] == 'Voleibol')]</code>?"),
-            opts={"a": "df_atletas[df_atletas['Edad'] > 20 and df_atletas['Deporte'] == 'Voleibol']",
-                  "b": "df_atletas[df_atletas['Edad'] > 20][df_atletas['Deporte'] == 'Voleibol']  (filtrar dos veces seguidas)",
-                  "c": "df_atletas[df_atletas['Edad'] > 20 | df_atletas['Deporte'] == 'Voleibol']",
-                  "d": "df_atletas['Edad'] > 20 & df_atletas['Deporte'] == 'Voleibol']  (sin el corchete externo)"},
+            title="T2 — Observaciones vs. variables",
+            q=("En una tabla de datos de atletas olímpicos, cada fila representa un atleta y "
+               "cada columna representa un dato sobre ese atleta (edad, altura, deporte...). "
+               "¿Cómo se llama correctamente cada fila y cada columna?"),
+            opts={"a": "Fila = variable, columna = observación",
+                  "b": "Fila = observación, columna = variable",
+                  "c": "Ambas son observaciones",
+                  "d": "Ambas son variables"},
             correct="b",
-            why=("Filtrar dos veces seguidas (primero por Edad, después por Deporte sobre lo que quedó) equivale "
-                 "exactamente a combinar ambas condiciones con '&', porque en los dos casos una fila sobrevive "
-                 "solo si cumple las dos condiciones a la vez. a) usa 'and' de Python, que falla sobre columnas "
-                 "de pandas (el mismo error de Debug 1). c) usa '|' (O) en vez de '&' (Y), lo que cambia el "
-                 "significado por completo. d) tiene un error de sintaxis."),
+            why="Fila = un caso/observación, columna = una característica/variable medida sobre cada caso.",
             pts=5,
         ),
         3: dict(
-            title="T3 — Qué devuelve groupby() antes de agregar",
-            q=("Después de escribir <code>grupos = df_atletas.groupby('Deporte')['Altura']</code> "
-               "(sin agregar <code>.mean()</code> ni ningún otro método todavía), ¿qué tiene guardado la "
-               "variable <code>grupos</code>?"),
-            opts={"a": "Un DataFrame con la altura promedio de cada deporte, ya calculada",
-                  "b": "Un solo número: la altura promedio de todos los deportes juntos",
-                  "c": "Los datos ya separados por deporte, pero SIN ningún resumen calculado todavía — falta aplicar .mean(), .median(), .std(), etc.",
-                  "d": "Una lista con los nombres de los deportes, sin ningún dato numérico"},
-            correct="c",
-            why=("'.groupby()' por sí solo únicamente organiza las filas en grupos — es el paso de 'agrupar'. "
-                 "El resumen (media, mediana, conteo...) es un paso aparte que se aplica después, sobre cada grupo."),
+            title="T3 — Agrupar, ¿es descriptivo o predictivo?",
+            q=("Un programa agrupa a 500 clientes en 4 grupos según sus hábitos de compra "
+               "similares. ¿Qué rama de la estadística describe mejor esto?"),
+            opts={"a": "Predictiva, porque usa un algoritmo",
+                  "b": "Descriptiva, porque organiza y resume lo que ya existe en los datos",
+                  "c": "Prescriptiva, porque recomienda una acción",
+                  "d": "No es estadística, es solo programación"},
+            correct="b",
+            why=("Agrupar (clustering) organiza patrones existentes; no proyecta un valor futuro. "
+                 "Esto se repetirá en la Semana 7 con k-means — no es predictivo."),
             pts=5,
         ),
         4: dict(

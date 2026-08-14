@@ -169,52 +169,29 @@ es tema protegido de la Semana 5; esta pregunta siembra la barrera sin adelantar
 numeración global de Semana 1 — ahora tiene su propia secuencia `check_t0`–`check_t4`
 dentro de `autograder_nb1_semana2.py` (ticket #10, no escrito todavía). Las tres
 primeras reutilizan preguntas ya existentes de este banco bajo su nuevo número local;
-las dos últimas son **nuevas**, escritas para esta reestructuración y documentadas
-aquí por primera vez.
+las dos últimas iban a ser nuevas, pandas-específicas — pero el usuario las encontró
+"fuera de contexto" (2026-08-14) frente al resto de la teoría, que es conceptual y no
+de sintaxis. Se reemplazaron por otras dos preguntas ya existentes de este banco
+(`check_t9` y `check_t3`), reutilizadas verbatim bajo su nuevo número local — misma
+lógica que las tres primeras.
 
 | Nº local (Semana 2) | Contenido | Fuente |
 |---|---|---|
 | `check_t0` | Valores atípicos | = `check_t10` de este banco, verbatim |
 | `check_t1` | Filtrado booleano | = `check_t11` de este banco, verbatim |
-| `check_t2` | Equivalencia de un filtro combinado | **Nueva**, ver abajo |
-| `check_t3` | Qué devuelve `groupby()` antes de agregar | **Nueva**, ver abajo |
+| `check_t2` | Observaciones vs. variables | = `check_t9` de este banco, verbatim |
+| `check_t3` | Agrupar, ¿descriptivo o predictivo? | = `check_t3` de este banco, verbatim |
 | `check_t4` | Límite de comparar grupos | = `check_t12` de este banco, verbatim |
 
-### check_t2 (Semana 2) — Equivalencia de un filtro combinado
-**Pregunta:** Quieres los atletas mayores de 20 años que juegan Vóleibol. ¿Cuál de estas
-opciones te da EXACTAMENTE el mismo resultado que
-`df_atletas[(df_atletas['Edad'] > 20) & (df_atletas['Deporte'] == 'Voleibol')]`?
-a) `df_atletas[df_atletas['Edad'] > 20 and df_atletas['Deporte'] == 'Voleibol']`
-b) `df_atletas[df_atletas['Edad'] > 20][df_atletas['Deporte'] == 'Voleibol']` — filtrar
-   dos veces seguidas, primero por edad y después por deporte sobre el resultado
-c) `df_atletas[df_atletas['Edad'] > 20 | df_atletas['Deporte'] == 'Voleibol']`
-d) `df_atletas['Edad'] > 20 & df_atletas['Deporte'] == 'Voleibol']` (sin el corchete
-   externo `df_atletas[...]`)
-**Respuesta correcta:** b)
-**Por qué:** filtrar dos veces seguidas (primero por Edad, después por Deporte sobre lo
-que quedó) equivale exactamente a combinar ambas condiciones con `&`, porque en los dos
-casos una fila sobrevive solo si cumple las dos condiciones a la vez. a) usa `and` de
-Python, que falla sobre columnas de pandas (el mismo error de Debug 1). c) usa `|` (O)
-en vez de `&` (Y), lo que cambia el significado por completo — se queda con filas que
-cumplen cualquiera de las dos, no ambas. d) tiene un error de sintaxis (falta el
-corchete externo y los paréntesis).
-**Distractor clave:** c) — apunta al error conceptual de confundir "Y" con "O" al
-combinar condiciones, no solo al error de sintaxis de `and`/`or`.
+### check_t2 (Semana 2) — Observaciones vs. variables
 
-### check_t3 (Semana 2) — Qué devuelve `groupby()` antes de agregar
-**Pregunta:** Después de escribir `grupos = df_atletas.groupby('Deporte')['Altura']`
-(sin agregar `.mean()` ni ningún otro método todavía), ¿qué tiene guardado la variable
-`grupos`?
-a) Un DataFrame con la altura promedio de cada deporte, ya calculada
-b) Un solo número: la altura promedio de todos los deportes juntos
-c) Los datos ya separados por deporte, pero SIN ningún resumen calculado todavía —
-   falta aplicar `.mean()`, `.median()`, `.std()`, etc.
-d) Una lista con los nombres de los deportes, sin ningún dato numérico
-**Respuesta correcta:** c)
-**Por qué:** `.groupby()` por sí solo solo organiza las filas en grupos — es el paso de
-"agrupar." El resumen (media, mediana, conteo...) es un paso aparte que se aplica
-después, sobre cada grupo. Previene el error común de tratar `.groupby()` como si ya
-calculara algo por sí mismo.
+Verbatim de `check_t9` de este banco (Bloque 3) — ver esa entrada para pregunta,
+opciones y justificación completas.
+
+### check_t3 (Semana 2) — Agrupar, ¿descriptivo o predictivo?
+
+Verbatim de `check_t3` de este banco (Bloque 1) — ver esa entrada para pregunta,
+opciones y justificación completas.
 
 ### check_intex3 (Semana 2) — Interpretación del propio hallazgo de Integración 1
 **Pregunta:** En Integración 1 calculaste que la edad promedio en Baloncesto y en
