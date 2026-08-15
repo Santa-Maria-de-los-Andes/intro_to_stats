@@ -11,7 +11,7 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 | # | Ticket | Owner | Notes |
 |---|---|---|---|
 
-| 7 | Statistically vet Weeks 3–4, 6, 7 candidate datasets and Week 5 debunk material once SOFIA drafts them | GAUSS | Weeks 1–2 datasets vetted and approved 2026-08-05 (see Done log). Blocks nothing yet for the remaining weeks — no content drafted. |
+| 7 | Statistically vet Weeks 3–4, 6, 7 candidate datasets and Week 5 debunk material once SOFIA drafts them | GAUSS | **Weeks 3–4 now drafted 2026-08-14** (see Done log) — dataset not yet downloaded/vetted, this is the blocking half of the ticket for that unit now. Weeks 1–2 datasets vetted and approved 2026-08-05. Weeks 6, 7, and Week 5 debunk material still not drafted. |
 | 8 | Draft statistically defensible model answers for the capstone's "descriptive analysis with interpretation" and "correlation analysis with causation critique" criteria (20 pts each) | GAUSS + ATLAS | Needed before ATLAS's Rubric Validation Report can sign off those two criteria as more than a point value. |
 | 12 | Rewrite debug-cell hint comments so they prompt investigation ("read the error, identify the type") rather than naming the bug directly — currently several debug cells hand over the diagnosis in the comment, undercutting the "build error-reading skill" purpose of `check_debugN` (`COURSE_TEMPLATE.md` §4) | SOFIA | Raised in SOFIA's Mode 3 review 2026-08-05 (see Done log), still not fully applied. **Partial incidental progress 2026-08-11**: while renumbering Semana 2's debug cells (see that Done log entry), `debug0` (Seccion C, the `=` vs `==` bug, old `debug2`) had its hint de-scaffolded from naming the bug outright to "ejecuta, lee el mensaje completo, e identifica que tipo de error es" — a side effect of the renumbering pass, not a deliberate sweep. Semana 2's `debug1` (Seccion C, `and`/`or`, old `debug3`) and Semana 1's `debug1` still hand over the diagnosis; not touched. |
 
@@ -19,6 +19,113 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 
 ## Done Log
 
+- 2026-08-14 — **`nb3_semana3_correlacion.ipynb` expanded for repetition**, same-day
+  follow-up to the build below, per direct user feedback: *"we need more repetition to
+  actually solidify the concepts, some reps + interpretation open ended questions right
+  after."* Both Sección A and Sección B previously worked only one student pair
+  (`Percepción de corrupción`); each now repeats the guided→predict→build/calculate
+  pattern **twice** — Ronda 1 unchanged (`Percepción de corrupción`), Ronda 2 new
+  (`Esperanza de vida saludable`, r≈0.780 vs. `Puntaje` — confirmed against the real CSV,
+  see arithmetic below), on top of the pre-existing guided `Apoyo social` example
+  (r≈0.777). Every round now ends in its own short 💭 REFLEXIONA cell immediately after
+  that round's result, replacing the old pattern of one long reflection saved for the end
+  of each section — mirrors the guided-example→exercise→compare rhythm
+  `nb1_semana2_recuperacion_datos.ipynb`'s Secciones C/D already use for the same reason.
+  New interpretation prompts (all ungraded/contract-exempt per `WORKFORCE_CONTRACT.md`
+  §3, none use causal language): after the guided `r_apoyo_social` (interpret the number
+  in plain language); after new `check_ex3`'s `r_corrupcion` (prediction-vs-reality +
+  plain-language meaning); after new `check_ex4`'s `r_esperanza` (prompts the student to
+  notice `r_apoyo_social` and `r_esperanza` are almost identical in strength, 0.777 vs.
+  0.780 — confirmed real, not a coincidence dressed up for the exercise — despite being
+  unrelated variables, and asks them to reason about why); after `check_ex5` (explore-all,
+  now renumbered from `check_ex3`, asks which of the six columns' r surprised them most).
+  **Renumbering** (safe now for the same reason as every prior renumbering pass in this
+  file — no `autograder_nb3_semana3.py` exists yet): `check_ex1`/`check_ex2` are now both
+  Sección A scatter-building exercises (`ex2` new, mirrors `ex1`'s spec shape —
+  `x_ex2`/`y_ex2`); `check_ex3`/`check_ex4` are now both Sección B correlation-calculating
+  exercises (`ex4` new, `r_esperanza`); the old explore-all `check_ex3` is now `check_ex5`;
+  `check_debug1` unchanged. Suggested points: `ex1`/`ex2` 15 each, `ex3`/`ex4` 12 each,
+  `ex5` 15, `debug1` 10 (79 total ex/debug, up from 52) + `t1`–`t6` theory (unchanged, 6
+  questions) — still comfortably under the ~180 §2 budget with Semana 4 (Sección C +
+  Integración) still to come. Validated: re-ran every non-stub solution (`ex1`/`ex2`'s
+  scatter data, `ex3`/`ex4`'s `.corr()` calls, `ex5`'s full scan, `debug1`'s broken/fixed
+  forms) against the real CSV — all match the values already vetted in the build entry
+  below; the "`r_apoyo_social` ≈ `r_esperanza`" claim the new reflection prompt makes was
+  itself checked (difference ≈0.003) before being written into the notebook, not asserted
+  on assumption.
+- 2026-08-14 — **`nb3_semana3_correlacion.ipynb` built** (Weeks 3–4, Semana 3 / Clase 1
+  only — Apertura + Teoría Desbloqueada + Sección A + Sección B, per the Semana 3/Semana 4
+  split proposed the same day in `Teoria_Semanas3-4_Mision2_Correlacion.md` §5), via new
+  `course-python-stats/Weeks 3-4/build_nb3.py` (mirrors `build_nb1.py`'s structure —
+  `md()`/`code()`/`teoria_check()` helpers, same icon legend). **Naming note (user
+  override, explicit and confirmed via direct question):** filed as `nb3` per the user's
+  literal request, which **contradicts** the convention already recorded lower in this
+  file (2026-08-07 entries) and in `supabase_schema.sql`'s comments — `nb2` = Tarea 2 =
+  Correlación, `nb3` reserved for Regresión/Clustering (Weeks 6–7). User was shown this
+  conflict directly and chose `nb3` anyway. **Consequence for whoever builds the real
+  Regresión/Clustering notebook later: that file cannot also be called `nb3`** without a
+  Supabase `notebook_id` collision against this one — needs a different id (or this file
+  needs renaming first) before that build happens. Flagging as unticketed since it's a
+  one-line naming call, not open work, but real enough to trip someone up later.
+  Dataset: `2019_es.csv` (World Happiness Report 2019, 156 rows × 10 cols, **zero missing
+  values** — confirmed by direct load, not assumed) — this is the dataset ticket #7
+  flagged as not-yet-downloaded for Weeks 3–4; downloading it and computing every number
+  in the notebook against it (below) covers the download/compute half of that ticket, but
+  **does not close ticket #7** — GAUSS's formal statistical vetting/sign-off is still
+  outstanding, this was SOFIA building directly against real data, not a GAUSS review.
+  All r values computed directly against the CSV (not estimated): Apertura's three hidden
+  scatter pairs — Libertad↔Puntaje r≈0.567, Generosidad↔Puntaje r≈0.076, PBI per
+  cápita↔Puntaje r≈0.794 (deliberately shows one strong + one weak/null pair, both real,
+  per the theory doc's own requirement for this section); Sección A/B's worked pair, Apoyo
+  social↔Puntaje r≈0.777; Ejercicio 1/2's student pair, Percepción de
+  corrupción↔Puntaje r≈0.386; Ejercicio 3 (`.corr()` against all numeric columns at once)
+  confirms PBI per cápita is the strongest real driver (r≈0.794) and Generosidad the
+  weakest (r≈0.076) — deliberately excludes `Puesto` from that ranking since it's the
+  rank *derived from* `Puntaje` (r≈-0.989, a circular definition, not a finding), a
+  dataset-honesty point folded into the exercise instructions rather than left as a trap.
+  Debug 1's `KeyError` (`'Punaje'` typo) confirmed to raise and nothing else. No
+  `check_causa`/causal language anywhere per the theory doc's non-negotiable rule; the two
+  💭 REFLEXIONA cells (Sección A: prediction-vs-reality; Sección B: GDP↔happiness
+  correlation-vs-causation prompt) are ungraded/contract-exempt per
+  `WORKFORCE_CONTRACT.md` §3, same as Semanas 1–2's pattern. Exercise-variable specs
+  (`x_ex1`/`y_ex1`, `r_corrupcion`, `correlaciones_puntaje`/`columna_mas_fuerte`/
+  `columna_mas_debil`) documented in-notebook for ATLAS the same way Semanas 1–2 did —
+  **no autograder exists yet** (`autograder_nb3_semana3.py`, referenced but not published
+  in the setup cell, same pattern as Semana 2's `nb1_semana2` setup cell before its
+  grader was written). Numbering restarts at 1 (`check_ex1`, `check_t1`, `check_debug1`)
+  — first class of a new mission, not a continuation of Mission 1's numbering. Validated:
+  every non-stub/non-grader cell (Apertura hidden+reveal scatters, Sección A guided
+  scatter, Sección B guided `.corr()`, all three exercise solutions, the debug cell's
+  broken and fixed forms) executed clean against the real CSV with `matplotlib` in
+  headless (`Agg`) mode; debug cell confirmed to raise `KeyError` and nothing else.
+  Sección C (`.groupby()` + `.corr()`) and the Semana 4 Integración/mini-proyecto are
+  **out of scope for this file** — a separate notebook, not yet built.
+- 2026-08-14 — **SOFIA drafted the Weeks 3–4 guiding theory doc**
+  (`course-python-stats/Weeks 3-4/Teoria_Semanas3-4_Mision2_Correlacion.md`), same role in the
+  build order as `Teoria_Semanas1-2_Mision1_RecuperacionDeDatos.md` played for Weeks 1–2 — fixes
+  the pedagogical sequence and formal theory content before GAUSS vets a dataset or PIXEL themes
+  it. Follows the four-step order already fixed in
+  `Bimestre3_Statistics_Python_Module_Guide.md` (scatter w/o code → correlation coefficient
+  conceptually → `.corr()` in code → `.groupby()` by subgroup), mapped to Sections A–D +
+  Semana 4 Integración/Mini-Proyecto, mirroring Semanas 1–2's letter-section pattern. Dataset:
+  World Happiness Report (primary candidate), per the reservation already made in this file's
+  2026-08-05 entry — **no real values pulled yet**, every number in the doc is a placeholder
+  pending GAUSS (reopens the Weeks 3–4 half of ticket #7, see updated ticket text). Bakes in two
+  guardrails directly from `04_GAUSS.md`'s per-week risk table: (1) the mini-project's "find two
+  strongly correlated variables" instructions now require a stated hypothesis and a reflection
+  question about why the highest-r pair alone isn't trustworthy, addressing the flagged
+  spurious-correlation trap; (2) a non-negotiable no-causal-language rule stated up front,
+  since this unit is designed to let students *feel* a causal pattern (GDP↔happiness) that
+  Week 5 then interrogates — Section C's subgroup finding gets the same single-sentence-only
+  caveat discipline Semanas 1–2 Section D used, no early spend of Week 5's protected depth.
+  Flags an explicit continuity requirement for whoever designs Week 5: the Semana 4 mini-project
+  write-up (variable pair, r, hypothesis) is Week 5's input material per the module guide's own
+  wording, not something to re-derive. Also flags: the ice-cream/drownings example is reserved
+  for Week 5's opening and must not be reused in this unit's hook. Proposed (not final) XP split
+  totaling ~170 of the ~180 `WORKFORCE_CONTRACT.md` §2 budget, and a proposed Semana 3/4 file
+  split mirroring Semanas 1–2's two-notebook pattern — explicitly flagged as pending real class
+  schedule confirmation before locking, same caution Semanas 1–2 needed before its own split was
+  finalized.
 - 2026-08-11 — **`autograder_nb1_semana2.py` written, closing ticket #10 and resolving
   ticket #11 for Semana 2.** Juegos Olímpicos theme (user-directed, sports/Olympics per the
   Semana 1→Semana 2 Pokémon→Olympics arc): dark navy background (same house palette as
