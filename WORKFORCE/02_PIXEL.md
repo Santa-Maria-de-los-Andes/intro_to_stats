@@ -101,6 +101,19 @@ Audience for this module specifically is narrower than your general range: 3rd�
 - **Achievements:** Primer Golpe, Leviathan (loops), Escudo del Norte (debugs), Hacha del Bifrost (checkpoints), Martillo de Thor (streak≥5), Príncipe de Asgard (100%), Ojo de Odín (bonus)
 - **Color palette:** `#080010` bg, `#cc2200` blood red, `#ffd700` gold, `#4aa8d8` frost blue, `#d4c5a9` parchment
 
+### Rank System (Cross-Notebook Leaderboard Layer) — Prototype, 2026-08-16
+
+**Status:** Direction approved by user through iterative review of a live mockup; not yet wired into any real notebook/leaderboard. Assets and mockup live in `WORKFORCE/design/rank-system/` (`rank_system_demo.html` + `badges/*.svg`); published preview at <https://claude.ai/code/artifact/00f9f7c5-c206-4e8d-a3ef-3406da33e61b>.
+
+**What it is:** a leaderboard layer that sits *above* each notebook's own themed Level, not a replacement for it. Where Level is per-notebook narrative flavor (Pokémon's "Elite Four en Ascenso", GoW's "Semidiós"), Rank is the same six tiers on every notebook — NB1, NB2, NB3, and whatever the Bimestre 3 theme ends up being — so it never needs re-theming. The leaderboard groups students into Rank sections instead of one flat sorted list.
+
+- **Tiers (6, by rank score band):** ⚫ Carbón (0–20%) → 🟠 Cobre (21–40%) → ⚪ Plata (41–60%) → 🟡 Oro (61–80%) → 🔷 Platino (81–95%) → 💎 Diamante (96–100%)
+- **Badge art:** 6 AI-generated vector medallion emblems (Recraft V4.1, `model_type: vector`), escalating ornamentation per tier (rough shard → wings → full crest), stored as standalone SVGs in `badges/` for reuse when this gets built into real notebook leaderboards
+- **Color tokens:** `--carbon:#9494ac` `--cobre:#e2955c` `--plata:#dcdff2` `--oro:#ffcf5e` `--platino:#57e3e3` `--diamante:#cdb8ff`; chrome/HUD accent `--accent:#8b6bff`, live/in-progress accent `--cyan:#3be6f2` — deliberately not any single notebook's palette, since this layer must stay neutral across themes
+- **Typography:** Rajdhani (HUD/display face for tier names, numbers, labels) paired with the existing Segoe UI body stack — a deliberate move away from NB1's retro 8-bit "Press Start 2P," since the brief was to feel like a 2025 competitive-game HUD, not 2000s arcade
+- **Rank criterion (confirmed with user 2026-08-16):** cumulative, best 7 of 8 weekly homeworks — `rango = promedio(semanas_cerradas − la más floja)`. Mid-bimestre, before all 8 weeks exist, this runs as "best (n−1) of n closed weeks," converging to best-7-of-8 once the season ends. The current week's homework shows its own live progress bar but is excluded from the Rank calculation until that week closes (so a hot start can't jump someone's tier before the week is actually done). Considered and rejected: simple average of completed-only weeks (exploitable — one great week with everything else skipped reads as Diamante); recency-weighted/decay scoring (too opaque to defend to a student asking why their rank moved without a new bad grade).
+- **Open dependency, not yet resolved:** every notebook's leaderboard today (e.g. `nb1.html`) queries `submissions` filtered to one `NOTEBOOK_ID`. A cross-notebook aggregate Rank needs one row per student per completed homework, summed/averaged across all of them, plus a way to identify "current week" — that's a Supabase schema/query question for ATLAS, not resolved by this design pass.
+
 ### Target Audience Constraints
 - Students: 1st–5th secondary, ages 12–17, Lima and Cusco, Peru
 - Platform: Google Colab (dark mode not guaranteed; test on default white)
@@ -219,5 +232,5 @@ Achievement unlock message format
 
 ---
 
-*Last updated: 2026-08-02*
+*Last updated: 2026-08-16*
 *Part of: SMA Intro Stats WORKFORCE*
