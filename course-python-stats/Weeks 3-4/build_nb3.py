@@ -30,15 +30,25 @@ repeticion para solidificar los conceptos, con interpretacion abierta justo
 despues"): Seccion A y Seccion B ya no trabajan un solo par por seccion --
 cada una repite el patron dos veces (Ronda 1: Percepcion de corrupcion,
 Ronda 2: Esperanza de vida saludable, ademas del par guiado Apoyo social),
-y cada ronda termina en una celda 💭 REFLEXIONA corta e inmediata (ungraded,
-contract-exempt) en vez de un unico reflexion al final de la seccion --
-misma logica de "ejemplo guiado -> ejercicio -> comparar" que
-nb1_semana2 usa en sus Secciones C/D.
+y cada ronda termina en una celda 💭 REFLEXIONA corta e inmediata -- misma
+logica de "ejemplo guiado -> ejercicio -> comparar" que nb1_semana2 usa en
+sus Secciones C/D.
 
 Convenciones (identicas a build_nb1.py): check_tN = una celda,
 grader.check_tN(); check_exN 🔨 CONSTRUYE = sin solucion escrita; check_exN
-🧩 COMPLETA = blancos ___; celdas 🔮 PREDICE / 💭 REFLEXIONA = ungraded,
-contract-exempt (WORKFORCE_CONTRACT.md SS3).
+🧩 COMPLETA = blancos ___; celdas 🔮 PREDICE = ungraded, contract-exempt
+(WORKFORCE_CONTRACT.md SS3).
+
+Reflexion calificada por IA (agregado 2026-08-19, pedido explicito del
+usuario -- SUPERA la nota "ungraded, contract-exempt" de abajo SOLO para
+este notebook en adelante; nb1_semana1/nb1_semana2 NO se tocan, siguen con
+revision manual del profesor per WORKFORCE_CONTRACT.md SS3): las 11 celdas
+💭 Reflexiona de este notebook ya NO son `variable = "___"` sin autograder --
+usan `reflexion_check()` (mismo patron widget-HTML que `teoria_check()`,
+ver autograder_nb3_semana3.py `_ask_reflexion`/`_grade_reflexion`), que
+manda el texto a DeepSeek via una funcion Edge de Supabase y devuelve
+0-5 pts + comentario. Sube `_CORE_MAX` de 209 a 264 (+55, 5 pts x 11
+celdas) -- ver nota de presupuesto actualizada mas abajo.
 
 Expansion 2026-08-18 (usuario, tras revisar el notebook generado): dos pedidos
 directos. (1) La celda de la "revelacion" de la Apertura (`nb3-apertura-reveal`)
@@ -61,11 +71,14 @@ p.ej. que la correlacion no es transitiva) y otra DESPUES (interpretar el
 resultado real que el estudiante acaba de calcular) -- `check_t7`-`check_t14`,
 8 preguntas nuevas. El viejo `check_ex5` (explorar todas las correlaciones)
 se renumero a `check_ex9` para dejarle el rango 5-8 a las rondas nuevas.
-**Nota de presupuesto**: esto sube el `_CORE_MAX` de Semana 3 de 109 a 209,
-bastante por encima del ~180 XP asignado a Semanas 3-4 completas en
-`WORKFORCE_CONTRACT.md` SS2 -- ver ticket nuevo en `WORKFORCE_HANDOFF.md`
-para el seguimiento; no se recorto nada para compensar porque el pedido fue
-explicito y aditivo.
+**Nota de presupuesto**: esto sube el `_CORE_MAX` de Semana 3 de 109 a 209
+(y despues a 264 con la reflexion calificada por IA, ver arriba), bastante
+por encima del ~180 XP asignado a Semanas 3-4 completas en
+`WORKFORCE_CONTRACT.md` SS2 -- no se recorto nada para compensar porque el
+pedido fue explicito y aditivo. El usuario decidio explicitamente 2026-08-19
+no abrir/actualizar un ticket de presupuesto para esto: el score se
+normaliza a 0-100% por notebook, asi que el numero crudo de `_CORE_MAX` no
+es un costo real cross-notebook.
 """
 import json
 
@@ -81,6 +94,11 @@ def teoria_check(cell_id, n):
 # ❓ Pregunta t{n} -- ejecuta esta celda para verla y responder
 grader.check_t{n}()""")
 
+def reflexion_check(cell_id, id):
+    return code(cell_id, f"""\
+# 💭 Reflexiona -- ejecuta esta celda para responder
+grader.check_reflexion_{id}()""")
+
 LEYENDA_ICONOS = """\
 ### Leyenda de iconos
 
@@ -94,7 +112,7 @@ LEYENDA_ICONOS = """\
 | 🔧 | **DEBUG** | Ejecuta, lee el error, corrigelo |
 | ✅ | **VERIFICA** | El autograder revisa tu respuesta |
 | ❓ | **TEORIA** | Pregunta de opcion multiple (se muestra al ejecutar la celda) |
-| 💭 | **REFLEXIONA** | Respuesta abierta, NO calificada por el autograder -- tu profesor la revisa |
+| 💭 | **REFLEXIONA** | Respuesta abierta -- calificada por IA, feedback instantaneo (+5 XP) |
 
 ---
 """
@@ -355,14 +373,12 @@ s3.append(code("nb3-a-ex1-code", """\
 s3.append(code("nb3-a-ex1-check", "grader.check_ex1()"))
 
 s3.append(md("nb3-a-ex1-reflexiona-md", """\
-#### 💭 Reflexiona -- Ronda 1 (respuesta abierta, no calificada)
+#### 💭 Reflexiona -- Ronda 1 (respuesta abierta -- calificada por IA, +5 XP)
 
 En una frase: ¿tu ojo acerto en fuerza y direccion para `Percepción de
 corrupción`, o te sorprendio algo del scatter que acabas de construir?
 """))
-s3.append(code("nb3-a-ex1-reflexiona-code", """\
-# 💭 REFLEXIONA -- una frase, no hay una unica respuesta correcta
-reflexion_a1 = "___" """))
+s3.append(reflexion_check("nb3-a-ex1-reflexiona-code", "a1"))
 
 s3.append(md("nb3-a-ex2-md", """\
 #### Ronda 2 -- Antes de seguir, predice
@@ -396,15 +412,13 @@ s3.append(code("nb3-a-ex2-code", """\
 s3.append(code("nb3-a-ex2-check", "grader.check_ex2()"))
 
 s3.append(md("nb3-a-ex2-reflexiona-md", """\
-#### 💭 Reflexiona -- Ronda 2 (respuesta abierta, no calificada)
+#### 💭 Reflexiona -- Ronda 2 (respuesta abierta -- calificada por IA, +5 XP)
 
 En una frase: comparando los dos scatter que construiste hoy (`Percepción de
 corrupción` y `Esperanza de vida saludable`), ¿cual te parecio visualmente
 mas fuerte?
 """))
-s3.append(code("nb3-a-ex2-reflexiona-code", """\
-# 💭 REFLEXIONA -- una frase, no hay una unica respuesta correcta
-reflexion_a2 = "___" """))
+s3.append(reflexion_check("nb3-a-ex2-reflexiona-code", "a2"))
 
 s3.append(code("nb3-a-checkpoint", """\
 # ✅ CHECKPOINT -- necesitas 80% en esta seccion para continuar
@@ -432,14 +446,12 @@ r_apoyo_social = df_felicidad['Apoyo social'].corr(df_felicidad['Puntaje'])
 print(f"r (Apoyo social vs. Puntaje) = {r_apoyo_social:.3f}")"""))
 
 s3.append(md("nb3-b-guiado-reflexiona-md", """\
-#### 💭 Reflexiona -- interpreta el numero guiado (respuesta abierta, no calificada)
+#### 💭 Reflexiona -- interpreta el numero guiado (respuesta abierta -- calificada por IA, +5 XP)
 
 En una frase, y sin usar la palabra "causa": ¿que te dice un r ≈ 0.78 sobre
 la relacion entre `Apoyo social` y `Puntaje`?
 """))
-s3.append(code("nb3-b-guiado-reflexiona-code", """\
-# 💭 REFLEXIONA -- una frase, no hay una unica respuesta correcta
-interpretacion_apoyo_social = "___" """))
+s3.append(reflexion_check("nb3-b-guiado-reflexiona-code", "guiado"))
 
 s3.append(teoria_check("nb3-t6-check", 6))
 
@@ -477,15 +489,13 @@ print(f"r (Percepcion de corrupcion vs. Puntaje) = {r_corrupcion:.3f}")"""))
 s3.append(code("nb3-b-ex3-check", "grader.check_ex3()"))
 
 s3.append(md("nb3-b-ex3-reflexiona-md", """\
-#### 💭 Reflexiona -- Ronda 1 (respuesta abierta, no calificada)
+#### 💭 Reflexiona -- Ronda 1 (respuesta abierta -- calificada por IA, +5 XP)
 
 ¿Que tan cerca estuvo tu prediccion del Ejercicio 1 del `r_corrupcion` real?
 Y en tus propias palabras: ¿que dice este numero sobre la relacion entre
 percepcion de corrupcion y felicidad?
 """))
-s3.append(code("nb3-b-ex3-reflexiona-code", """\
-# 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
-interpretacion_corrupcion = "___" """))
+s3.append(reflexion_check("nb3-b-ex3-reflexiona-code", "corrupcion"))
 
 s3.append(md("nb3-b-ex4-md", """\
 #### Ronda 2 -- ✅ Ejercicio 4: Tu prediccion contra la realidad, otra vez (12 pts)
@@ -502,16 +512,14 @@ print(f"r (Esperanza de vida saludable vs. Puntaje) = {r_esperanza:.3f}")"""))
 s3.append(code("nb3-b-ex4-check", "grader.check_ex4()"))
 
 s3.append(md("nb3-b-ex4-reflexiona-md", """\
-#### 💭 Reflexiona -- Ronda 2 (respuesta abierta, no calificada)
+#### 💭 Reflexiona -- Ronda 2 (respuesta abierta -- calificada por IA, +5 XP)
 
 `r_apoyo_social` y `r_esperanza` resultan casi identicos en fuerza (ambos
 cerca de 0.78) aunque son variables completamente distintas. ¿Te parece
 casualidad, o tiene sentido que ambas se relacionen con la felicidad de
 manera parecida? Explica en 1-2 oraciones.
 """))
-s3.append(code("nb3-b-ex4-reflexiona-code", """\
-# 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
-interpretacion_esperanza = "___" """))
+s3.append(reflexion_check("nb3-b-ex4-reflexiona-code", "esperanza"))
 
 # ─── Rondas 3-6 -- mas alla de Puntaje ───────────────────────────────────
 s3.append(md("nb3-b-mas-alla-md", """\
@@ -555,16 +563,14 @@ s3.append(code("nb3-b-ex5-code", """\
 s3.append(code("nb3-b-ex5-check", "grader.check_ex5()"))
 s3.append(teoria_check("nb3-t8-check", 8))
 s3.append(md("nb3-b-ex5-reflexiona-md", """\
-##### 💭 Reflexiona -- Ronda 3 (respuesta abierta, no calificada)
+##### 💭 Reflexiona -- Ronda 3 (respuesta abierta -- calificada por IA, +5 XP)
 
 `PBI per cápita` y `Esperanza de vida saludable` salio con el r mas alto que
 calculaste en toda la clase -- mas alto incluso que cualquiera de los dos con
 `Puntaje`. ¿Por que crees que estas dos variables en particular se mueven
 tan juntas?
 """))
-s3.append(code("nb3-b-ex5-reflexiona-code", """\
-# 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
-interpretacion_ex5 = "___" """))
+s3.append(reflexion_check("nb3-b-ex5-reflexiona-code", "ronda3"))
 
 s3.append(md("nb3-b-ex6-md", """\
 #### Ronda 4 -- Apoyo social vs. Esperanza de vida saludable
@@ -590,16 +596,14 @@ s3.append(code("nb3-b-ex6-code", """\
 s3.append(code("nb3-b-ex6-check", "grader.check_ex6()"))
 s3.append(teoria_check("nb3-t10-check", 10))
 s3.append(md("nb3-b-ex6-reflexiona-md", """\
-##### 💭 Reflexiona -- Ronda 4 (respuesta abierta, no calificada)
+##### 💭 Reflexiona -- Ronda 4 (respuesta abierta -- calificada por IA, +5 XP)
 
 Compara el r de esta ronda con el r de la Ronda 3. Ambos pares comparten
 `Esperanza de vida saludable`, pero dan numeros distintos. ¿Que te dice eso
 sobre generalizar "esta variable siempre se relaciona igual de fuerte con
 todo"?
 """))
-s3.append(code("nb3-b-ex6-reflexiona-code", """\
-# 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
-interpretacion_ex6 = "___" """))
+s3.append(reflexion_check("nb3-b-ex6-reflexiona-code", "ronda4"))
 
 s3.append(md("nb3-b-ex7-md", """\
 #### Ronda 5 -- Libertad para tomar decisiones vs. Percepción de corrupción
@@ -625,14 +629,12 @@ s3.append(code("nb3-b-ex7-code", """\
 s3.append(code("nb3-b-ex7-check", "grader.check_ex7()"))
 s3.append(teoria_check("nb3-t12-check", 12))
 s3.append(md("nb3-b-ex7-reflexiona-md", """\
-##### 💭 Reflexiona -- Ronda 5 (respuesta abierta, no calificada)
+##### 💭 Reflexiona -- Ronda 5 (respuesta abierta -- calificada por IA, +5 XP)
 
 Este par dio un r notablemente mas chico que las Rondas 3 y 4. En tus propias
 palabras: ¿que significa "una relacion real, pero mucho menos consistente"?
 """))
-s3.append(code("nb3-b-ex7-reflexiona-code", """\
-# 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
-interpretacion_ex7 = "___" """))
+s3.append(reflexion_check("nb3-b-ex7-reflexiona-code", "ronda5"))
 
 s3.append(md("nb3-b-ex8-md", """\
 #### Ronda 6 -- PBI per cápita vs. Generosidad
@@ -658,16 +660,14 @@ s3.append(code("nb3-b-ex8-code", """\
 s3.append(code("nb3-b-ex8-check", "grader.check_ex8()"))
 s3.append(teoria_check("nb3-t14-check", 14))
 s3.append(md("nb3-b-ex8-reflexiona-md", """\
-##### 💭 Reflexiona -- Ronda 6 (respuesta abierta, no calificada)
+##### 💭 Reflexiona -- Ronda 6 (respuesta abierta -- calificada por IA, +5 XP)
 
 De las seis variables economicas y sociales del dataset, `PBI per cápita` y
 `Generosidad` dieron el r mas cercano a 0 de las cuatro rondas nuevas. ¿Te
 parece razonable que el dinero de un pais casi no prediga que tan generosa
 es su gente? ¿Por que si o por que no?
 """))
-s3.append(code("nb3-b-ex8-reflexiona-code", """\
-# 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
-interpretacion_ex8 = "___" """))
+s3.append(reflexion_check("nb3-b-ex8-reflexiona-code", "ronda6"))
 
 s3.append(md("nb3-b-ex9-md", """\
 #### ✅ Ejercicio 9 -- Explora todas las correlaciones con Puntaje (15 pts)
@@ -701,15 +701,13 @@ print(f"Mas fuerte: {columna_mas_fuerte} | Mas debil: {columna_mas_debil}")"""))
 s3.append(code("nb3-b-ex9-check", "grader.check_ex9()"))
 
 s3.append(md("nb3-b-ex9-reflexiona-md", """\
-#### 💭 Reflexiona (respuesta abierta, no calificada)
+#### 💭 Reflexiona (respuesta abierta -- calificada por IA, +5 XP)
 
 De las seis variables que exploraste, ¿cual resultado te sorprendio mas --
 una que esperabas fuerte y salio debil, o al reves? ¿Por que crees que pasa
 eso?
 """))
-s3.append(code("nb3-b-ex9-reflexiona-code", """\
-# 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
-interpretacion_explora = "___" """))
+s3.append(reflexion_check("nb3-b-ex9-reflexiona-code", "explora"))
 
 s3.append(md("nb3-b-debug1-md", """\
 #### ✅ Debug 1 -- Corrige el error (10 pts)
@@ -724,16 +722,14 @@ print(r_pbi)"""))
 s3.append(code("nb3-b-debug1-check", "grader.check_debug1()"))
 
 s3.append(md("nb3-b-reflexiona-md", """\
-#### 💭 Reflexiona (respuesta abierta -- tu profesor la revisa, no el autograder)
+#### 💭 Reflexiona (respuesta abierta -- calificada por IA, +5 XP)
 
 `PBI per cápita` y `Puntaje` tienen r ≈ 0.79 -- una relacion fuerte y
 positiva. **¿Significa esto que tener mas dinero produce felicidad?**
 Escribe 2-3 oraciones: si no estas seguro de que la respuesta sea "si," ¿que
 otra explicacion se te ocurre para esa relacion?
 """))
-s3.append(code("nb3-b-reflexiona-code", """\
-# 💭 REFLEXIONA -- escribe 2-3 oraciones, no hay una unica respuesta correcta
-reflexion_b = "___" """))
+s3.append(reflexion_check("nb3-b-reflexiona-code", "causacion"))
 
 s3.append(code("nb3-b-checkpoint", "grader.check_mini_b()"))
 

@@ -112,6 +112,35 @@ INSERT INTO public.courses (id, name, bimestre, year) VALUES
   ('STAT_2026', 'Estadistica',      'Bimestre 3', 2026)
 ON CONFLICT (id) DO NOTHING;
 
+-- ── llm_reflexion_grades: auditoria de calificacion IA de celdas ─
+-- 💭 Reflexiona (nb3_semana3 en adelante -- ver WORKFORCE_CONTRACT.md SS3).
+-- No es una tabla "en vivo": hoy solo respalda la funcion Edge
+-- grade-reflexion (grado + comentario devueltos al notebook), sin pagina de
+-- revision docente todavia. `grado` se guarda para poder auditar despues que
+-- la calibracion de estrictez por año (3ro/4to/5to) se comporto como se
+-- espera, no solo para revisar notas individuales.
+CREATE TABLE IF NOT EXISTS public.llm_reflexion_grades (
+  id            uuid        DEFAULT gen_random_uuid() PRIMARY KEY,
+  dni           text,
+  notebook      text        NOT NULL,
+  curso         text        NOT NULL,
+  reflexion_id  text        NOT NULL,
+  grado         text,
+  student_text  text        NOT NULL,
+  score         integer     NOT NULL,
+  max_pts       integer     NOT NULL,
+  comment       text        NOT NULL,
+  model         text        DEFAULT 'deepseek-chat',
+  created_at    timestamptz DEFAULT now()
+);
+
+ALTER TABLE public.llm_reflexion_grades ENABLE ROW LEVEL SECURITY;
+
+-- Solo la Edge Function (service_role) inserta. Anon no lee ni escribe --
+-- no hay pagina de revision docente en esta pasada; si se construye una
+-- despues, agregar aqui una policy de SELECT (probablemente detras de auth,
+-- no anon abierto como `submissions`, porque esto incluye texto de alumnos).
+
 -- ── Consulta rapida: mejor puntaje por alumno ────────────────
 -- Ejecuta esto en el SQL Editor para ver el leaderboard actual:
 --

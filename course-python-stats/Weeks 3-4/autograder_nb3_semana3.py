@@ -20,15 +20,32 @@ Notas de scoring (ATLAS):
   combinados en un solo ejercicio) valen 15 pts c/u = 60.
   ex9 (explorar las 6 correlaciones -- antes ex5, renumerado 2026-08-18 para
   dejarle el rango 5-8 a las rondas nuevas) vale 15. debug1 vale 10.
+  Las 11 celdas 💭 Reflexiona valen 5 pts c/u = 55 (calificadas por IA,
+  ver mas abajo) -- agregado 2026-08-19, pedido explicito del usuario.
   _CORE_MAX = 25 (t1-5) + 15 (ex1) + 15 (ex2) + 5 (t6) + 12 (ex3) + 12 (ex4)
-            + 40 (t7-14) + 15*4 (ex5-8) + 15 (ex9) + 10 (debug1) = 209.
+            + 40 (t7-14) + 15*4 (ex5-8) + 15 (ex9) + 10 (debug1)
+            + 5*11 (reflexion x11) = 264.
   Sin bonus/reto en esta Clase 1 -- Semana 3 no declara check_retoN.
-  **Nota de presupuesto**: 209 pts supera bastante el ~180 XP asignado a
+  **Nota de presupuesto**: 264 pts supera bastante el ~180 XP asignado a
   Semanas 3-4 juntas en WORKFORCE_CONTRACT.md SS2 (que ademas todavia debe
   cubrir Seccion C + Integracion de Semana 4) -- expansion 2026-08-18 pedida
   explicitamente por el usuario (4 rondas nuevas + preguntas pre/post cada
-  una), no una desviacion accidental. Ver WORKFORCE_HANDOFF.md para el
-  ticket de seguimiento del presupuesto.
+  una), no una desviacion accidental. El usuario decidio explicitamente
+  2026-08-19 no abrir/actualizar un ticket de presupuesto para esto: el
+  score se normaliza a 0-100% por notebook (ver `_totals()`), asi que el
+  numero crudo de `_CORE_MAX` no es un costo real cross-notebook.
+
+Calificacion IA de 💭 Reflexiona (agregado 2026-08-19):
+  Cada celda reemplaza el patron viejo "variable = '___'" (editar y no pasa
+  nada) por un widget HTML (misma tecnica que check_tN: boton -> JS ->
+  google.colab.kernel.invokeFunction -> callback Python) que envia el texto
+  a la funcion Edge `grade-reflexion` de Supabase, la cual llama a DeepSeek
+  (deepseek-chat) y devuelve {score 0-5, comment}. La clave de DeepSeek vive
+  solo en esa funcion (Supabase secret), nunca en este archivo/notebook.
+  Un fallo de red/API NO califica con 0 -- se le pide al alumno reintentar y
+  la celda queda sin bloquear (ver `_grade_reflexion`). Solo `nb3_semana3` en
+  adelante -- `nb1_semana1`/`nb1_semana2` siguen con revision manual del
+  profesor, sin tocar (WORKFORCE_CONTRACT.md SS3).
 
 Nota Supabase: mismo proyecto/tabla `submissions` que nb1 (Bimestre 3 --
 Estadistica en Python), campo "curso"="STAT_2026", "notebook"="nb3_semana3".
@@ -60,8 +77,13 @@ _DEADLINE_UTC   = _dt.datetime(2026, 8, 31, 4, 59, 0, tzinfo=_dt.timezone.utc)
 DEADLINE_PASSED = _dt.datetime.now(_dt.timezone.utc) >= _DEADLINE_UTC
 
 # ─── Scoring ─────────────────────────────────────────────────
-_CORE_MAX = 209   # 25 (t1-5) + 15+15 (ex1,ex2) + 5 (t6) + 12+12 (ex3,ex4)
+_CORE_MAX = 264   # 25 (t1-5) + 15+15 (ex1,ex2) + 5 (t6) + 12+12 (ex3,ex4)
                   # + 40 (t7-14) + 15*4 (ex5-8) + 15 (ex9) + 10 (debug1)
+                  # + 5*11 (reflexion x11)
+
+# ─── Reflexion (calificada por IA vía Supabase Edge Function) ─
+_REFLEXION_PTS       = 5
+GRADE_REFLEXION_URL  = f"{SUPABASE_URL}/functions/v1/grade-reflexion"
 
 # ─── Niveles "En Busca de la Felicidad" (por % del score core) ───
 _LEVELS = [
@@ -93,6 +115,19 @@ def _level_info(pct):
 
 def _lv_color(n):
     return _LV_CSS_COLOR.get(n, "#8fae7a")
+
+
+def _is_nontrivial_text(v, min_len=15):
+    """Guarda de placeholder/vacio -- misma logica que
+    Weeks 1-2/autograder_nb1_semana2.py, portada aca para no depender de un
+    import cross-archivo entre autograders independientes. Corre ANTES de
+    cualquier llamada de red a la funcion de calificacion IA."""
+    if not isinstance(v, str):
+        return False
+    t = v.strip().strip('"').strip("'").strip()
+    if t in ("", "___", "?", "..."):
+        return False
+    return len(t) >= min_len
 
 
 # ─── Helpers ─────────────────────────────────────────────────
@@ -303,6 +338,7 @@ setTimeout(function(){{
 
             _out.register_callback('_ag_register', _on_register)
             _out.register_callback('_ag_teoria_answer', self._grade_teoria)
+            _out.register_callback('_ag_reflexion_answer', self._grade_reflexion)
 
             display(HTML(f'''
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -1230,6 +1266,353 @@ async function {uid}_pick(letter) {{
     def check_t12(self): return self._ask_teoria(12)
     def check_t13(self): return self._ask_teoria(13)
     def check_t14(self): return self._ask_teoria(14)
+
+    # ═══════════════════════════════════════════════════════════
+    # REFLEXIÓN — 💭 calificada por IA (DeepSeek vía Supabase Edge Function)
+    # ═══════════════════════════════════════════════════════════
+
+    def _call_grade_reflexion(self, reflexion_id, text):
+        """POST a la funcion Edge grade-reflexion. Devuelve (score, comment)
+        en exito, None en CUALQUIER fallo (red, timeout, respuesta con forma
+        invalida) -- el caller nunca debe interpretar None como "el alumno
+        saco 0", solo como "no se pudo calificar, que reintente"."""
+        try:
+            import json as _json, urllib.request as _ur
+            payload = _json.dumps({
+                "dni":          self._dni,
+                "notebook":     NOTEBOOK_ID,
+                "curso":        CURSO_ID,
+                "reflexion_id": reflexion_id,
+                "student_text": text,
+                "grado":        self._grado or "",
+            }).encode("utf-8")
+            req = _ur.Request(
+                GRADE_REFLEXION_URL,
+                data=payload,
+                headers={
+                    "apikey":        SUPABASE_ANON_KEY,
+                    "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
+                    "Content-Type":  "application/json",
+                },
+                method="POST",
+            )
+            with _ur.urlopen(req, timeout=15) as resp:
+                data = _json.loads(resp.read().decode("utf-8"))
+            score, comment = data.get("score"), data.get("comment")
+            if not isinstance(score, int) or not isinstance(comment, str) or not comment.strip():
+                return None
+            return score, comment
+        except Exception:
+            return None
+
+    def _show_reflexion_locked(self, id):
+        """Reflexion ya respondida -- no se permite un segundo intento."""
+        key = f"refl_{id}"
+        pts, max_pts = self._scores[key]
+        color = "#4caf50" if pts == max_pts else ("#ffd166" if pts > 0 else "#ff5d5d")
+        display(HTML(
+            f'<div style="max-width:840px;margin:10px 0;background:#12100a;'
+            f'border:2px solid {color};border-radius:4px;padding:14px 18px;'
+            f'font-family:\'Segoe UI\',Roboto,sans-serif;">'
+            f'<div style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
+            f'color:#a8a08a;letter-spacing:1px;margin-bottom:8px;">'
+            f'🔒 💭 REFLEXIONA — YA RESPONDIDA</div>'
+            f'<div style="color:{color};font-size:13px;">'
+            f'Ya enviaste tu reflexión ({pts}/{max_pts} pts)</div>'
+            f'<div style="color:#a8a08a;font-size:12px;margin-top:6px;">'
+            f'Esta celda admite una sola respuesta. Volver a ejecutar la celda no '
+            f'genera un nuevo intento.</div></div>'
+        ))
+
+    def _grade_reflexion(self, id, text):
+        key = f"refl_{id}"
+        if key in self._scores:
+            self._show_reflexion_locked(id)
+            return
+
+        if not _is_nontrivial_text(text):
+            self._award_reflexion(
+                key, 0, _REFLEXION_PTS,
+                "Escribe una reflexión real de 1-2 oraciones -- no dejes el "
+                "placeholder \"___\" ni una respuesta de una sola palabra."
+            )
+            return
+
+        result = self._call_grade_reflexion(id, text)
+        if result is None:
+            display(HTML(
+                '<div style="max-width:840px;margin:10px 0;background:#12100a;'
+                'border:2px solid #ffb703;border-radius:4px;padding:14px 18px;'
+                'font-family:\'Segoe UI\',Roboto,sans-serif;">'
+                '<div style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
+                'color:#ffb703;letter-spacing:1px;margin-bottom:8px;">'
+                '⏳ NO SE PUDO CALIFICAR</div>'
+                '<div style="color:#f0ece0;font-size:13px;">'
+                'No pudimos calificar tu reflexión ahora mismo (problema de conexión). '
+                'Vuelve a ejecutar esta celda para intentar de nuevo -- tu respuesta no '
+                'se perdió ni se calificó con 0.</div></div>'
+            ))
+            return
+
+        score, comment = result
+        score = max(0, min(_REFLEXION_PTS, int(round(score))))
+        self._award_reflexion(key, score, _REFLEXION_PTS, comment)
+
+    def _ask_reflexion(self, id, question):
+        key = f"refl_{id}"
+        if key in self._scores:
+            self._show_reflexion_locked(id)
+            return
+        try:
+            from google.colab import output as _out  # noqa: F401  (solo para confirmar entorno Colab)
+            import random as _r
+            uid = f"rq_{id}_{_r.randint(10000, 99999)}"
+
+            display(HTML(f'''
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<div id="{uid}-wrap" style="background:#12100a;border:2px solid #4aa8d8;border-radius:4px;
+  max-width:840px;margin:10px 0;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.7);">
+  <div style="background:#4aa8d818;border-bottom:1px solid #4aa8d840;padding:10px 16px;">
+    <span style="font-family:'Press Start 2P',monospace;font-size:9px;color:#4aa8d8;
+      letter-spacing:1px;">💭 REFLEXIONA</span>
+  </div>
+  <div style="padding:16px 18px;">
+    <div style="color:#f0ece0;font-size:13px;line-height:1.6;margin-bottom:14px;">{question}</div>
+    <textarea id="{uid}-text" rows="3" placeholder="Escribe tu reflexión aquí..."
+      style="width:100%;box-sizing:border-box;background:#171307;border:2px solid #4aa8d8;
+      border-radius:4px;color:#f0ece0;font-family:'Segoe UI',Roboto,sans-serif;
+      font-size:13px;padding:10px 12px;resize:vertical;"></textarea>
+    <button id="{uid}-btn" onclick="{uid}_submit()"
+      style="margin-top:10px;padding:10px 20px;background:#4aa8d8;border:none;
+      border-radius:4px;color:#0d0b06;font-family:'Press Start 2P',monospace;
+      font-size:9px;cursor:pointer;">ENVIAR ✉️</button>
+    <div id="{uid}-status" style="margin-top:10px;font-size:12px;color:#a8a08a;"></div>
+  </div>
+</div>
+<script>
+async function {uid}_submit() {{
+  var ta = document.getElementById('{uid}-text');
+  var btn = document.getElementById('{uid}-btn');
+  var status = document.getElementById('{uid}-status');
+  var text = ta.value;
+  ta.disabled = true;
+  btn.disabled = true;
+  btn.style.opacity = '0.5';
+  btn.style.cursor = 'not-allowed';
+  status.innerHTML = '⏳ Calificando...';
+  await google.colab.kernel.invokeFunction('_ag_reflexion_answer', ['{id}', text], {{}});
+  status.innerHTML = '';
+}}
+</script>
+'''))
+        except ImportError:
+            print(f"💭 REFLEXIONA\n{question}\n")
+            text = input("Tu reflexión: ").strip()
+            self._grade_reflexion(id, text)
+
+    def _award_reflexion(self, key, pts, max_pts, comment):
+        """Hermano de _award() para calificacion IA -- no reusa _award()
+        directamente porque su motor de pts = round(max_pts * passed/len(checks))
+        promedia sub-checks booleanos, y aca ya tenemos un puntaje numerico
+        directo del LLM. Replica los efectos secundarios que importan (score,
+        envio async a Supabase, chequeo de logros) con una tarjeta mas simple
+        (un comentario, no una lista de checks)."""
+        self._scores[key] = (pts, max_pts)
+        # No toca self._streak -- una reflexion no debe romper ni construir
+        # la racha de ejercicios core (mismo principio que check_reto1 en
+        # Weeks 1-2, que preserva su racha previa en vez de dejar que el
+        # bonus la afecte).
+
+        earned, possible, pct = self._totals()
+        lvl_num, lvl_name     = _level_info(pct)
+
+        import threading as _thr
+        _thr.Thread(
+            target=self._submit_to_supabase,
+            args=(earned, possible, pct, lvl_num, lvl_name, True),
+            daemon=True,
+        ).start()
+
+        new_ach = self._check_achievements(key)
+        reg_ach = [(n, c, r) for n, c, r in new_ach if r != "Nivel"]
+
+        _RC = {
+            "Chispa":    ("#8fae7a", "rgba(143,174,122,.12)", "🌱"),
+            "Rayo":      ("#4aa8d8", "rgba(74,168,216,.12)",  "🌤️"),
+            "Amanecer":  ("#ffb703", "rgba(255,183,3,.10)",   "🌻"),
+            "Sol Pleno": ("#ff9e2c", "rgba(255,158,44,.15)",  "☀️"),
+        }
+        ach_html = ""
+        for ach_name, _, ach_rarity in reg_ach:
+            bc, bg, ach_icon = _RC.get(ach_rarity, _RC["Chispa"])
+            ach_html += (
+                f'<div style="display:flex;align-items:center;gap:10px;margin-top:8px;'
+                f'padding:10px 12px;background:{bg};border:1px solid {bc};border-radius:3px;">'
+                f'<span style="font-size:18px;">{ach_icon}</span>'
+                f'<div style="flex:1;">'
+                f'<div style="margin-bottom:3px;">'
+                f'<span style="background:{bc};color:#12100a;font-size:7px;font-weight:bold;'
+                f'padding:1px 5px;border-radius:2px;font-family:\'Press Start 2P\',monospace;">'
+                f'{ach_rarity.upper()}</span>'
+                f'<span style="font-family:\'Press Start 2P\',monospace;font-size:7px;'
+                f'color:{bc};margin-left:6px;">LOGRO DESBLOQUEADO</span>'
+                f'</div>'
+                f'<div style="color:#f0ece0;font-size:12px;font-weight:bold;">{ach_name}</div>'
+                f'</div></div>'
+            )
+
+        if pts == max_pts:
+            s_icon, s_text, s_color = "💭", f"¡REFLEXIÓN COMPLETA! +{pts} XP", "#4caf50"
+            border_color, glow = "#4caf50", "0 0 22px rgba(76,175,80,.15)"
+        elif pts > 0:
+            s_icon, s_text, s_color = "💭", f"+{pts} XP  ·  {max_pts - pts} por profundizar", "#ffd166"
+            border_color, glow = "#ffb703", "0 0 22px rgba(255,183,3,.12)"
+        else:
+            s_icon, s_text, s_color = "💭", "Sin XP esta vez — lee el comentario abajo", "#ff5d5d"
+            border_color, glow = "#ff5d5d", "0 0 22px rgba(255,93,93,.15)"
+
+        xp_grad = _XP_GRAD.get(lvl_num, _XP_GRAD[1])
+        _core_pct_bar = min(round(earned / _CORE_MAX * 100), 100)
+        xp_bar_html = (
+            f'<div style="display:flex;justify-content:space-between;margin-bottom:4px;">'
+            f'<span style="font-family:\'Press Start 2P\',monospace;font-size:7px;color:#6a6656;">'
+            f'XP: {earned}/{_CORE_MAX}</span>'
+            f'<span style="font-family:\'Press Start 2P\',monospace;font-size:7px;'
+            f'color:{_lv_color(lvl_num)};">{lvl_name}</span></div>'
+            f'<div style="width:100%;height:10px;background:#1c1810;border:1px solid #26241a;'
+            f'border-radius:2px;overflow:hidden;">'
+            f'<div style="width:{_core_pct_bar}%;height:100%;background:{xp_grad};'
+            f'border-radius:2px;transform-origin:left;'
+            f'animation:pg-xpscale 1.1s cubic-bezier(.4,0,.2,1) forwards;'
+            f'box-shadow:0 0 6px rgba(255,209,102,.25);"></div></div>'
+        )
+
+        comment_html = (
+            f'<div style="padding:10px 12px;margin:2px 0 8px;background:rgba(74,168,216,.06);'
+            f'border-left:3px solid #4aa8d8;border-radius:0 3px 3px 0;">'
+            f'<span style="font-family:\'Press Start 2P\',monospace;font-size:7px;color:#4aa8d8;">'
+            f'🤖 FEEDBACK</span>'
+            f'<div style="color:#f0ece0;font-size:12px;line-height:1.6;margin-top:5px;">{comment}</div>'
+            f'</div>'
+        )
+
+        deadline_html = ""
+        if DEADLINE_PASSED:
+            deadline_html = '''<div style="margin-top:10px;padding:12px 16px;background:#1a0000;
+  border:2px solid #ff0000;border-radius:3px;text-align:center;">
+  <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:#ff0000;
+    letter-spacing:2px;text-shadow:0 0 10px rgba(255,0,0,.6);">🚫 PLAZO VENCIDO</div>
+  <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:#ff8888;
+    margin-top:6px;letter-spacing:1px;">TU NOTA NO SERÁ ACTUALIZADA</div>
+  <div style="font-size:11px;color:#cc6666;margin-top:6px;">
+    Puedes revisar tus respuestas, pero la entrega ya cerró.</div></div>'''
+        elif self._dni:
+            deadline_html = ('<div style="margin-top:8px;font-family:\'Press Start 2P\',monospace;'
+                             'font-size:6px;color:#4aa8d8;letter-spacing:1px;opacity:.85;">'
+                             '📊 Calificación actualizada en la base de datos</div>')
+
+        card_html = f'''<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  @keyframes pg-xpscale{{from{{transform:scaleX(0)}}to{{transform:scaleX(1)}}}}
+</style>
+<div style="background:#12100a;border:2px solid {border_color};border-radius:4px;max-width:840px;
+  margin-bottom:14px;overflow:hidden;box-shadow:{glow},0 6px 24px rgba(0,0,0,.7);
+  font-family:'Segoe UI',Roboto,sans-serif;">
+  <div style="background:{border_color}18;border-bottom:1px solid {border_color}40;
+    padding:9px 16px;display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-family:'Press Start 2P',monospace;font-size:9px;
+      color:{border_color};letter-spacing:1px;">💭 REFLEXIÓN CALIFICADA</span>
+    <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:#ff9e2c;
+      background:rgba(255,158,44,.1);border:1px solid rgba(255,158,44,.4);
+      padding:3px 8px;border-radius:2px;">MAX {max_pts} XP</div>
+  </div>
+  <div style="padding:10px 14px 6px;">{comment_html}</div>
+  <div style="background:#0d0b06;border-top:1px solid #1a1710;padding:11px 14px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+      <span style="font-size:16px;">{s_icon}</span>
+      <span style="font-family:'Press Start 2P',monospace;font-size:8px;
+        color:{s_color};">{s_text}</span>
+    </div>
+    {xp_bar_html}
+    {ach_html}
+    {deadline_html}
+  </div>
+</div>'''
+        display(HTML(card_html))
+
+    def check_reflexion_a1(self):
+        return self._ask_reflexion("a1",
+            'En una frase: ¿tu ojo acerto en fuerza y direccion para '
+            '"Percepción de corrupción", o te sorprendio algo del scatter '
+            'que acabas de construir?')
+
+    def check_reflexion_a2(self):
+        return self._ask_reflexion("a2",
+            'En una frase: comparando los dos scatter que construiste hoy '
+            '("Percepción de corrupción" y "Esperanza de vida saludable"), '
+            '¿cual te parecio visualmente mas fuerte?')
+
+    def check_reflexion_guiado(self):
+        return self._ask_reflexion("guiado",
+            'En una frase, y sin usar la palabra "causa": ¿que te dice un '
+            'r ≈ 0.78 sobre la relacion entre "Apoyo social" y "Puntaje"?')
+
+    def check_reflexion_corrupcion(self):
+        return self._ask_reflexion("corrupcion",
+            '¿Que tan cerca estuvo tu prediccion del Ejercicio 1 del '
+            '"r_corrupcion" real? Y en tus propias palabras: ¿que dice este '
+            'numero sobre la relacion entre percepcion de corrupcion y '
+            'felicidad?')
+
+    def check_reflexion_esperanza(self):
+        return self._ask_reflexion("esperanza",
+            '"r_apoyo_social" y "r_esperanza" resultan casi identicos en '
+            'fuerza (ambos cerca de 0.78) aunque son variables completamente '
+            'distintas. ¿Te parece casualidad, o tiene sentido que ambas se '
+            'relacionen con la felicidad de manera parecida? Explica en 1-2 '
+            'oraciones.')
+
+    def check_reflexion_ronda3(self):
+        return self._ask_reflexion("ronda3",
+            '"PBI per cápita" y "Esperanza de vida saludable" salio con el '
+            'r mas alto que calculaste en toda la clase -- mas alto incluso '
+            'que cualquiera de los dos con "Puntaje". ¿Por que crees que '
+            'estas dos variables en particular se mueven tan juntas?')
+
+    def check_reflexion_ronda4(self):
+        return self._ask_reflexion("ronda4",
+            'Compara el r de esta ronda con el r de la Ronda 3. Ambos pares '
+            'comparten "Esperanza de vida saludable", pero dan numeros '
+            'distintos. ¿Que te dice eso sobre generalizar "esta variable '
+            'siempre se relaciona igual de fuerte con todo"?')
+
+    def check_reflexion_ronda5(self):
+        return self._ask_reflexion("ronda5",
+            'Este par dio un r notablemente mas chico que las Rondas 3 y 4. '
+            'En tus propias palabras: ¿que significa "una relacion real, '
+            'pero mucho menos consistente"?')
+
+    def check_reflexion_ronda6(self):
+        return self._ask_reflexion("ronda6",
+            'De las seis variables economicas y sociales del dataset, "PBI '
+            'per cápita" y "Generosidad" dieron el r mas cercano a 0 de las '
+            'cuatro rondas nuevas. ¿Te parece razonable que el dinero de un '
+            'pais casi no prediga que tan generosa es su gente? ¿Por que si '
+            'o por que no?')
+
+    def check_reflexion_explora(self):
+        return self._ask_reflexion("explora",
+            'De las seis variables que exploraste, ¿cual resultado te '
+            'sorprendio mas -- una que esperabas fuerte y salio debil, o al '
+            'reves? ¿Por que crees que pasa eso?')
+
+    def check_reflexion_causacion(self):
+        return self._ask_reflexion("causacion",
+            '"PBI per cápita" y "Puntaje" tienen r ≈ 0.79 -- una relacion '
+            'fuerte y positiva. ¿Significa esto que tener mas dinero '
+            'produce felicidad? Escribe 2-3 oraciones: si no estas seguro '
+            'de que la respuesta sea "si," ¿que otra explicacion se te '
+            'ocurre para esa relacion?')
 
     # ═══════════════════════════════════════════════════════════
     # SECCIÓN A — Antes de Calcular (scatter propio)
