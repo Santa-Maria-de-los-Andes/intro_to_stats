@@ -114,6 +114,19 @@ Audience for this module specifically is narrower than your general range: 3rd�
 - **Rank criterion (confirmed with user 2026-08-16):** cumulative, best 7 of 8 weekly homeworks — `rango = promedio(semanas_cerradas − la más floja)`. Mid-bimestre, before all 8 weeks exist, this runs as "best (n−1) of n closed weeks," converging to best-7-of-8 once the season ends. The current week's homework shows its own live progress bar but is excluded from the Rank calculation until that week closes (so a hot start can't jump someone's tier before the week is actually done). Considered and rejected: simple average of completed-only weeks (exploitable — one great week with everything else skipped reads as Diamante); recency-weighted/decay scoring (too opaque to defend to a student asking why their rank moved without a new bad grade).
 - **Open dependency, not yet resolved:** every notebook's leaderboard today (e.g. `nb1.html`) queries `submissions` filtered to one `NOTEBOOK_ID`. A cross-notebook aggregate Rank needs one row per student per completed homework, summed/averaged across all of them, plus a way to identify "current week" — that's a Supabase schema/query question for ATLAS, not resolved by this design pass.
 
+### Public Rankings Page (`public_leaderboard.html`) — Premium Redesign, 2026-08-17
+
+**Status:** Second artifact built on top of the Rank System above — "a general page where all can see the rankings" (user's framing), not the internal PIXEL pitch. Lives at `WORKFORCE/design/rank-system/public_leaderboard.html`; published at <https://claude.ai/code/artifact/d1cfb7a7-9c90-4410-8146-85bf0d5bc0a4>. Same prototype status as the Rank System itself — not wired to Supabase.
+
+**Iteration history (fast, all same day, all direct user feedback):** started as a scroll-scrubbed hero using 70 frames from a user-supplied AI video (a golden-palace-to-storm sequence) → user asked to drop the scroll mechanism, kept one static frame with a Ken Burns drift → user said "forget the image, make it feel like a videogame leaderboard," became a pure-CSS animated arena (grid floor, glow blobs, light sweep) → user said cut the hero entirely, background should carry the feeling behind the ranks instead → user called that generic ("this isnt premium design... impress me"), which prompted an actual design-system rebuild rather than another effects pass. Worth remembering: the violet/cyan glow-and-grid look several iterations converged on by default is *the* generic AI-dashboard cliché, not a safe fallback — restraint plus a distinct shape language read as more premium than more ambient motion.
+
+- **Shape language:** one consistent angular cut-corner motif (`clip-path` diagonal clip on two corners, `.cut-lg`/`.cut-md`) applied to every structural panel — header, podium, ladder tiles, tier groups — instead of rounded cards. This is the single biggest lever for reading as a real competitive-game UI (Valorant/League ranked screens) rather than a generic dark dashboard.
+- **Palette pivot:** moved off the Rank System's violet/cyan chrome to obsidian + gold + ice — `--ink:#0a0a0b` `--ink-raise:#141418` `--gold:#e7b350` (prestige signal — rank numbers, achievement chips, header accent) `--ice:#7fd4ea` (reserved only for "live/in-progress" data, not decoration). Tier badge colors (carbon/cobre/plata/oro/platino/diamante) unchanged. This palette is specific to this artifact — if the Rank System's own spec (above) gets reconciled with it later, confirm with the user which wins.
+- **Material:** SVG `feTurbulence` grain overlay at ~5% opacity, `mix-blend-mode:overlay`, fixed full-viewport, no image asset — cheap and is what separates "flat CSS gradient" from something that reads as designed material.
+- **New: a podium** for the top 3 (absent from the original Rank System mockup) — #1 elevated, gold border/glow, crown, bigger badge and number. Reuses `nb1.html`'s proven 2nd–1st–3rd visual order.
+- **Background restraint:** background elements (grid texture, two soft glows) are intentionally near-invisible now — texture, not decoration. Earlier passes had an animated perspective floor grid, drifting light sweep, and rising particles; all cut as reading like a generic "sci-fi HUD kit" rather than a considered design.
+- **Motion:** staggered reveal-on-load (`nth-child` delays) on ladder tiles and tier groups replaced ambient background animation as the primary "alive" signal.
+
 ### Target Audience Constraints
 - Students: 1st–5th secondary, ages 12–17, Lima and Cusco, Peru
 - Platform: Google Colab (dark mode not guaranteed; test on default white)
@@ -232,5 +245,5 @@ Achievement unlock message format
 
 ---
 
-*Last updated: 2026-08-16*
+*Last updated: 2026-08-17*
 *Part of: SMA Intro Stats WORKFORCE*

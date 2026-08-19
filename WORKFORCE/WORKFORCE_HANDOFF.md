@@ -14,11 +14,59 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 | 7 | Statistically vet Weeks 3–4, 6, 7 candidate datasets and Week 5 debunk material once SOFIA drafts them | GAUSS | **Weeks 3–4 now drafted 2026-08-14** (see Done log) — dataset not yet downloaded/vetted, this is the blocking half of the ticket for that unit now. Weeks 1–2 datasets vetted and approved 2026-08-05. Weeks 6, 7, and Week 5 debunk material still not drafted. |
 | 8 | Draft statistically defensible model answers for the capstone's "descriptive analysis with interpretation" and "correlation analysis with causation critique" criteria (20 pts each) | GAUSS + ATLAS | Needed before ATLAS's Rubric Validation Report can sign off those two criteria as more than a point value. |
 | 12 | Rewrite debug-cell hint comments so they prompt investigation ("read the error, identify the type") rather than naming the bug directly — currently several debug cells hand over the diagnosis in the comment, undercutting the "build error-reading skill" purpose of `check_debugN` (`COURSE_TEMPLATE.md` §4) | SOFIA | Raised in SOFIA's Mode 3 review 2026-08-05 (see Done log), still not fully applied. **Partial incidental progress 2026-08-11**: while renumbering Semana 2's debug cells (see that Done log entry), `debug0` (Seccion C, the `=` vs `==` bug, old `debug2`) had its hint de-scaffolded from naming the bug outright to "ejecuta, lee el mensaje completo, e identifica que tipo de error es" — a side effect of the renumbering pass, not a deliberate sweep. Semana 2's `debug1` (Seccion C, `and`/`or`, old `debug3`) and Semana 1's `debug1` still hand over the diagnosis; not touched. |
+| 13 | `nb3_semana3` alone now scores `_CORE_MAX = 209`, well past the ~180 XP `WORKFORCE_CONTRACT.md` §2 budgets for **all of Weeks 3–4 combined** — and Semana 4 (Sección C + Integración/mini-proyecto) hasn't been built yet, so the real overage is larger still once that's added | SOFIA + ATLAS | Opened 2026-08-18 alongside the Ronda 3–6 expansion (see Done log) — the expansion was an explicit, aditive user request, not accidental scope creep, so nothing was cut to compensate. Needs a decision: raise the §2 budget for this unit, split Semana 3 across two class sessions, or rebalance point values once Semana 4's content is known. Not blocking the current build; flagging before ATLAS locks any downstream rubric arithmetic against the old ~180 number. |
 
 ---
 
 ## Done Log
 
+- 2026-08-18 — **`nb3_semana3_correlacion.ipynb` revised per direct user review** (two
+  concrete pieces of feedback after reading the generated notebook). (1) **Apertura
+  "revelación" cell rewritten for clarity/replicability**: it previously computed each
+  r via `pares_apertura[i][0]/[1]` tuple-indexing — technically correct but opaque as a
+  pattern to copy, and the user flagged it as "confusing." Replaced with three direct,
+  named lines (`r_diagrama1 = df_felicidad['Libertad para tomar decisiones'].corr(...)`,
+  etc.) — the first place in the notebook where the full `df[col_x].corr(df[col_y])`
+  pattern is visible as plain, copyable code, foreshadowing Sección B's own guided
+  example instead of only resembling it. (2) **Four new exercise rounds added after
+  Ejercicio 4** (`check_ex5`–`check_ex8`, "Ronda 3"–"Ronda 6"), per direct user request:
+  *"at least 4 more exercises following the same pattern... not only with puntaje but
+  PBI vs expectativa de vida etc... accompanied by some previous multiple choice
+  questions and some post-calculation multiple choice to check understanding."* Each
+  round combines the scatter-building and `.corr()`-calculating steps into one exercise
+  (Ejercicios 1–4 taught them separately; by Ronda 3 the student has both skills), uses
+  a pair that does **not** include `Puntaje` (deliberately, so the lesson is "correlation
+  strength is a property of the pair, not of a variable" — otherwise a student could
+  wrongly generalize "everything is ~r=0.78" from Ejercicios 1–4 all being vs. `Puntaje`),
+  and is bracketed by a pre-question theory MC (`check_t7`/`t9`/`t11`/`t13` — tests a
+  *concept* before the number is known, e.g. correlation's non-transitivity, not a guess
+  at the unrevealed value) and a post-question theory MC (`check_t8`/`t10`/`t12`/`t14` —
+  interprets the actual r the student just computed, non-causal language enforced same
+  as every other interpretation prompt in this file). Pairs and real r (computed directly
+  against `2019_es.csv`, not estimated): PBI per cápita↔Esperanza de vida saludable
+  r≈0.8355 (the single strongest pair in the whole dataset, stronger than either
+  variable's own relationship with `Puntaje`); Apoyo social↔Esperanza de vida saludable
+  r≈0.7190; Libertad para tomar decisiones↔Percepción de corrupción r≈0.4388 (moderate,
+  a deliberate step down from the two strong pairs above); PBI per cápita↔Generosidad
+  r≈-0.0797 (near-zero, teaches that a negative sign this close to 0 isn't informative).
+  The pre-existing "explore all correlations" exercise was renumbered `check_ex5` →
+  `check_ex9` to free up the 5–8 range (safe per this file's standing renumbering
+  precedent — no real student submissions yet, deadline still 2026-08-31). `_CORE_MAX`
+  rose from 109 to **209** (25 t1–5 + 30 ex1/ex2 + 5 t6 + 24 ex3/ex4 + 40 t7–14 + 60
+  ex5–8 + 15 ex9 + 10 debug1) — opened as **ticket #13** since this is well past the
+  ~180 XP `WORKFORCE_CONTRACT.md` §2 budget for Weeks 3–4 combined, and Semana 4 isn't
+  built yet; not walked back since the expansion was an explicit, additive user request.
+  Achievement logic updated to match: `explorador_completo` now keys off `ex9` (was
+  `ex5`), and a new achievement `cartografo_patrones` (🗺️ Cartógrafo de Patrones) added
+  for a perfect `ex5`–`ex8`. Validated: `py_compile` clean; a scratch smoke-test
+  (`_test_nb3.py`, not committed) called `_grade_teoria`/`check_exN` directly against
+  real CSV-derived values for every new `t7`–`t14` and `ex5`–`ex9` — correct-answer and
+  wrong-answer paths both score as expected, a full happy-path run across every
+  `check_*` (t1–14, ex1–9, debug1) sums to exactly `_CORE_MAX` (209/209), and the
+  renumbered `ex9` still grades correctly under its new name. `build_nb3.py` re-run
+  clean (96 cells, up from 62); the Apertura reveal and all four new rounds' reference
+  solutions re-executed against the real CSV in headless (`Agg`) matplotlib, matching
+  the r values above to 3 decimals.
 - 2026-08-14 — **`nb3_semana3_correlacion.ipynb` expanded for repetition**, same-day
   follow-up to the build below, per direct user feedback: *"we need more repetition to
   actually solidify the concepts, some reps + interpretation open ended questions right

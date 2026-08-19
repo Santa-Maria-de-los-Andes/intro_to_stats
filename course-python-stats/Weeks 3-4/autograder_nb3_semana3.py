@@ -2,7 +2,7 @@
 Autograder — Bimestre 3, Mision 2: Buscando Patrones — SEMANA 3 (Clase 1)
 EN BUSCA DE LA FELICIDAD EDITION — World Happiness Report 2019
 
-Cubre: check_t1-t6, check_ex1-ex5, check_debug1, check_mini_a, check_mini_b, resumen()
+Cubre: check_t1-t14, check_ex1-ex9, check_debug1, check_mini_a, check_mini_b, resumen()
 Dataset: 2019_es.csv (156 filas x 10 columnas, World Happiness Report)
 
 Companion file (Semana 4, Clase 2 -- Seccion C + Mini-Proyecto): pendiente,
@@ -15,10 +15,20 @@ Notas de scoring (ATLAS):
   numero rompería la consistencia notebook<->autograder.
   t6 (justo antes de la explicacion del outlier de Catar, Seccion B) vale 5.
   ex3/ex4 (Seccion B -- prediccion vs. realidad) valen 12 pts c/u.
-  ex5 (explorar las 6 correlaciones) vale 15. debug1 vale 10.
+  t7-t14 (Rondas 3-6, un par pre/post por ronda, ninguna incluye Puntaje)
+  valen 5 pts c/u = 40. ex5-ex8 (esas mismas cuatro rondas, scatter+.corr()
+  combinados en un solo ejercicio) valen 15 pts c/u = 60.
+  ex9 (explorar las 6 correlaciones -- antes ex5, renumerado 2026-08-18 para
+  dejarle el rango 5-8 a las rondas nuevas) vale 15. debug1 vale 10.
   _CORE_MAX = 25 (t1-5) + 15 (ex1) + 15 (ex2) + 5 (t6) + 12 (ex3) + 12 (ex4)
-            + 15 (ex5) + 10 (debug1) = 109.
+            + 40 (t7-14) + 15*4 (ex5-8) + 15 (ex9) + 10 (debug1) = 209.
   Sin bonus/reto en esta Clase 1 -- Semana 3 no declara check_retoN.
+  **Nota de presupuesto**: 209 pts supera bastante el ~180 XP asignado a
+  Semanas 3-4 juntas en WORKFORCE_CONTRACT.md SS2 (que ademas todavia debe
+  cubrir Seccion C + Integracion de Semana 4) -- expansion 2026-08-18 pedida
+  explicitamente por el usuario (4 rondas nuevas + preguntas pre/post cada
+  una), no una desviacion accidental. Ver WORKFORCE_HANDOFF.md para el
+  ticket de seguimiento del presupuesto.
 
 Nota Supabase: mismo proyecto/tabla `submissions` que nb1 (Bimestre 3 --
 Estadistica en Python), campo "curso"="STAT_2026", "notebook"="nb3_semana3".
@@ -50,7 +60,8 @@ _DEADLINE_UTC   = _dt.datetime(2026, 8, 31, 4, 59, 0, tzinfo=_dt.timezone.utc)
 DEADLINE_PASSED = _dt.datetime.now(_dt.timezone.utc) >= _DEADLINE_UTC
 
 # ─── Scoring ─────────────────────────────────────────────────
-_CORE_MAX = 109   # 25 (t1-5) + 15+15 (ex1,ex2) + 5 (t6) + 12+12 (ex3,ex4) + 15 (ex5) + 10 (debug1)
+_CORE_MAX = 209   # 25 (t1-5) + 15+15 (ex1,ex2) + 5 (t6) + 12+12 (ex3,ex4)
+                  # + 40 (t7-14) + 15*4 (ex5-8) + 15 (ex9) + 10 (debug1)
 
 # ─── Niveles "En Busca de la Felicidad" (por % del score core) ───
 _LEVELS = [
@@ -440,9 +451,15 @@ async function agRegister() {{
                 and self._unlock("numero_exacto")):
             unlocked.append(("🔢 Número Exacto — Tu predicción, confirmada con datos reales", "#4aa8d8", "Rayo"))
 
-        # Explorador Completo — ex5 perfecto
-        if (self._scores.get("ex5", (0, 1))[0] == self._scores.get("ex5", (0, 1))[1]
-                and "ex5" in self._scores and self._unlock("explorador_completo")):
+        # Cartografo de Patrones — ex5,ex6,ex7,ex8 perfectos (las 4 rondas sin Puntaje)
+        ex_extra = ["ex5", "ex6", "ex7", "ex8"]
+        if (all(k in self._scores and self._scores[k][0] == self._scores[k][1] for k in ex_extra)
+                and self._unlock("cartografo_patrones")):
+            unlocked.append(("🗺️ Cartógrafo de Patrones — Cuatro pares nuevos, cuatro relaciones distintas", "#4aa8d8", "Rayo"))
+
+        # Explorador Completo — ex9 perfecto
+        if (self._scores.get("ex9", (0, 1))[0] == self._scores.get("ex9", (0, 1))[1]
+                and "ex9" in self._scores and self._unlock("explorador_completo")):
             unlocked.append(("🧭 Explorador Completo — Recorriste las seis variables del bienestar", "#ffb703", "Amanecer"))
 
         # Depurador Feliz — debug1 perfecto
@@ -987,6 +1004,118 @@ async function agRegister() {{
             why="`.corr()` mide específicamente relación lineal -- un patrón real pero curvo puede pasar casi invisible para ese número.",
             pts=5,
         ),
+        7: dict(
+            title="T7 — Ronda 3, antes de calcular",
+            q=("Ya viste que tanto `PBI per cápita` como `Esperanza de vida saludable` "
+               "tienen cada una r ≈ 0.78-0.79 con `Puntaje`. ¿Qué puedes concluir sobre "
+               "la correlación ENTRE esas dos variables, sin Puntaje de por medio?"),
+            opts={"a": "Tiene que ser también ≈0.78, porque ambas se relacionan igual con Puntaje",
+                  "b": "No se puede saber su valor exacto sin calcularlo directamente -- que ambas se relacionen con una tercera variable no fija su relación mutua",
+                  "c": "Tiene que ser 0, porque ya \"usaron\" su relación con Puntaje",
+                  "d": "Tiene que ser negativa, porque son variables distintas"},
+            correct="b",
+            why=("La correlación no es transitiva: que A y B se relacionen con C no dice "
+                 "cuánto se relacionan A y B entre sí. Hay que calcularlo directamente, "
+                 "como vas a hacer ahora."),
+            pts=5,
+        ),
+        8: dict(
+            title="T8 — Ronda 3, interpreta tu resultado",
+            q=("Acabas de calcular que `PBI per cápita` y `Esperanza de vida saludable` "
+               "tienen r ≈ 0.84 -- más fuerte incluso que la relación de cualquiera de las "
+               "dos con `Puntaje`. ¿Cuál es la lectura correcta de ese número?"),
+            opts={"a": "Los países ricos causan que su población viva más años",
+                  "b": "Es un error de cálculo -- dos variables que no son Puntaje no pueden tener una relación tan fuerte",
+                  "c": "Los países con mayor producción económica por persona tienden a reportar también mayor esperanza de vida saludable -- una relación observada muy fuerte, no una prueba de causa",
+                  "d": "r ≈ 0.84 significa que el 84% de los países tienen ambos valores altos"},
+            correct="c",
+            why=("Un r alto describe qué tan consistentemente se mueven juntas dos "
+                 "variables -- nunca prueba causa, y no es un porcentaje de países."),
+            pts=5,
+        ),
+        9: dict(
+            title="T9 — Ronda 4, antes de calcular",
+            q=("¿Por qué tiene sentido calcular r entre dos variables explicativas "
+               "(ninguna de las dos es Puntaje), como vas a hacer ahora?"),
+            opts={"a": "Porque el curso lo exige, no tiene una razón estadística",
+                  "b": "Porque dos variables explicativas pueden estar relacionadas entre sí, y eso es información real más allá de su relación con Puntaje",
+                  "c": "Porque Puntaje deja de importar una vez que lo calculaste una vez",
+                  "d": "No tiene ningún uso real, es solo práctica repetida"},
+            correct="b",
+            why=("Las variables que usas para explicar algo (aquí, el bienestar) pueden "
+                 "estar relacionadas entre sí -- entender eso es parte de leer un dataset "
+                 "con honestidad, no solo mirar cada una contra el objetivo final."),
+            pts=5,
+        ),
+        10: dict(
+            title="T10 — Ronda 4, interpreta tu resultado",
+            q=("Calculaste r ≈ 0.72 entre `Apoyo social` y `Esperanza de vida saludable`. "
+               "¿Cuál es la lectura correcta?"),
+            opts={"a": "Todos los países con Apoyo social alto tienen la Esperanza de vida más alta del dataset",
+                  "b": "Los países con mayor apoyo social percibido tienden a reportar también mayor esperanza de vida saludable -- una relación observada fuerte, no una regla sin excepciones",
+                  "c": "r ≈ 0.72 significa que no hay relación real entre las dos variables",
+                  "d": "El signo debería ser negativo porque son conceptos completamente distintos"},
+            correct="b",
+            why=("Fuerte y positivo no significa \"sin excepciones\" -- significa que la "
+                 "tendencia general es consistente, no que cada fila individual la cumpla."),
+            pts=5,
+        ),
+        11: dict(
+            title="T11 — Ronda 5, antes de calcular",
+            q=("Hasta ahora, en las rondas sin Puntaje viste r ≈ 0.72 y r ≈ 0.84 (fuertes). "
+               "Si un nuevo par te da r ≈ 0.44, ¿qué tan fuerte es esa relación, comparada "
+               "con las anteriores?"),
+            opts={"a": "Sigue siendo igual de fuerte que las anteriores",
+                  "b": "Es una relación real y positiva, pero notablemente menos consistente que las que viste antes",
+                  "c": "No es una relación real -- hay que ignorarla por completo",
+                  "d": "Es imposible que dos pares del mismo dataset tengan r tan distinto"},
+            correct="b",
+            why=("r ≈ 0.44 sigue siendo un patrón real y positivo -- solo que mucho menos "
+                 "consistente que uno de 0.72 u 0.84. Distintos pares, distinta fuerza, "
+                 "mismo dataset."),
+            pts=5,
+        ),
+        12: dict(
+            title="T12 — Ronda 5, interpreta tu resultado",
+            q=("`Libertad para tomar decisiones` y `Percepción de corrupción` te dieron "
+               "r ≈ 0.44. ¿Cuál interpretación es correcta?"),
+            opts={"a": "Sentirse libre para tomar decisiones causa que un país perciba menos corrupción",
+                  "b": "Los países con mayor libertad percibida tienden, de forma moderada, a percibir también algo menos de corrupción -- una relación real pero bastante menos consistente que las de las rondas anteriores",
+                  "c": "r ≈ 0.44 es prácticamente 0, no vale la pena mencionarlo",
+                  "d": "El resultado no se puede interpretar porque las dos variables son percepciones subjetivas"},
+            correct="b",
+            why=("Un r moderado (ni cerca de 0 ni cerca de ±1) sigue siendo una lectura "
+                 "real -- solo hay que describirlo con la fuerza que realmente tiene, sin "
+                 "inflarlo a \"fuerte\" ni descartarlo como \"nada\"."),
+            pts=5,
+        ),
+        13: dict(
+            title="T13 — Ronda 6, antes de calcular",
+            q=("Vas a calcular la correlación entre `PBI per cápita` y `Generosidad`. Si el "
+               "resultado te da un número negativo pero muy cercano a 0 (por ejemplo, "
+               "-0.08), ¿qué deberías concluir?"),
+            opts={"a": "Que hay una relación negativa fuerte entre las dos variables",
+                  "b": "Que casi no hay relación lineal entre las dos variables -- el signo negativo no es informativo cuando el número está tan cerca de 0",
+                  "c": "Que el cálculo está mal, porque r no puede ser negativo",
+                  "d": "Que los países ricos son menos generosos, sin excepción"},
+            correct="b",
+            why=("Cerca de 0, el signo deja de ser el dato importante -- lo que importa es "
+                 "que el valor está pegado a 0, es decir, casi sin relación lineal."),
+            pts=5,
+        ),
+        14: dict(
+            title="T14 — Ronda 6, interpreta tu resultado",
+            q=("Confirmaste que `PBI per cápita` y `Generosidad` tienen r ≈ -0.08. ¿Qué te "
+               "dice esto sobre estas dos variables en el dataset?"),
+            opts={"a": "El dinero de un país destruye la generosidad de su gente",
+                  "b": "Es el par más fuerte de toda la clase de hoy",
+                  "c": "Casi no hay relación lineal -- saber el PBI per cápita de un país casi no ayuda a predecir qué tan generosa es su gente",
+                  "d": "El resultado es un error porque Generosidad debería depender del PBI"},
+            correct="c",
+            why=("r ≈ -0.08 está pegado a 0: prácticamente no hay relación lineal detectable "
+                 "entre estas dos variables en este dataset, ni fuerte ni débil-pero-real."),
+            pts=5,
+        ),
     }
 
     def _show_teoria_locked(self, n):
@@ -1093,6 +1222,14 @@ async function {uid}_pick(letter) {{
     def check_t4(self): return self._ask_teoria(4)
     def check_t5(self): return self._ask_teoria(5)
     def check_t6(self): return self._ask_teoria(6)
+    def check_t7(self): return self._ask_teoria(7)
+    def check_t8(self): return self._ask_teoria(8)
+    def check_t9(self): return self._ask_teoria(9)
+    def check_t10(self): return self._ask_teoria(10)
+    def check_t11(self): return self._ask_teoria(11)
+    def check_t12(self): return self._ask_teoria(12)
+    def check_t13(self): return self._ask_teoria(13)
+    def check_t14(self): return self._ask_teoria(14)
 
     # ═══════════════════════════════════════════════════════════
     # SECCIÓN A — Antes de Calcular (scatter propio)
@@ -1206,9 +1343,63 @@ async function {uid}_pick(letter) {{
 
         return self._award("ex4", checks, 12)
 
+    # ═══════════════════════════════════════════════════════════
+    # RONDAS 3-6 — scatter + .corr() combinados, sin Puntaje
+    # ═══════════════════════════════════════════════════════════
+
+    def _check_ronda(self, key, header_n, x_col, y_col, r_exp, pts=15):
+        self._header(f"EJERCICIO {header_n} — Construye y Calcula 🗺️", icon="🗺️", pts=pts)
+        checks = []
+        df = _get("df_felicidad")
+        x_val = _get(f"x_{key}")
+        y_val = _get(f"y_{key}")
+        r_val = _get(f"r_{key}")
+
+        if x_val is None:
+            checks.append((False, f"x_{key}", f"No definida — usa '{x_col}' en el eje X"))
+        elif _col_match(x_val, x_col, df):
+            checks.append((True, f"x_{key} == '{x_col}'", "✓"))
+        else:
+            checks.append((False, f"x_{key}", f"Debe ser '{x_col}', obtuve '{x_val}'"))
+
+        if y_val is None:
+            checks.append((False, f"y_{key}", f"No definida — usa '{y_col}' en el eje Y"))
+        elif _col_match(y_val, y_col, df):
+            checks.append((True, f"y_{key} == '{y_col}'", "✓"))
+        else:
+            checks.append((False, f"y_{key}", f"Debe ser '{y_col}', obtuve '{y_val}'"))
+
+        if r_val is None:
+            checks.append((False, f"r_{key}",
+                           f"No definida — usa df_felicidad['{x_col}'].corr(df_felicidad['{y_col}'])"))
+        elif not _is_number(r_val):
+            checks.append((False, f"r_{key}", f"Debe ser número, recibí {type(r_val).__name__}"))
+        elif _approx(r_val, r_exp, tol=0.01):
+            checks.append((True, f"r_{key} ≈ {r_exp:.3f}", "✓"))
+        else:
+            checks.append((False, f"r_{key}", f"Debe ser ≈{r_exp:.3f}, obtuve {r_val}"))
+
+        return self._award(key, checks, pts)
+
     def check_ex5(self):
-        """Ex5 — Explora todas las correlaciones con Puntaje (15 pts)"""
-        self._header("EJERCICIO 5 — Explora Todas las Correlaciones 🧭", icon="🧭", pts=15)
+        """Ex5 — Ronda 3: PBI per cápita vs. Esperanza de vida saludable (15 pts)"""
+        return self._check_ronda("ex5", 5, _COL_PBI, _COL_ESPERANZA, 0.8354621150416076)
+
+    def check_ex6(self):
+        """Ex6 — Ronda 4: Apoyo social vs. Esperanza de vida saludable (15 pts)"""
+        return self._check_ronda("ex6", 6, _COL_APOYO, _COL_ESPERANZA, 0.7190094590308561)
+
+    def check_ex7(self):
+        """Ex7 — Ronda 5: Libertad para tomar decisiones vs. Percepción de corrupción (15 pts)"""
+        return self._check_ronda("ex7", 7, _COL_LIBERTAD, _COL_CORRUPCION, 0.4388433064150672)
+
+    def check_ex8(self):
+        """Ex8 — Ronda 6: PBI per cápita vs. Generosidad (15 pts)"""
+        return self._check_ronda("ex8", 8, _COL_PBI, _COL_GENEROSIDAD, -0.07966231348976406)
+
+    def check_ex9(self):
+        """Ex9 — Explora todas las correlaciones con Puntaje (15 pts) — antes ex5"""
+        self._header("EJERCICIO 9 — Explora Todas las Correlaciones 🧭", icon="🧭", pts=15)
         checks = []
         df = _get("df_felicidad")
         correlaciones_puntaje = _get("correlaciones_puntaje")
@@ -1263,7 +1454,7 @@ async function {uid}_pick(letter) {{
             checks.append((False, "columna_mas_debil",
                            f"Debe ser 'Generosidad' (r ≈ 0.08), obtuve '{columna_mas_debil}'"))
 
-        return self._award("ex5", checks, 15)
+        return self._award("ex9", checks, 15)
 
     def check_debug1(self):
         """Debug1 — nombre de columna mal escrito: Punaje -> Puntaje (10 pts)"""
@@ -1303,7 +1494,19 @@ async function {uid}_pick(letter) {{
             "t6": ("T6 — El límite de .corr()", 5),
             "ex3": ("Ejercicio 3 – r real de corrupción", 12),
             "ex4": ("Ejercicio 4 – r real de esperanza de vida", 12),
-            "ex5": ("Ejercicio 5 – Explora todas las correlaciones", 15),
+            "t7": ("T7 — Ronda 3, antes de calcular", 5),
+            "ex5": ("Ejercicio 5 – PBI per cápita vs. Esperanza de vida", 15),
+            "t8": ("T8 — Ronda 3, interpreta tu resultado", 5),
+            "t9": ("T9 — Ronda 4, antes de calcular", 5),
+            "ex6": ("Ejercicio 6 – Apoyo social vs. Esperanza de vida", 15),
+            "t10": ("T10 — Ronda 4, interpreta tu resultado", 5),
+            "t11": ("T11 — Ronda 5, antes de calcular", 5),
+            "ex7": ("Ejercicio 7 – Libertad vs. Percepción de corrupción", 15),
+            "t12": ("T12 — Ronda 5, interpreta tu resultado", 5),
+            "t13": ("T13 — Ronda 6, antes de calcular", 5),
+            "ex8": ("Ejercicio 8 – PBI per cápita vs. Generosidad", 15),
+            "t14": ("T14 — Ronda 6, interpreta tu resultado", 5),
+            "ex9": ("Ejercicio 9 – Explora todas las correlaciones", 15),
             "debug1": ("Debug 1 – Corrige el error de columna", 10),
         }
         self._render_checkpoint("CHECKPOINT — CASI AMANECE", seccion, "#ff9e2c")
@@ -1335,6 +1538,7 @@ async function {uid}_pick(letter) {{
             "primer_rayo":          "☀️ Primer Rayo de Sol",
             "ojo_entrenado":        "👁️ Ojo Entrenado",
             "numero_exacto":        "🔢 Número Exacto",
+            "cartografo_patrones":  "🗺️ Cartógrafo de Patrones",
             "explorador_completo":  "🧭 Explorador Completo",
             "depurador_feliz":      "🔧 Depurador Feliz",
             "medalla_camino":       "🌻 Medalla del Camino",

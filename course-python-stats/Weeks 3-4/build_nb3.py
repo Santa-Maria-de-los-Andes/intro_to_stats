@@ -39,6 +39,33 @@ Convenciones (identicas a build_nb1.py): check_tN = una celda,
 grader.check_tN(); check_exN 🔨 CONSTRUYE = sin solucion escrita; check_exN
 🧩 COMPLETA = blancos ___; celdas 🔮 PREDICE / 💭 REFLEXIONA = ungraded,
 contract-exempt (WORKFORCE_CONTRACT.md SS3).
+
+Expansion 2026-08-18 (usuario, tras revisar el notebook generado): dos pedidos
+directos. (1) La celda de la "revelacion" de la Apertura (`nb3-apertura-reveal`)
+indexaba `pares_apertura[i][0]/[1]` -- confuso e improductivo como ejemplo a
+replicar. Reescrita para calcular cada r con una linea directa y nombrada
+(`df_felicidad['col_x'].corr(df_felicidad['col_y'])`), el mismo patron que
+Seccion B enseña despues, para que sea el primer lugar donde el patron
+completo es visible y copiable. (2) Cuatro rondas nuevas despues del
+Ejercicio 4 (ahora `check_ex5`-`check_ex8`), mismo patron scatter+`.corr()`
+pero esta vez en un solo ejercicio combinado (antes Seccion A/B lo partian en
+dos), y con pares que **no** incluyen `Puntaje` -- PBI per capita vs.
+Esperanza de vida (r≈0.835, el mas fuerte de todo el dataset), Apoyo social
+vs. Esperanza de vida (r≈0.719), Libertad vs. Percepcion de corrupcion
+(r≈0.439), PBI per capita vs. Generosidad (r≈-0.080, practicamente nulo).
+Objetivo pedagogico: que el estudiante no generalice "las seis variables
+tienen todas r≈0.78 porque asi salieron contra Puntaje" -- la fuerza de una
+correlacion es especifica del par, no una propiedad de la variable. Cada
+ronda añade una pregunta teorica ❓ ANTES (concepto, no el numero exacto --
+p.ej. que la correlacion no es transitiva) y otra DESPUES (interpretar el
+resultado real que el estudiante acaba de calcular) -- `check_t7`-`check_t14`,
+8 preguntas nuevas. El viejo `check_ex5` (explorar todas las correlaciones)
+se renumero a `check_ex9` para dejarle el rango 5-8 a las rondas nuevas.
+**Nota de presupuesto**: esto sube el `_CORE_MAX` de Semana 3 de 109 a 209,
+bastante por encima del ~180 XP asignado a Semanas 3-4 completas en
+`WORKFORCE_CONTRACT.md` SS2 -- ver ticket nuevo en `WORKFORCE_HANDOFF.md`
+para el seguimiento; no se recorto nada para compensar porque el pedido fue
+explicito y aditivo.
 """
 import json
 
@@ -175,12 +202,17 @@ mi_orden_apertura = "___"  # ej: "Diagrama 3 es el mas fuerte, Diagrama 2 el mas
 
 s3.append(code("nb3-apertura-reveal", """\
 # 👀 OBSERVA: la revelacion -- mismos tres diagramas, ahora con nombres reales y su r
-print("Diagrama 1:", pares_apertura[0], "-> r =",
-      round(df_felicidad[pares_apertura[0][0]].corr(df_felicidad[pares_apertura[0][1]]), 3))
-print("Diagrama 2:", pares_apertura[1], "-> r =",
-      round(df_felicidad[pares_apertura[1][0]].corr(df_felicidad[pares_apertura[1][1]]), 3))
-print("Diagrama 3:", pares_apertura[2], "-> r =",
-      round(df_felicidad[pares_apertura[2][0]].corr(df_felicidad[pares_apertura[2][1]]), 3))"""))
+# El patron que vas a repetir todo el dia es siempre este:
+#     df_felicidad['columna_x'].corr(df_felicidad['columna_y'])
+# Aqui lo aplicamos tres veces, una por diagrama, con las columnas ya identificadas.
+
+r_diagrama1 = df_felicidad['Libertad para tomar decisiones'].corr(df_felicidad['Puntaje'])
+r_diagrama2 = df_felicidad['Generosidad'].corr(df_felicidad['Puntaje'])
+r_diagrama3 = df_felicidad['PBI per cápita'].corr(df_felicidad['Puntaje'])
+
+print("Diagrama 1 (Libertad para tomar decisiones vs. Puntaje) -> r =", round(r_diagrama1, 3))
+print("Diagrama 2 (Generosidad vs. Puntaje)                    -> r =", round(r_diagrama2, 3))
+print("Diagrama 3 (PBI per cápita vs. Puntaje)                 -> r =", round(r_diagrama3, 3))"""))
 
 s3.append(md("nb3-apertura-explicacion", """\
 **Diagrama 3 (PBI per cápita) es el patron mas fuerte** (r ≈ 0.79): los
@@ -481,12 +513,169 @@ s3.append(code("nb3-b-ex4-reflexiona-code", """\
 # 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
 interpretacion_esperanza = "___" """))
 
-s3.append(md("nb3-b-ex5-md", """\
-#### ✅ Ejercicio 5 -- Explora todas las correlaciones con Puntaje (15 pts)
+# ─── Rondas 3-6 -- mas alla de Puntaje ───────────────────────────────────
+s3.append(md("nb3-b-mas-alla-md", """\
+### 🔁 Practica repetida: pares que NO incluyen Puntaje
 
-🔨 Hasta ahora calculaste r para pares que ya conocias. Ahora explora **todas**
-las columnas numericas del dataset a la vez: calcula la correlacion de cada
-una con `Puntaje`, y encuentra cual es la mas fuerte y cual es la mas debil.
+Hasta ahora cada par que trabajaste incluia `Puntaje`. Pero las seis
+variables economicas y sociales tambien pueden relacionarse **entre si** --
+esa es informacion real, y no se puede adivinar solo porque dos variables se
+parezcan en como se relacionan con `Puntaje`.
+
+Cuatro rondas mas, mismo patron de siempre (`plt.scatter()` + `.corr()`),
+pero esta vez cada ronda junta las dos partes en un solo ejercicio. Cada
+ronda tiene una pregunta ❓ **antes** de calcular (para pensar en el concepto,
+no para adivinar el numero exacto) y otra ❓ **despues** (para revisar si
+interpretaste bien tu propio resultado).
+"""))
+
+s3.append(md("nb3-b-ex5-md", """\
+#### Ronda 3 -- PBI per cápita vs. Esperanza de vida saludable
+"""))
+s3.append(teoria_check("nb3-t7-check", 7))
+s3.append(md("nb3-b-ex5-ej-md", """\
+##### ✅ Ejercicio 5 -- Construye y calcula (15 pts)
+
+🔨 Repite el patron completo: un scatter (`plt.scatter` con `xlabel`/`ylabel`)
+**y** el coeficiente de correlacion, ahora para `PBI per cápita` (eje X) vs.
+`Esperanza de vida saludable` (eje Y). Ninguna de las dos es `Puntaje`.
+
+Variables que espera el autograder: `x_ex5`, `y_ex5` (columnas del scatter),
+`r_ex5` (el coeficiente de correlacion entre ambas).
+"""))
+s3.append(code("nb3-b-ex5-code", """\
+# 🔨 CONSTRUYE
+
+# ============================
+#      Tu codigo aqui
+# ============================
+
+
+"""))
+s3.append(code("nb3-b-ex5-check", "grader.check_ex5()"))
+s3.append(teoria_check("nb3-t8-check", 8))
+s3.append(md("nb3-b-ex5-reflexiona-md", """\
+##### 💭 Reflexiona -- Ronda 3 (respuesta abierta, no calificada)
+
+`PBI per cápita` y `Esperanza de vida saludable` salio con el r mas alto que
+calculaste en toda la clase -- mas alto incluso que cualquiera de los dos con
+`Puntaje`. ¿Por que crees que estas dos variables en particular se mueven
+tan juntas?
+"""))
+s3.append(code("nb3-b-ex5-reflexiona-code", """\
+# 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
+interpretacion_ex5 = "___" """))
+
+s3.append(md("nb3-b-ex6-md", """\
+#### Ronda 4 -- Apoyo social vs. Esperanza de vida saludable
+"""))
+s3.append(teoria_check("nb3-t9-check", 9))
+s3.append(md("nb3-b-ex6-ej-md", """\
+##### ✅ Ejercicio 6 -- Construye y calcula, otra vez (15 pts)
+
+🔨 Mismo patron completo, ahora con `Apoyo social` (eje X) vs. `Esperanza de
+vida saludable` (eje Y).
+
+Variables que espera el autograder: `x_ex6`, `y_ex6`, `r_ex6`.
+"""))
+s3.append(code("nb3-b-ex6-code", """\
+# 🔨 CONSTRUYE
+
+# ============================
+#      Tu codigo aqui
+# ============================
+
+
+"""))
+s3.append(code("nb3-b-ex6-check", "grader.check_ex6()"))
+s3.append(teoria_check("nb3-t10-check", 10))
+s3.append(md("nb3-b-ex6-reflexiona-md", """\
+##### 💭 Reflexiona -- Ronda 4 (respuesta abierta, no calificada)
+
+Compara el r de esta ronda con el r de la Ronda 3. Ambos pares comparten
+`Esperanza de vida saludable`, pero dan numeros distintos. ¿Que te dice eso
+sobre generalizar "esta variable siempre se relaciona igual de fuerte con
+todo"?
+"""))
+s3.append(code("nb3-b-ex6-reflexiona-code", """\
+# 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
+interpretacion_ex6 = "___" """))
+
+s3.append(md("nb3-b-ex7-md", """\
+#### Ronda 5 -- Libertad para tomar decisiones vs. Percepción de corrupción
+"""))
+s3.append(teoria_check("nb3-t11-check", 11))
+s3.append(md("nb3-b-ex7-ej-md", """\
+##### ✅ Ejercicio 7 -- Construye y calcula, una vez mas (15 pts)
+
+🔨 Mismo patron completo, ahora con `Libertad para tomar decisiones` (eje X)
+vs. `Percepción de corrupción` (eje Y).
+
+Variables que espera el autograder: `x_ex7`, `y_ex7`, `r_ex7`.
+"""))
+s3.append(code("nb3-b-ex7-code", """\
+# 🔨 CONSTRUYE
+
+# ============================
+#      Tu codigo aqui
+# ============================
+
+
+"""))
+s3.append(code("nb3-b-ex7-check", "grader.check_ex7()"))
+s3.append(teoria_check("nb3-t12-check", 12))
+s3.append(md("nb3-b-ex7-reflexiona-md", """\
+##### 💭 Reflexiona -- Ronda 5 (respuesta abierta, no calificada)
+
+Este par dio un r notablemente mas chico que las Rondas 3 y 4. En tus propias
+palabras: ¿que significa "una relacion real, pero mucho menos consistente"?
+"""))
+s3.append(code("nb3-b-ex7-reflexiona-code", """\
+# 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
+interpretacion_ex7 = "___" """))
+
+s3.append(md("nb3-b-ex8-md", """\
+#### Ronda 6 -- PBI per cápita vs. Generosidad
+"""))
+s3.append(teoria_check("nb3-t13-check", 13))
+s3.append(md("nb3-b-ex8-ej-md", """\
+##### ✅ Ejercicio 8 -- Construye y calcula, la ultima ronda (15 pts)
+
+🔨 Mismo patron completo, ahora con `PBI per cápita` (eje X) vs.
+`Generosidad` (eje Y).
+
+Variables que espera el autograder: `x_ex8`, `y_ex8`, `r_ex8`.
+"""))
+s3.append(code("nb3-b-ex8-code", """\
+# 🔨 CONSTRUYE
+
+# ============================
+#      Tu codigo aqui
+# ============================
+
+
+"""))
+s3.append(code("nb3-b-ex8-check", "grader.check_ex8()"))
+s3.append(teoria_check("nb3-t14-check", 14))
+s3.append(md("nb3-b-ex8-reflexiona-md", """\
+##### 💭 Reflexiona -- Ronda 6 (respuesta abierta, no calificada)
+
+De las seis variables economicas y sociales del dataset, `PBI per cápita` y
+`Generosidad` dieron el r mas cercano a 0 de las cuatro rondas nuevas. ¿Te
+parece razonable que el dinero de un pais casi no prediga que tan generosa
+es su gente? ¿Por que si o por que no?
+"""))
+s3.append(code("nb3-b-ex8-reflexiona-code", """\
+# 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
+interpretacion_ex8 = "___" """))
+
+s3.append(md("nb3-b-ex9-md", """\
+#### ✅ Ejercicio 9 -- Explora todas las correlaciones con Puntaje (15 pts)
+
+🔨 Ya calculaste r para ocho pares distintos, seis de ellos contra `Puntaje`.
+Ahora explora **todas** las columnas numericas del dataset a la vez: calcula
+la correlacion de cada una con `Puntaje`, y encuentra cual es la mas fuerte y
+cual es la mas debil.
 
 Pista: `df_felicidad.corr(numeric_only=True)['Puntaje']` te da un r por cada
 columna numerica de una sola vez -- pero **excluye la columna `'Puesto'`
@@ -500,7 +689,7 @@ Variables que espera el autograder: `correlaciones_puntaje` (la Serie de r,
 sin `Puesto` ni `Puntaje`), `columna_mas_fuerte` (nombre de columna, string),
 `columna_mas_debil` (nombre de columna, string).
 """))
-s3.append(code("nb3-b-ex5-code", """\
+s3.append(code("nb3-b-ex9-code", """\
 # 🔨 CONSTRUYE
 
 # ============================
@@ -509,16 +698,16 @@ s3.append(code("nb3-b-ex5-code", """\
 
 
 print(f"Mas fuerte: {columna_mas_fuerte} | Mas debil: {columna_mas_debil}")"""))
-s3.append(code("nb3-b-ex5-check", "grader.check_ex5()"))
+s3.append(code("nb3-b-ex9-check", "grader.check_ex9()"))
 
-s3.append(md("nb3-b-ex5-reflexiona-md", """\
+s3.append(md("nb3-b-ex9-reflexiona-md", """\
 #### 💭 Reflexiona (respuesta abierta, no calificada)
 
 De las seis variables que exploraste, ¿cual resultado te sorprendio mas --
 una que esperabas fuerte y salio debil, o al reves? ¿Por que crees que pasa
 eso?
 """))
-s3.append(code("nb3-b-ex5-reflexiona-code", """\
+s3.append(code("nb3-b-ex9-reflexiona-code", """\
 # 💭 REFLEXIONA -- 1-2 oraciones, no hay una unica respuesta correcta
 interpretacion_explora = "___" """))
 
