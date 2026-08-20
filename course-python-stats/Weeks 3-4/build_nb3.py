@@ -415,8 +415,8 @@ s3.append(md("nb3-a-ex2-reflexiona-md", """\
 #### 💭 Reflexiona -- Ronda 2 (respuesta abierta -- calificada por IA, +5 XP)
 
 En una frase: comparando los dos scatter que construiste hoy (`Percepción de
-corrupción` y `Esperanza de vida saludable`), ¿cual te parecio visualmente
-mas fuerte?
+corrupción` y `Esperanza de vida saludable`), ¿en cual de los dos los puntos
+siguen un patron mas apretado (menos dispersos)?
 """))
 s3.append(reflexion_check("nb3-a-ex2-reflexiona-code", "a2"))
 
@@ -448,8 +448,8 @@ print(f"r (Apoyo social vs. Puntaje) = {r_apoyo_social:.3f}")"""))
 s3.append(md("nb3-b-guiado-reflexiona-md", """\
 #### 💭 Reflexiona -- interpreta el numero guiado (respuesta abierta -- calificada por IA, +5 XP)
 
-En una frase, y sin usar la palabra "causa": ¿que te dice un r ≈ 0.78 sobre
-la relacion entre `Apoyo social` y `Puntaje`?
+En una frase, sin decir que una "causa" la otra: ¿que te dice un r ≈ 0.78
+sobre la relacion entre `Apoyo social` y `Puntaje`?
 """))
 s3.append(reflexion_check("nb3-b-guiado-reflexiona-code", "guiado"))
 

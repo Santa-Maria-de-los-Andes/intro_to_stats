@@ -42,7 +42,7 @@ const GRADING_NOTES: Record<string, ReflexionSpec> = {
   },
   a2: {
     question:
-      'En una frase: comparando los dos scatter que construiste hoy ("Percepción de corrupción" y "Esperanza de vida saludable"), ¿cual te parecio visualmente mas fuerte?',
+      'En una frase: comparando los dos scatter que construiste hoy ("Percepción de corrupción" y "Esperanza de vida saludable"), ¿en cual de los dos los puntos siguen un patron mas apretado (menos dispersos)?',
     grounding:
       "r real: Percepción de corrupción vs Puntaje = 0.386; Esperanza de vida saludable vs Puntaje = 0.780 -- Esperanza es visualmente la relacion mas fuerte. Igual que en a1, es observacion pre-calculo -- no penalices si 'vio' distinto, solo evalua si comparo genuinamente los dos graficos.",
     grading_notes:
@@ -51,7 +51,7 @@ const GRADING_NOTES: Record<string, ReflexionSpec> = {
   },
   guiado: {
     question:
-      'En una frase, y sin usar la palabra "causa": ¿que te dice un r ≈ 0.78 sobre la relacion entre "Apoyo social" y "Puntaje"?',
+      'En una frase, sin decir que una "causa" la otra: ¿que te dice un r ≈ 0.78 sobre la relacion entre "Apoyo social" y "Puntaje"?',
     grounding:
       "r real (Apoyo social vs Puntaje) = 0.777, ya revelado en el enunciado (~0.78) -- relacion fuerte y positiva.",
     grading_notes:

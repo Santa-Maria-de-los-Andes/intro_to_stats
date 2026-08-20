@@ -1562,12 +1562,13 @@ async function {uid}_submit() {{
         return self._ask_reflexion("a2",
             'En una frase: comparando los dos scatter que construiste hoy '
             '("Percepción de corrupción" y "Esperanza de vida saludable"), '
-            '¿cual te parecio visualmente mas fuerte?')
+            '¿en cual de los dos los puntos siguen un patron mas apretado '
+            '(menos dispersos)?')
 
     def check_reflexion_guiado(self):
         return self._ask_reflexion("guiado",
-            'En una frase, y sin usar la palabra "causa": ¿que te dice un '
-            'r ≈ 0.78 sobre la relacion entre "Apoyo social" y "Puntaje"?')
+            'En una frase, sin decir que una "causa" la otra: ¿que te dice '
+            'un r ≈ 0.78 sobre la relacion entre "Apoyo social" y "Puntaje"?')
 
     def check_reflexion_corrupcion(self):
         return self._ask_reflexion("corrupcion",
