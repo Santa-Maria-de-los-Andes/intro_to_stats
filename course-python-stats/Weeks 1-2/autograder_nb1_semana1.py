@@ -166,7 +166,7 @@ class Autograder:
                     import urllib.request as _ur2, json as _json2, urllib.parse as _up2
                     _qurl = (
                         f"{SUPABASE_URL}/rest/v1/submissions"
-                        f"?select=earned,possible,pct,level_name,streak"
+                        f"?select=earned,possible,pct,level_name,level_num,streak,achievements,score_breakdown"
                         f"&dni=eq.{_up2.quote(str(dni), safe='')}"
                         f"&notebook=eq.{NOTEBOOK_ID}"
                         f"&order=pct.desc,submitted_at.desc&limit=1"
@@ -179,6 +179,18 @@ class Autograder:
                         _rows = _json2.loads(_resp2.read())
                     if _rows:
                         _best = _rows[0]
+                        # Restaura el progreso ya calificado -- si no, un
+                        # reconecte de Colab (kernel nuevo, self._scores
+                        # vacio) deja cada pregunta de opcion multiple /
+                        # reflexion respondible de nuevo, aunque Supabase
+                        # ya tenga la respuesta guardada.
+                        self._scores = {
+                            k: (int(v.get("e", 0)), int(v.get("p", 0)))
+                            for k, v in (_best.get("score_breakdown") or {}).items()
+                        }
+                        self._achievements = set(_best.get("achievements") or [])
+                        self._streak       = int(_best.get("streak") or 0)
+                        self._prev_level   = int(_best.get("level_num") or 0)
                 except Exception:
                     pass
 
