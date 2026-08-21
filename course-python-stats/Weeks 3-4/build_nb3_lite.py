@@ -1,53 +1,26 @@
 # -*- coding: utf-8 -*-
 """
-build_nb3.py -- Genera nb3_correlacion.ipynb (Semana 3 / Clase 1 de la
-Mision 2: Buscando Patrones -- nombre placeholder, pendiente PIXEL ticket #2).
+build_nb3_lite.py -- Genera nb3_lite_correlacion.ipynb, la RUTA DE
+INTERPRETACION de la Semana 3 (accesibilidad/inclusion), companion de
+build_nb3.py.
 
-RENOMBRADO 2026-08-20 (decision explicita del usuario, SUPERA la convencion
-"un script genera dos notebooks del mismo nb-prefijo" que nb1_semana1/
-nb1_semana2 usan): hasta hoy este archivo generaba nb3_semana3_correlacion.ipynb
-Y nb3_semana4_correlacion.ipynb desde un solo script. El usuario pidio
-renombrar los dos notebooks a "nb3" y "nb4" respectivamente -- cada semana de
-esta unidad ahora es su propio nb-prefijo top-level, no una sub-sesion
-compartiendo el prefijo "nb3". Este script quedo solo con la Semana 3;
-Semana 4 vive en `build_nb4.py`, hermano de este archivo, mismos helpers
-duplicados (mismo criterio que cada build_nbN.py es autocontenido, no importa
-de otro build script).
+Mismo dataset, mismo narrativa, mismos 7 preguntas de teoria y las mismas 3
+reflexiones que nb3_correlacion.ipynb -- confirmado que ninguna de ellas
+depende de escribir codigo antes de construir esta ruta (ver
+autograder_nb3_lite.py). Lo unico que cambia: los cuatro 🔨 CONSTRUYE de
+"Grafica y Calcula" (antes check_ex1-ex4) se presentan aqui como celdas 👀
+OBSERVA ya resueltas -- mismo codigo de referencia, mismos r reales
+(recalculados 2026-08-20 contra 2019_es.csv, ver WORKFORCE_HANDOFF.md), el
+estudiante ejecuta y lee en vez de escribir. Nunca se le pide "codigo mas
+facil" -- se le quita la escritura, no el dato ni el grafico.
 
-⚠️ Nota de numeracion (no cambio con este rename, solo el nombre de archivo):
-check_ex/check_debug/check_tN de nb4 SIGUEN la numeracion global desde donde
-nb3 termina (ex1-4/t1-7 en nb3, ex5-8/t8-10/debug1/intex1 en nb4) -- las dos
-narrativamente siguen siendo "Mision 2" en dos clases, aunque ya no compartan
-nb-prefijo de archivo. Ver `ATLAS_spec_nb3_nb4.md` para el detalle completo
-que ATLAS necesita.
+No hereda nada de build_nb3.py en tiempo de ejecucion (cada build_nbN.py es
+autocontenido, COURSE_TEMPLATE.md SS3) -- el contenido markdown que se
+reusa (Apertura, Teoria Desbloqueada, dataset intro) se copio a mano desde
+ese archivo, a proposito, para que este script siga siendo independiente.
 
-⚠️ Nota de convencion nb-prefijo (hereda la de la version anterior, sigue
-aplicando): "nb3" ya rompia la convencion documentada en
-WORKFORCE_HANDOFF.md/supabase_schema.sql (nb2 = Tarea 2 = Correlacion, nb3
-reservado para Regresion/Clustering Semanas 6-7) por decision explicita del
-usuario 2026-08-14. Ahora que Semana 4 tambien reclama su propio prefijo
-("nb4"), lo que sea que Semanas 6-7 (Regresion/Clustering) iba a llamarse
-("nb3" en el esquema original) probablemente necesite correrse a "nb5" --
-no es bloqueante para este archivo, pero quien diseñe Semanas 6-7 debe
-confirmarlo antes de nombrar ese build script.
-
-Cubre Apertura + Teoria Desbloqueada + Grafica y Calcula (fusion de las
-Secciones A/B originales), segun la reestructuracion 2026-08-20 documentada
-en WORKFORCE_HANDOFF.md (resuelve ticket #13) y WORKFORCE_CONTRACT.md SS2.
-
-Fuente de contenido:
-  - Teoria_Semanas3-4_Mision2_Correlacion.md (SS0 Apertura, SS1 Teoria
-    Desbloqueada, SS2 Seccion A / Seccion B)
-  - 2019_es.csv (World Happiness Report 2019, 156 filas x 10 columnas, SIN
-    valores nulos) -- todos los numeros de este notebook se recalcularon
-    directamente contra el CSV real 2026-08-20 (ver WORKFORCE_HANDOFF.md
-    Done log de esa fecha para el detalle de validacion).
-
-Convenciones: check_tN = una celda, grader.check_tN(); check_exN 🔨
-CONSTRUYE = sin solucion escrita; celdas 🔮 PREDICE = ungraded,
-contract-exempt (WORKFORCE_CONTRACT.md SS3); celdas 💭 Reflexiona =
-calificadas por IA via `grade-reflexion` (Supabase Edge Function ->
-DeepSeek), +5 XP c/u, patron `reflexion_check()` abajo.
+Fuente de contenido: identico a build_nb3.py + ATLAS_spec_nb3_nb4.md (para
+los r-values de referencia de cada ronda).
 """
 import json
 
@@ -90,7 +63,7 @@ LEYENDA_ICONOS = """\
 
 s3 = []
 
-s3.append(md("nb3-titulo", f"""\
+s3.append(md("nb3l-titulo", f"""\
 # Mision 2: Buscando Patrones
 ### Semana 3 -- Antes de Calcular, Aprende a Ver
 
@@ -105,11 +78,12 @@ esa relacion como algo mas de lo que realmente es.
 
 {LEYENDA_ICONOS}"""))
 
-s3.append(code("nb3-setup", """\
+s3.append(code("nb3l-setup", """\
 # Carga el autograder y el dataset de esta leccion
 !wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/course-python-stats/Weeks%203-4/autograder_nb3.py"
+!wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/course-python-stats/Weeks%203-4/autograder_nb3_lite.py"
 !wget -q "https://raw.githubusercontent.com/Santa-Maria-de-los-Andes/intro_to_stats/main/course-python-stats/Weeks%203-4/2019_es.csv"
-from autograder_nb3 import Autograder
+from autograder_nb3_lite import Autograder
 grader = Autograder()
 
 import pandas as pd
@@ -118,7 +92,7 @@ df_felicidad = pd.read_csv('2019_es.csv')
 
 print("Dataset cargado.")"""))
 
-s3.append(md("nb3-dataset-md", """\
+s3.append(md("nb3l-dataset-md", """\
 ## 🌍 Un vistazo rapido antes de empezar
 
 `df_felicidad` tiene **156 filas** (un pais o region por fila) y **10
@@ -135,8 +109,8 @@ el problema no es "que falta," sino **"que tan honesto es el patron que
 creo ver."**
 """))
 
-# ─── Apertura ─────────────────────────────────────────────────────────────
-s3.append(md("nb3-apertura-md", """\
+# ─── Apertura (identica a nb3_correlacion.ipynb -- ya es 100% observacional) ──
+s3.append(md("nb3l-apertura-md", """\
 ## 🎬 Apertura -- Tres Diagramas, Ningun Numero Todavia
 
 > *"Antes de que exista un numero para esto, tu ojo ya sabe reconocer un
@@ -152,7 +126,7 @@ patron** (los puntos forman una linea reconocible) a **menos patron** (una
 nube sin forma clara). No hay codigo que calcular todavia -- solo tu ojo.
 """))
 
-s3.append(code("nb3-apertura-oculto", """\
+s3.append(code("nb3l-apertura-oculto", """\
 # 👀 OBSERVA: tres diagramas reales, ejes sin identificar a proposito
 import matplotlib.pyplot as plt
 
@@ -171,19 +145,19 @@ for i, (ax, (col_x, col_y)) in enumerate(zip(axes, pares_apertura), start=1):
 plt.tight_layout()
 plt.show()"""))
 
-s3.append(md("nb3-apertura-orden-md", """\
+s3.append(md("nb3l-apertura-orden-md", """\
 #### Antes de seguir -- tu orden
 
 Escribe tu orden de "mas patron" a "menos patron" (ej. `"2, 3, 1"`). No se
 califica -- es solo para comparar con la revelacion.
 """))
-s3.append(code("nb3-apertura-orden-code", """\
+s3.append(code("nb3l-apertura-orden-code", """\
 # 🔮 PREDICE (no se califica, es solo para ti)
 mi_orden_apertura = "___"  # ej: "Diagrama 3 es el mas fuerte, Diagrama 2 el mas debil\""""))
 
-s3.append(code("nb3-apertura-reveal", """\
+s3.append(code("nb3l-apertura-reveal", """\
 # 👀 OBSERVA: la revelacion -- mismos tres diagramas, ahora con nombres reales y su r
-# El patron que vas a repetir todo el dia es siempre este:
+# El patron que vas a ver repetido todo el dia es siempre este:
 #     df_felicidad['columna_x'].corr(df_felicidad['columna_y'])
 # Aqui lo aplicamos tres veces, una por diagrama, con las columnas ya identificadas.
 
@@ -195,7 +169,7 @@ print("Diagrama 1 (Libertad para tomar decisiones vs. Puntaje) -> r =", round(r_
 print("Diagrama 2 (Generosidad vs. Puntaje)                    -> r =", round(r_diagrama2, 3))
 print("Diagrama 3 (PBI per cápita vs. Puntaje)                 -> r =", round(r_diagrama3, 3))"""))
 
-s3.append(md("nb3-apertura-explicacion", """\
+s3.append(md("nb3l-apertura-explicacion", """\
 **Diagrama 3 (PBI per cápita) es el patron mas fuerte** (r ≈ 0.79): los
 paises con mayor produccion economica por persona tienden a reportar mayor
 puntaje de felicidad. **Diagrama 2 (Generosidad) es casi una nube sin forma**
@@ -214,8 +188,8 @@ hoy: aprender a ponerle un numero exacto a "que tan juntas" -- y a reconocer
 cuando ese numero se puede malinterpretar.*
 """))
 
-# ─── Teoria Desbloqueada ────────────────────────────────────────────────
-s3.append(md("nb3-teoria0-md", """\
+# ─── Teoria Desbloqueada (identica) ────────────────────────────────────
+s3.append(md("nb3l-teoria0-md", """\
 ## 🔓 Teoria Desbloqueada -- El Coeficiente de Correlacion
 
 ### ¿Que es el coeficiente de correlacion?
@@ -248,23 +222,24 @@ exige que lo memorices.
 > ⚠️ **La regla mas importante de estas dos semanas:** un coeficiente de
 > correlacion **nunca, por si solo, te dice si una variable causa la otra.**
 > Todavia no explicamos el porque a fondo -- eso es trabajo de la Semana 5 --
-> pero la frase queda plantada aqui, la primera vez que calculas un r real.
+> pero la frase queda plantada aqui, la primera vez que ves un r real.
 """))
 
-s3.append(teoria_check("nb3-t1-check", 1))
-s3.append(teoria_check("nb3-t2-check", 2))
-s3.append(teoria_check("nb3-t3-check", 3))
-s3.append(teoria_check("nb3-t4-check", 4))
-s3.append(teoria_check("nb3-t5-check", 5))
+s3.append(teoria_check("nb3l-t1-check", 1))
+s3.append(teoria_check("nb3l-t2-check", 2))
+s3.append(teoria_check("nb3l-t3-check", 3))
+s3.append(teoria_check("nb3l-t4-check", 4))
+s3.append(teoria_check("nb3l-t5-check", 5))
 
-# ─── Grafica y Calcula (fusion Seccion A + Seccion B) ────────────────────
-s3.append(md("nb3-graficaycalcula-header", """\
+# ─── Observa y Calcula (version de interpretacion de Grafica y Calcula) ──
+s3.append(md("nb3l-observaycalcula-header", """\
 ---
-## 📈🔢 Grafica y Calcula
+## 📈🔢 Observa y Calcula
 
-Hoy graficas y calculas en el mismo paso -- ya sabes leer un patron con el
-ojo (Apertura) y ya sabes que significa `r` (Teoria Desbloqueada). El patron
-completo que vas a repetir toda la clase:
+Hoy vas a ver el mismo patron repetido varias veces -- el grafico y el
+numero **ya vienen calculados**, tu trabajo es leerlos con atencion, no
+escribir el codigo que los produce. Cada celda de abajo hace exactamente
+esto, con columnas distintas cada vez:
 
 ```python
 plt.scatter(df['columna_x'], df['columna_y'])
@@ -277,7 +252,7 @@ print(f"r = {r:.3f}")
 ```
 """))
 
-s3.append(code("nb3-guiado", """\
+s3.append(code("nb3l-guiado", """\
 # 👀 OBSERVA: el patron completo, de una vez -- Apoyo social vs. Puntaje
 plt.scatter(df_felicidad['Apoyo social'], df_felicidad['Puntaje'], alpha=0.6)
 plt.xlabel('Apoyo social')
@@ -288,7 +263,7 @@ plt.show()
 r_apoyo_social = df_felicidad['Apoyo social'].corr(df_felicidad['Puntaje'])
 print(f"r (Apoyo social vs. Puntaje) = {r_apoyo_social:.3f}")"""))
 
-s3.append(md("nb3-outlier-md", """\
+s3.append(md("nb3l-outlier-md", """\
 ### 🔍 ¿Por que el ojo a veces se equivoca?
 
 `Catar` tiene el `PBI per cápita` mas alto de las 156 filas (1.684) -- pero
@@ -301,183 +276,158 @@ numero confirma -- o al reves, que tu ojo "vea" un patron que el numero
 desmiente.
 """))
 
-s3.append(teoria_check("nb3-t6-check", 6))
+s3.append(teoria_check("nb3l-t6-check", 6))
 
-s3.append(md("nb3-repeticion-md", """\
-### 🔁 Practica repetida: mismo patron, distintos pares
+s3.append(md("nb3l-repeticion-md", """\
+### 🔁 Cuatro rondas mas: mismo patron, distintos pares
 
-Cuatro rondas, mismo patron de siempre (`plt.scatter()` + `.corr()`, ahora
-en un solo ejercicio). No todas las rondas piden reflexion escrita -- las
-que si la piden son las que valen la pena pausar; en las demas, sigue de
-largo apenas veas tu numero.
+Cuatro rondas, mismo patron de siempre (`plt.scatter()` + `.corr()`), ya
+ejecutadas -- el codigo y el resultado estan completos en cada celda. Lee el
+grafico, lee el numero, y responde lo que se te pide despues.
 """))
 
 # Ronda 1 -- reflexiona
-s3.append(md("nb3-ronda1-predice-md", """\
+s3.append(md("nb3l-ronda1-predice-md", """\
 #### Ronda 1 -- Antes de seguir, predice
 
 Mirando el patron guiado de arriba (Apoyo social vs. Puntaje): ¿te parece un
-patron fuerte o debil? ¿positivo o negativo? Ahora, **sin graficar
+patron fuerte o debil? ¿positivo o negativo? Ahora, **sin ver el resultado
 todavia**, predice lo mismo para un par nuevo: `Percepción de corrupción`
 vs. `Puntaje`.
 """))
-s3.append(code("nb3-ronda1-predice-code", """\
+s3.append(code("nb3l-ronda1-predice-code", """\
 # 🔮 PREDICE (no se califica, es solo para ti)
 mi_prediccion_ronda1 = "___"  # ej: "creo que es un patron debil y positivo\""""))
 
-s3.append(md("nb3-ronda1-ej-md", """\
-#### ✅ Ejercicio 1 -- Grafica y calcula (20 pts)
+s3.append(md("nb3l-ronda1-md", """\
+#### 👀 Ronda 1 -- Percepción de corrupción vs. Puntaje
 
-🔨 Repite el patron completo (scatter + `.corr()`) con `Percepción de
-corrupción` en el eje X y `Puntaje` en el eje Y. Incluye `plt.xlabel()` e
-`plt.ylabel()`.
-
-Variables que espera el autograder: `x_ex1`, `y_ex1` (columnas del scatter),
-`r_ex1` (el coeficiente de correlacion entre ambas).
+Codigo y resultado ya listos -- ejecuta la celda y compara con tu prediccion.
 """))
-s3.append(code("nb3-ronda1-code", """\
-# 🔨 CONSTRUYE
+s3.append(code("nb3l-ronda1-code", """\
+# 👀 OBSERVA
+plt.scatter(df_felicidad['Percepción de corrupción'], df_felicidad['Puntaje'], alpha=0.6)
+plt.xlabel('Percepción de corrupción')
+plt.ylabel('Puntaje')
+plt.title('Percepción de corrupción vs. Puntaje de felicidad')
+plt.show()
 
-# ============================
-#      Tu codigo aqui
-# ============================
+r_ronda1 = df_felicidad['Percepción de corrupción'].corr(df_felicidad['Puntaje'])
+print(f"r (Percepción de corrupción vs. Puntaje) = {r_ronda1:.3f}")"""))
 
-
-"""))
-s3.append(code("nb3-ronda1-check", "grader.check_ex1()"))
-
-s3.append(md("nb3-ronda1-reflexiona-md", """\
+s3.append(md("nb3l-ronda1-reflexiona-md", """\
 #### 💭 Reflexiona -- Ronda 1 (respuesta abierta -- calificada por IA, +5 XP)
 
 En una frase: ¿tu ojo acerto en fuerza y direccion para `Percepción de
 corrupción`, o te sorprendio algo del resultado?
 """))
-s3.append(reflexion_check("nb3-ronda1-reflexiona-code", "ronda1"))
+s3.append(reflexion_check("nb3l-ronda1-reflexiona-code", "ronda1"))
 
 # Ronda 2 -- sin reflexion
-s3.append(md("nb3-ronda2-predice-md", """\
+s3.append(md("nb3l-ronda2-predice-md", """\
 #### Ronda 2 -- Antes de seguir, predice
 
-Misma mecanica, tercera columna: **sin graficar todavia**, predice si
+Misma mecanica, tercera columna: **sin ver el resultado todavia**, predice si
 `Esperanza de vida saludable` vs. `Puntaje` te parece un patron fuerte o
 debil, positivo o negativo.
 """))
-s3.append(code("nb3-ronda2-predice-code", """\
+s3.append(code("nb3l-ronda2-predice-code", """\
 # 🔮 PREDICE (no se califica, es solo para ti)
 mi_prediccion_ronda2 = "___"  # ej: "creo que es un patron fuerte y positivo\""""))
 
-s3.append(md("nb3-ronda2-ej-md", """\
-#### ✅ Ejercicio 2 -- Grafica y calcula, otra vez (20 pts)
-
-🔨 Mismo patron completo, ahora con `Esperanza de vida saludable` en el eje X
-y `Puntaje` en el eje Y.
-
-Variables que espera el autograder: `x_ex2`, `y_ex2`, `r_ex2`.
+s3.append(md("nb3l-ronda2-md", """\
+#### 👀 Ronda 2 -- Esperanza de vida saludable vs. Puntaje
 """))
-s3.append(code("nb3-ronda2-code", """\
-# 🔨 CONSTRUYE
+s3.append(code("nb3l-ronda2-code", """\
+# 👀 OBSERVA
+plt.scatter(df_felicidad['Esperanza de vida saludable'], df_felicidad['Puntaje'], alpha=0.6)
+plt.xlabel('Esperanza de vida saludable')
+plt.ylabel('Puntaje')
+plt.title('Esperanza de vida saludable vs. Puntaje de felicidad')
+plt.show()
 
-# ============================
-#      Tu codigo aqui
-# ============================
+r_ronda2 = df_felicidad['Esperanza de vida saludable'].corr(df_felicidad['Puntaje'])
+print(f"r (Esperanza de vida saludable vs. Puntaje) = {r_ronda2:.3f}")"""))
 
-
-"""))
-s3.append(code("nb3-ronda2-check", "grader.check_ex2()"))
-
-s3.append(teoria_check("nb3-t7-check", 7))
+s3.append(teoria_check("nb3l-t7-check", 7))
 
 # Ronda 3 -- reflexiona
-s3.append(md("nb3-ronda3-md", """\
-#### Ronda 3 -- PBI per cápita vs. Esperanza de vida saludable
+s3.append(md("nb3l-ronda3-md", """\
+#### 👀 Ronda 3 -- PBI per cápita vs. Esperanza de vida saludable
 
 Esta vez ninguna de las dos columnas es `Puntaje` -- las seis variables
 economicas y sociales tambien pueden relacionarse **entre si**.
 """))
-s3.append(md("nb3-ronda3-ej-md", """\
-##### ✅ Ejercicio 3 -- Grafica y calcula (20 pts)
+s3.append(code("nb3l-ronda3-code", """\
+# 👀 OBSERVA
+plt.scatter(df_felicidad['PBI per cápita'], df_felicidad['Esperanza de vida saludable'], alpha=0.6)
+plt.xlabel('PBI per cápita')
+plt.ylabel('Esperanza de vida saludable')
+plt.title('PBI per cápita vs. Esperanza de vida saludable')
+plt.show()
 
-🔨 `PBI per cápita` (eje X) vs. `Esperanza de vida saludable` (eje Y).
+r_ronda3 = df_felicidad['PBI per cápita'].corr(df_felicidad['Esperanza de vida saludable'])
+print(f"r (PBI per cápita vs. Esperanza de vida saludable) = {r_ronda3:.3f}")"""))
 
-Variables que espera el autograder: `x_ex3`, `y_ex3`, `r_ex3`.
-"""))
-s3.append(code("nb3-ronda3-code", """\
-# 🔨 CONSTRUYE
-
-# ============================
-#      Tu codigo aqui
-# ============================
-
-
-"""))
-s3.append(code("nb3-ronda3-check", "grader.check_ex3()"))
-
-s3.append(md("nb3-ronda3-reflexiona-md", """\
-##### 💭 Reflexiona -- Ronda 3 (respuesta abierta -- calificada por IA, +5 XP)
+s3.append(md("nb3l-ronda3-reflexiona-md", """\
+#### 💭 Reflexiona -- Ronda 3 (respuesta abierta -- calificada por IA, +5 XP)
 
 `PBI per cápita` y `Esperanza de vida saludable` te deberia haber dado el r
 mas alto que has visto hoy (mas alto incluso que cualquiera de los dos contra
 `Puntaje`). ¿Por que crees que estas dos variables en particular se mueven
 tan juntas?
 """))
-s3.append(reflexion_check("nb3-ronda3-reflexiona-code", "ronda3"))
+s3.append(reflexion_check("nb3l-ronda3-reflexiona-code", "ronda3"))
 
 # Ronda 4 -- sin reflexion
-s3.append(md("nb3-ronda4-md", """\
-#### Ronda 4 -- Apoyo social vs. Esperanza de vida saludable
+s3.append(md("nb3l-ronda4-md", """\
+#### 👀 Ronda 4 -- Apoyo social vs. Esperanza de vida saludable
 
 Mismo patron, otro par sin `Puntaje`.
 """))
-s3.append(md("nb3-ronda4-ej-md", """\
-##### ✅ Ejercicio 4 -- Grafica y calcula (20 pts)
+s3.append(code("nb3l-ronda4-code", """\
+# 👀 OBSERVA
+plt.scatter(df_felicidad['Apoyo social'], df_felicidad['Esperanza de vida saludable'], alpha=0.6)
+plt.xlabel('Apoyo social')
+plt.ylabel('Esperanza de vida saludable')
+plt.title('Apoyo social vs. Esperanza de vida saludable')
+plt.show()
 
-🔨 `Apoyo social` (eje X) vs. `Esperanza de vida saludable` (eje Y).
-
-Variables que espera el autograder: `x_ex4`, `y_ex4`, `r_ex4`.
-"""))
-s3.append(code("nb3-ronda4-code", """\
-# 🔨 CONSTRUYE
-
-# ============================
-#      Tu codigo aqui
-# ============================
-
-
-"""))
-s3.append(code("nb3-ronda4-check", "grader.check_ex4()"))
+r_ronda4 = df_felicidad['Apoyo social'].corr(df_felicidad['Esperanza de vida saludable'])
+print(f"r (Apoyo social vs. Esperanza de vida saludable) = {r_ronda4:.3f}")"""))
 
 # Chequeo de concepto -- reflexiona
-s3.append(md("nb3-concepto-md", """\
+s3.append(md("nb3l-concepto-md", """\
 ### 🧠 Chequeo de concepto
 
-Ya calculaste `r` seis veces hoy (Apertura + cuatro Rondas + el ejemplo
+Ya viste `r` calculado seis veces hoy (Apertura + cuatro Rondas + el ejemplo
 guiado). Antes de cerrar la clase, pon el concepto en tus propias palabras
 -- sin usar ningun dataset ni numero especifico.
 """))
-s3.append(md("nb3-concepto-reflexiona-md", """\
+s3.append(md("nb3l-concepto-reflexiona-md", """\
 #### 💭 Reflexiona -- explica el concepto (respuesta abierta -- calificada por IA, +5 XP)
 
 En 2-3 oraciones, sin usar ningun par de columnas como ejemplo: ¿que te dice
 el coeficiente de correlacion, y que es lo que **nunca** te dice por si
 solo?
 """))
-s3.append(reflexion_check("nb3-concepto-reflexiona-code", "concepto"))
+s3.append(reflexion_check("nb3l-concepto-reflexiona-code", "concepto"))
 
-s3.append(code("nb3-checkpoint", """\
+s3.append(code("nb3l-checkpoint", """\
 # ✅ CHECKPOINT -- necesitas 80% en esta seccion para continuar
 grader.check_mini_a()"""))
 
-s3.append(md("nb3-cierre", """\
+s3.append(md("nb3l-cierre", """\
 ---
 ## 🏁 Fin de la Clase 1 -- Semana 3
 
-Aprendiste a leer un patron con el ojo, a ponerle un numero exacto en el
-mismo paso, y a desconfiar de ese numero cuando corresponde. La **Semana 4**
+Aprendiste a leer un patron, a reconocer que te dice el numero que lo
+acompaña, y a desconfiar de ese numero cuando corresponde. La **Semana 4**
 continua la Mision 2: vas a descubrir que el patron general puede esconder --
 o hasta invertir -- lo que pasa dentro de cada grupo, y vas a elegir tu propio
 par de variables para un mini-proyecto.
 """))
-s3.append(code("nb3-resumen", "grader.resumen()"))
+s3.append(code("nb3l-resumen", "grader.resumen()"))
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -497,4 +447,4 @@ def write_notebook(cells, filename):
         json.dump(nb, f, ensure_ascii=False, indent=1)
     print(f"OK: {filename} generado - {len(cells)} celdas")
 
-write_notebook(s3, "nb3_correlacion.ipynb")
+write_notebook(s3, "nb3_lite_correlacion.ipynb")

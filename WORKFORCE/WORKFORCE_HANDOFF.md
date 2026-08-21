@@ -14,12 +14,146 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 | 7 | Statistically vet Weeks 3–4, 6, 7 candidate datasets and Week 5 debunk material once SOFIA drafts them | GAUSS | **Weeks 3–4 now drafted 2026-08-14** (see Done log) — dataset not yet downloaded/vetted, this is the blocking half of the ticket for that unit now. Weeks 1–2 datasets vetted and approved 2026-08-05. Weeks 6, 7, and Week 5 debunk material still not drafted. |
 | 8 | Draft statistically defensible model answers for the capstone's "descriptive analysis with interpretation" and "correlation analysis with causation critique" criteria (20 pts each) | GAUSS + ATLAS | Needed before ATLAS's Rubric Validation Report can sign off those two criteria as more than a point value. |
 | 12 | Rewrite debug-cell hint comments so they prompt investigation ("read the error, identify the type") rather than naming the bug directly — currently several debug cells hand over the diagnosis in the comment, undercutting the "build error-reading skill" purpose of `check_debugN` (`COURSE_TEMPLATE.md` §4) | SOFIA | Raised in SOFIA's Mode 3 review 2026-08-05 (see Done log), still not fully applied. **Partial incidental progress 2026-08-11**: while renumbering Semana 2's debug cells (see that Done log entry), `debug0` (Seccion C, the `=` vs `==` bug, old `debug2`) had its hint de-scaffolded from naming the bug outright to "ejecuta, lee el mensaje completo, e identifica que tipo de error es" — a side effect of the renumbering pass, not a deliberate sweep. Semana 2's `debug1` (Seccion C, `and`/`or`, old `debug3`) and Semana 1's `debug1` still hand over the diagnosis; not touched. |
-| 13 | `nb3_semana3` alone now scores `_CORE_MAX = 209`, well past the ~180 XP `WORKFORCE_CONTRACT.md` §2 budgets for **all of Weeks 3–4 combined** — and Semana 4 (Sección C + Integración/mini-proyecto) hasn't been built yet, so the real overage is larger still once that's added | SOFIA + ATLAS | Opened 2026-08-18 alongside the Ronda 3–6 expansion (see Done log) — the expansion was an explicit, aditive user request, not accidental scope creep, so nothing was cut to compensate. Needs a decision: raise the §2 budget for this unit, split Semana 3 across two class sessions, or rebalance point values once Semana 4's content is known. Not blocking the current build; flagging before ATLAS locks any downstream rubric arithmetic against the old ~180 number. |
 
 ---
 
 ## Done Log
 
+- 2026-08-21 — **Weeks 3–4 "ruta de interpretación" built** (SOFIA, user-requested): a
+  parallel track for two inclusion students who struggle with writing code but test
+  strong on interpretation — `build_nb3_lite.py`/`build_nb4_lite.py` generate
+  `nb3_lite_correlacion.ipynb` (43 cells) / `nb4_lite_correlacion.ipynb` (42 cells), graded
+  by new `autograder_nb3_lite.py`/`autograder_nb4_lite.py`.
+  **Design, not dilution**: per §1's own "statistical thinking first, code as the tool"
+  philosophy, and confirmed directly against `autograder_nb3.py`'s `_TEORIA` dict before
+  building — the 10 theory MCs and 7 AI-graded reflection prompts across nb3/nb4 never
+  depended on writing pandas in the first place. Reused **verbatim, zero rewrite**: the
+  dataset, every real r-value, every graph, all 10 theory questions (`t1`–`t10`, wording
+  unchanged), all 7 reflection prompts, the Apertura hook, the narrative/theme/registration
+  screen (no visible "lite" framing anywhere a student sees — deliberate, avoids a
+  visibly-lower-tier signal). What changed: every `🔨 CONSTRUYE` round (`ex1`–`ex4` nb3,
+  `ex5`–`ex8` nb4) becomes a pre-filled `👀 OBSERVA` cell — same reference solution code,
+  same real output, run instead of written. `debug1` becomes a new theory-bank entry (`t11`)
+  — the same broken cell still executes and raises the real `KeyError`, but the student
+  answers a multiple-choice "what kind of error is this" instead of typing a fix. The
+  own-choice mini-project (`intex1`) becomes `🧩 COMPLETA`: the student fills in
+  `mini_var_x`/`mini_var_y`/`mini_hipotesis` from the printed correlation matrix, with the
+  `.corr()` line already written in the cell — same validation (real column, not `Puesto`,
+  not an already-used pair, non-trivial hypothesis) reused from `autograder_nb4.py`'s
+  helpers, just no longer gated on the student authoring the calculation.
+  **Engineering approach**: both lite autograders *subclass* the main ones
+  (`class Autograder(autograder_nb3.Autograder)`) rather than duplicating the
+  theory-widget/DeepSeek-reflection/gamification/Supabase engine — confirmed by reading
+  `_ask_teoria`/`_grade_teoria`/`_ask_reflexion`/`_render_checkpoint` that they resolve
+  `self._TEORIA` and `.get(key, default)` safely, so overriding only `_TEORIA` (to add
+  `t11`), `check_debug1`, `check_intex1`, the checkpoint methods, and `_check_achievements`
+  (retargeted to theory/reflection completion, same achievement keys as the base classes
+  so `resumen()`'s label table needed no changes) was sufficient — no method that stays
+  inherited references a check key (`ex1`, `debug1`-original, etc.) that no longer exists.
+  **`NOTEBOOK_ID`/`_CORE_MAX` are reassigned on the imported base module**
+  (`autograder_nb3.NOTEBOOK_ID = "nb3_lite"`, not a local variable) because every inherited
+  method resolves those names against its own module's `__globals__`, not the subclass's —
+  documented in-file as a docstring warning since it has one real consequence: importing
+  `autograder_nb3_lite` mutates the shared `autograder_nb3` module object for the rest of
+  that Python process. Harmless in production (each Colab notebook is its own fresh
+  kernel, never imports both), but real for anyone writing a combined test script.
+  Distinct notebook ids (`nb3_lite`/`nb4_lite`) so these two students' submissions land in
+  the same Supabase `submissions` table without mixing into the main leaderboard's
+  percentage comparison.
+  **Scoring**: `_CORE_MAX` = 50 (nb3_lite: 35 theory + 15 reflection) / 55 (nb4_lite: 15
+  theory t8–t10 + 5 t11 + 20 reflection ×4 + 15 redesigned `intex1`) — theory/reflection
+  only, no `ex`/`debug`/`intex`-as-code points, both scaled 0–100% like every other
+  notebook so the lighter absolute total doesn't read as "worth less."
+  **Validated**: both build scripts regenerate clean; `py_compile` clean on both
+  autograders; new `_test_nb3_nb4_lite.py` (throwaway, `COURSE_TEMPLATE.md` §3 pattern,
+  each module tested in its own subprocess per the mutation caveat above) — 22/22
+  assertions pass: correct/wrong theory answers score right and lock on retry, all-`t`
+  achievement unlocks, trivial reflection text scores 0 without a network call, an
+  AI-unreachable reflection leaves the key unset rather than recording a 0 (matching the
+  inherited `_grade_reflexion` contract), both checkpoints render with zero/partial scores
+  without a `KeyError`, and `check_intex1` (redesigned) accepts a genuine new pair with a
+  real hypothesis for full 15/15 while separately rejecting `Puesto`, an already-used pair,
+  and a placeholder hypothesis (each a partial-credit case, not a crash). The one new,
+  not-copied code snippet (nb4_lite's `ex7`-equivalent explore-all cell, `.corr()` +
+  `.drop(['Puesto','Puntaje'])` + `.abs().idxmax()/.idxmin()`) was independently re-run
+  against `2019_es.csv` and confirmed to reproduce `PBI per cápita` (0.794) strongest /
+  `Generosidad` (0.076) weakest, matching the already-vetted values. Every
+  `grader.check_*()`/`grader.resumen()` call referenced in both generated notebooks was
+  cross-checked against the corresponding lite `Autograder` class to confirm the method
+  actually exists (catches a cell-vs-grader typo class of bug before a student ever hits it).
+  **Open, by explicit default (not yet confirmed by the user)**: (1) no `nb3_lite.html`/
+  `nb4_lite.html` public leaderboard page built — submissions land in Supabase and should
+  already surface in the existing all-notebooks `dashboard.html`, but there's no
+  student-facing page for this notebook id yet; (2) whether a formal CNB
+  differentiation/accommodation record is needed for these two students — not drafted;
+  (3) none of these files have been pushed to `main`, so the notebooks' `!wget` setup
+  cells won't resolve yet — pushing is what actually ships this to students, same as any
+  other notebook per `COURSE_TEMPLATE.md` §1.
+- 2026-08-21 — **`autograder_nb3.py` and `autograder_nb4.py` built (ATLAS), closing ticket #14.**
+  Full rewrite against `ATLAS_spec_nb3_nb4.md`, not a patch of the deleted
+  `autograder_nb3_semana3.py`. `_CORE_MAX` = 130 (nb3) / 150 (nb4), both confirmed by direct
+  arithmetic to equal the exact sum of declared `max_pts` across every non-bonus `check_*` — the
+  150 corrects a gap in the spec doc itself (a `check_reflexion_ronda6` row was missing from the
+  nb4 table, undercounting it as 145).
+  **Validated** via new `_test_nb3_nb4.py` (throwaway ATLAS-style script, `COURSE_TEMPLATE.md` §3
+  pattern): 63/63 assertions pass. Per-check, at least (1) correct solution passes and (2) a
+  common-wrong or hardcoded/lazy case fails (`03_ATLAS.md` "Must ALWAYS"), plus targeted cases:
+  `check_ex7`'s `Puesto`-included circular-correlation trap rejected; `check_ex8`'s "used the
+  unfiltered overall r instead of the per-continent filtered r" mistake rejected; `check_intex1`
+  (mini-project) rejects an already-used pair, rejects `Puesto`, and rejects a placeholder
+  hypothesis, while accepting a genuine new pair for full points; reflection grading's "AI
+  unreachable" path confirmed to leave the score key unset (retry-eligible) rather than recording
+  a 0, matching the documented `_grade_reflexion` contract.
+  Old `autograder_nb3_semana3.py` (`_CORE_MAX=264`, stale since the 2026-08-20 restructure)
+  **deleted** — nothing in either current notebook's setup cell references it anymore (both wget
+  the new `autograder_nb3.py`/`autograder_nb4.py`), and its replacements are now built and tested.
+- 2026-08-20 — **`nb3_semana3_correlacion.ipynb` restructured and split into two files,
+  `nb3_semana3_correlacion.ipynb` (49 cells) + new `nb3_semana4_correlacion.ipynb` (46 cells),
+  both generated by revised `Weeks 3-4/build_nb3.py`** — resolves **ticket #13** (the 264-pt
+  overage flagged 2026-08-18). Root cause identified through direct user conversation about
+  actual classroom delivery: the plan was 40-50 min lecture + 1-1.5h homework for what was still
+  labeled "Clase 1," and at that size the real bottleneck wasn't exercise difficulty (graph +
+  `.corr()` exercises are column-name substitution, fast) but the 11 💭 Reflexiona cells, each a
+  real round-trip to the `grade-reflexion` Supabase Edge Function (DeepSeek) — 5-8 min each
+  including wait time, unsupervised. Fix, per explicit user direction: (1) **fuse graph-building
+  and `.corr()`-calculation into one exercise per round** (previously two separate exercises,
+  Sección A then Sección B, split across the file) so the coefficient's math backing lands the
+  same session as the visual, never a week later; (2) **cut Reflexiona cells from 11 to 6**,
+  reflecting only "occasionally" (every other round) rather than after every exercise — repetition
+  itself is preserved (still 6 full graph+`.corr()` rounds across the two files, same pairs as the
+  old build, same verified r-values); (3) **Sección C (`.groupby()` + subgroups) and the
+  Semana 4 mini-project — spec'd in `Teoria_Semanas3-4_Mision2_Correlacion.md` in 2026-08-14 but
+  never actually built — now exist**, giving Semana 4 real content instead of overflow homework
+  from Semana 3.
+  **Technical scope note:** Sección C does *not* use `.groupby().apply(lambda...)` — that pattern
+  isn't in the committed technical spine (`WORKFORCE_CONTRACT.md` §5 lists `.groupby()` but not
+  `.apply()`/lambda). Per-continent correlation instead uses boolean filtering (already taught,
+  Weeks 1-2) + `.corr()` on the filtered subset — zero new syntax, same "code is never a syntax
+  drill" principle (`COURSE_TEMPLATE.md` §4). `.groupby()` itself still appears, for a plain
+  `.mean()` aggregation that sets up the "our dataset has subgroups" framing before the filtering
+  approach takes over for the actual per-group `r`.
+  **Mini-project** (Semana 4 close, `check_intex1`) implements both non-negotiable requirements
+  `04_GAUSS.md`/the Teoria doc flagged for this exercise: a required hypothesis field
+  (`mini_hipotesis`, not just the highest r), and a dedicated reflection asking why exploring many
+  column pairs means the single highest-r pair shouldn't be trusted automatically (the
+  spurious-correlation/multiple-comparisons risk GAUSS named for this exact exercise shape).
+  Output format (`mini_var_x`/`mini_var_y`/`mini_r`/`mini_hipotesis`) is deliberately the reusable
+  shape Semana 5 needs as its debunking input, per the Teoria doc's explicit continuity
+  requirement — not something Semana 5's design has to re-derive.
+  **Validated:** every exercise's reference solution (all six graph+`.corr()` rounds, the
+  explore-all scan, the Sección C per-continent filters including the Oceanía n=2 case, `debug1`'s
+  broken/fixed forms) re-run directly against `2019_es.csv` 2026-08-20 — all values in the
+  notebook text match computed output to 3 decimals (script + raw output kept in this session's
+  scratchpad, not committed). New real findings surfaced by this validation, not fabricated:
+  `Percepción de corrupción` vs `Puntaje` r≈0.386 (not previously stated in prose); PBI↔Puntaje by
+  continente (Europa 0.808, Asia 0.727, América 0.696, África 0.486, Oceanía -1.000 on n=2);
+  Generosidad↔Puntaje by continente (Europa 0.530, Asia 0.042, África -0.183, América -0.211,
+  Oceanía -1.000 on n=2) — the sign flip between Europa and América on a pair whose *overall* r is
+  ≈0 is the real, non-manufactured finding Sección C's exercise is built around.
+  **Net effect on reflection load**: 11 → 6 Reflexiona cells across the unit (was all 11 crammed
+  into one file); full spec for ATLAS in `course-python-stats/Weeks 3-4/ATLAS_spec_nb3_semana3-4.md`
+  (ticket #14). Old `autograder_nb3_semana3.py` (`_CORE_MAX=264`) is now stale and not deleted —
+  ATLAS rebuilds both autograders from the spec, not by patching it.
 - 2026-08-18 — **`nb3_semana3_correlacion.ipynb` revised per direct user review** (two
   concrete pieces of feedback after reading the generated notebook). (1) **Apertura
   "revelación" cell rewritten for clarity/replicability**: it previously computed each

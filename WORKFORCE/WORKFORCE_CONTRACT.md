@@ -33,10 +33,45 @@ delivery reality. `check_ex`/`check_debug`/`check_tN` numbering stays global acr
 (not reset per file) so the two sessions still read as one mission. Other weeks' bundling still
 open where noted.
 
+**Revised (2026-08-20): Weeks 3–4 ("Correlation") also split into two notebook files**, same
+pattern as Weeks 1–2 — `nb3_semana3_correlacion.ipynb` (49 cells) / `nb3_semana4_correlacion.ipynb`
+(46 cells), both from `Weeks 3-4/build_nb3.py`. Triggered by the same failure mode Weeks 1–2 hit
+first: a single-file "Clase 1" (see `WORKFORCE_HANDOFF.md` ticket #13, resolved by this split)
+reached `_CORE_MAX=264` against a real classroom plan of 40-50 min lecture + 1-1.5h homework —
+well past what fits. Unlike the Weeks 1–2 split, the fix here wasn't only "more sessions": graph
+building and `.corr()` calculation were fused into one exercise per round (previously two separate
+exercises), and the 11 AI-graded 💭 Reflexiona cells — the actual time cost, each a real
+`grade-reflexion` Edge Function round-trip, not the exercises themselves — were cut to 6 by making
+reflection "occasional" rather than per-exercise. Sección C (subgroup correlation) and the Semana 4
+mini-project, spec'd in `Teoria_Semanas3-4_Mision2_Correlacion.md` since 2026-08-14 but never built,
+now exist in the Semana 4 file. Full rebuild rationale and validation in `WORKFORCE_HANDOFF.md`'s
+2026-08-20 Done log entry.
+
 | Weeks | Focus | Learning Target | XP Budget |
 |---|---|---|---|
 | 1–2 | Pandas bootcamp (2 notebooks, "Mission 1: Data Recovery" Semana 1 / Semana 2) | Load, explore, filter, describe a dataset | ~150 (under review — see `WORKFORCE_HANDOFF.md` ticket #11) |
-| 3–4 | Correlation | Calculate and visualize correlation; `.groupby()` by subgroup | ~180 |
+| 3–4 | Correlation (2 notebooks, "Misión 2: Buscando Patrones" Semana 3 / Semana 4) | Calculate and visualize correlation in one step; `.groupby()`/filter by subgroup; own-choice mini-project | ~180 nominal — actual suggested total ≈275 across both files (see `ATLAS_spec_nb3_semana3-4.md`); not treated as a hard budget per the user's 2026-08-19 call that per-notebook % normalization makes the raw `_CORE_MAX` non-comparable across notebooks |
+
+**New (2026-08-21): Weeks 3–4 gained a parallel "ruta de interpretación" track**
+(`nb3_lite_correlacion.ipynb` / `nb4_lite_correlacion.ipynb`, from new sibling build
+scripts `build_nb3_lite.py` / `build_nb4_lite.py`) for inclusion students who struggle
+with writing code but test strong on interpretation — the actual stated target of this
+module per §1's "statistical thinking first, code as the tool to get there." Same
+dataset, same real r-values, same graphs, same 10 theory MCs and 7 AI-graded reflection
+prompts as the main nb3/nb4 track, verbatim — none of that content ever depended on the
+student writing pandas (confirmed against `_TEORIA` before building). What's removed is
+only the code-writing layer: every `🔨 CONSTRUYE` round becomes a pre-filled `👀 OBSERVA`
+cell (same reference solution, same real output, run not written); the debug exercise
+becomes a multiple-choice "what kind of error is this" question instead of a typed fix;
+the own-choice mini-project becomes a `🧩 COMPLETA` fill-in (pick two real, unused column
+names + write a hypothesis) with the `.corr()` line pre-written rather than authored.
+`autograder_nb3_lite.py`/`autograder_nb4_lite.py` subclass the main autograders to reuse
+their theory-widget/reflection-grading/gamification/Supabase engine verbatim rather than
+duplicating it — only the exercise-completion layer differs. Distinct `notebook_id`s
+(`nb3_lite`/`nb4_lite`) keep these submissions out of the main leaderboard's percentage
+comparison. `_CORE_MAX` = 50 (nb3_lite) / 55 (nb4_lite), both theory+reflection only
+(no `ex`/`debug`/`intex` code points). Full design rationale and open questions in
+`WORKFORCE_HANDOFF.md`'s 2026-08-21 Done log entry.
 | 5 | Causation reality check | Distinguish correlation from causation; identify confounders | ~100 |
 | 6 | Linear regression | Interpret a fitted regression, not derive it | ~150 |
 | 7 | K-means clustering | Interpret clusters, not derive the algorithm | ~120 |
@@ -123,6 +158,14 @@ assembles the notebook** (`COURSE_TEMPLATE.md` §12).
 
 ## Change Log
 
+- 2026-08-21 — §2 updated: added the Weeks 3–4 "ruta de interpretación" track
+  (`nb3_lite_correlacion.ipynb` / `nb4_lite_correlacion.ipynb`) for inclusion students —
+  same content, code-writing removed. See §2's new paragraph and `WORKFORCE_HANDOFF.md`'s
+  2026-08-21 Done log entry for full detail.
+- 2026-08-20 — §2 updated: Weeks 3–4 ("Correlation") split into two notebook files
+  (`nb3_semana3_correlacion.ipynb` / `nb3_semana4_correlacion.ipynb`), mirroring the Weeks 1–2
+  split. Resolves `WORKFORCE_HANDOFF.md` ticket #13 (264-pt single-file overage). Details in that
+  file's 2026-08-20 Done log entry and in `course-python-stats/Weeks 3-4/ATLAS_spec_nb3_semana3-4.md`.
 - 2026-07-20 — Contract created as part of workforce polish for the Bimestre 3 Statistics module.
   Seeded from `Bimestre3_Statistics_Python_Module_Guide.md` and `COURSE_TEMPLATE.md`. Week→notebook
   mapping and capstone ML-requirement left open (see `WORKFORCE_HANDOFF.md`).
