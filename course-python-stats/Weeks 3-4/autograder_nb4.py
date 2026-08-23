@@ -808,6 +808,8 @@ async function agRegister() {{
   border:2px solid {c};border-radius:6px;max-width:840px;margin:14px 0;
   box-shadow:0 0 55px {c}44,0 0 110px {c}11,0 12px 50px rgba(0,0,0,.97);">
 
+  <div style="position:absolute;top:14px;left:14px;z-index:16;">{self._logo_tag_sm}</div>
+
   <div style="position:absolute;inset:0;background:{c};border-radius:4px;
     animation:{uid}-flash .55s ease-out forwards;pointer-events:none;z-index:20;"></div>
 
@@ -897,8 +899,10 @@ async function agRegister() {{
             f'<div style="background:#12100a;border:2px solid {color};border-radius:4px;'
             f'max-width:840px;margin:10px 0;padding:18px 20px;'
             f'box-shadow:0 0 20px {color}22,0 4px 16px rgba(0,0,0,.6);">'
-            f'<div style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
-            f'color:{color};letter-spacing:2px;margin-bottom:16px;">🌻 {title}</div>'
+            f'<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">'
+            f'{self._logo_tag_sm}'
+            f'<span style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
+            f'color:{color};letter-spacing:2px;">🌻 {title}</span></div>'
             f'{rows}'
             f'<div style="margin-top:14px;padding-top:10px;border-top:1px solid {color}30;'
             f'display:flex;justify-content:space-between;align-items:center;">'
@@ -950,20 +954,24 @@ async function agRegister() {{
                 pass
             if not silent:
                 display(HTML(
-                    f'<div style="font-family:\'Press Start 2P\',monospace;font-size:8px;'
+                    f'<div style="display:flex;align-items:center;gap:8px;'
+                    f'font-family:\'Press Start 2P\',monospace;font-size:8px;'
                     f'color:#4caf50;background:#020d02;border:1px solid #4caf50;'
                     f'border-radius:3px;padding:10px 16px;max-width:840px;margin-top:6px;">'
-                    f'✅ SCORE ENVIADO — {self._nombre_real} · DNI {self._dni}'
+                    f'{self._logo_tag_sm}'
+                    f'<span>✅ SCORE ENVIADO — {self._nombre_real} · DNI {self._dni}'
                     f'<br><span style="color:#4aa8d8;font-size:7px;">'
-                    f'📊 Calificación actualizada en la base de datos</span></div>'
+                    f'📊 Calificación actualizada en la base de datos</span></span></div>'
                 ))
         except Exception as _ex:
             if not silent:
                 display(HTML(
-                    f'<div style="font-family:\'Press Start 2P\',monospace;font-size:7px;'
+                    f'<div style="display:flex;align-items:center;gap:8px;'
+                    f'font-family:\'Press Start 2P\',monospace;font-size:7px;'
                     f'color:#ff5d5d;background:#1a0005;border:1px solid #ff5d5d;'
                     f'border-radius:3px;padding:10px 16px;max-width:840px;margin-top:6px;">'
-                    f'⚠️ Leaderboard no disponible: {_ex}</div>'
+                    f'{self._logo_tag_sm}'
+                    f'<span>⚠️ Leaderboard no disponible: {_ex}</span></div>'
                 ))
 
     # ═══════════════════════════════════════════════════════════
@@ -1032,9 +1040,11 @@ async function agRegister() {{
             f'<div style="max-width:840px;margin:10px 0;background:#12100a;'
             f'border:2px solid {color};border-radius:4px;padding:14px 18px;'
             f'font-family:\'Segoe UI\',Roboto,sans-serif;">'
-            f'<div style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
-            f'color:#a8a08a;letter-spacing:1px;margin-bottom:8px;">'
-            f'🔒 {spec["title"]} — YA RESPONDIDA</div>'
+            f'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+            f'{self._logo_tag_sm}'
+            f'<span style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
+            f'color:#a8a08a;letter-spacing:1px;">'
+            f'🔒 {spec["title"]} — YA RESPONDIDA</span></div>'
             f'<div style="color:{color};font-size:13px;">{estado}</div>'
             f'<div style="color:#a8a08a;font-size:12px;margin-top:6px;">'
             f'Esta pregunta admite una sola respuesta. Volver a ejecutar la celda no '
@@ -1088,7 +1098,9 @@ async function agRegister() {{
 </style>
 <div id="{uid}-wrap" style="background:#12100a;border:2px solid #4aa8d8;border-radius:4px;
   max-width:840px;margin:10px 0;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.7);">
-  <div style="background:#4aa8d818;border-bottom:1px solid #4aa8d840;padding:10px 16px;">
+  <div style="background:#4aa8d818;border-bottom:1px solid #4aa8d840;padding:10px 16px;
+    display:flex;align-items:center;gap:8px;">
+    {self._logo_tag_sm}
     <span style="font-family:'Press Start 2P',monospace;font-size:9px;color:#4aa8d8;
       letter-spacing:1px;">❓ {spec['title']}</span>
   </div>
@@ -1169,9 +1181,11 @@ async function {uid}_pick(letter) {{
             f'<div style="max-width:840px;margin:10px 0;background:#12100a;'
             f'border:2px solid {color};border-radius:4px;padding:14px 18px;'
             f'font-family:\'Segoe UI\',Roboto,sans-serif;">'
-            f'<div style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
-            f'color:#a8a08a;letter-spacing:1px;margin-bottom:8px;">'
-            f'🔒 💭 REFLEXIONA — YA RESPONDIDA</div>'
+            f'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+            f'{self._logo_tag_sm}'
+            f'<span style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
+            f'color:#a8a08a;letter-spacing:1px;">'
+            f'🔒 💭 REFLEXIONA — YA RESPONDIDA</span></div>'
             f'<div style="color:{color};font-size:13px;">'
             f'Ya enviaste tu reflexión ({pts}/{max_pts} pts)</div>'
             f'<div style="color:#a8a08a;font-size:12px;margin-top:6px;">'
@@ -1227,7 +1241,9 @@ async function {uid}_pick(letter) {{
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <div id="{uid}-wrap" style="background:#12100a;border:2px solid #4aa8d8;border-radius:4px;
   max-width:840px;margin:10px 0;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.7);">
-  <div style="background:#4aa8d818;border-bottom:1px solid #4aa8d840;padding:10px 16px;">
+  <div style="background:#4aa8d818;border-bottom:1px solid #4aa8d840;padding:10px 16px;
+    display:flex;align-items:center;gap:8px;">
+    {self._logo_tag_sm}
     <span style="font-family:'Press Start 2P',monospace;font-size:9px;color:#4aa8d8;
       letter-spacing:1px;">💭 REFLEXIONA</span>
   </div>
@@ -1369,8 +1385,11 @@ async function {uid}_submit() {{
   font-family:'Segoe UI',Roboto,sans-serif;">
   <div style="background:{border_color}18;border-bottom:1px solid {border_color}40;
     padding:9px 16px;display:flex;justify-content:space-between;align-items:center;">
-    <span style="font-family:'Press Start 2P',monospace;font-size:9px;
-      color:{border_color};letter-spacing:1px;">💭 REFLEXIÓN CALIFICADA</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      {self._logo_tag_sm}
+      <span style="font-family:'Press Start 2P',monospace;font-size:9px;
+        color:{border_color};letter-spacing:1px;">💭 REFLEXIÓN CALIFICADA</span>
+    </div>
     <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:#ff9e2c;
       background:rgba(255,158,44,.1);border:1px solid rgba(255,158,44,.4);
       padding:3px 8px;border-radius:2px;">MAX {max_pts} XP</div>
@@ -1665,10 +1684,12 @@ async function {uid}_submit() {{
         self._checkpoints.add("mini_c")
         if len(self._checkpoints) >= 2 and self._unlock("medalla_camino"):
             display(HTML(
-                '<div style="font-family:\'Press Start 2P\',monospace;font-size:8px;'
-                'color:#ffb703;background:#1a1400;border:1px solid #ffb703;'
-                'border-radius:3px;padding:12px 16px;max-width:840px;margin:6px 0;">'
-                '🌻 LOGRO: Medalla del Camino — Ambos checkpoints de Semana 4 superados</div>'
+                f'<div style="display:flex;align-items:center;gap:8px;'
+                f'font-family:\'Press Start 2P\',monospace;font-size:8px;'
+                f'color:#ffb703;background:#1a1400;border:1px solid #ffb703;'
+                f'border-radius:3px;padding:12px 16px;max-width:840px;margin:6px 0;">'
+                f'{self._logo_tag_sm}'
+                f'<span>🌻 LOGRO: Medalla del Camino — Ambos checkpoints de Semana 4 superados</span></div>'
             ))
         seccion = {
             "t10": ("T10 — La trampa de Oceanía", 5),

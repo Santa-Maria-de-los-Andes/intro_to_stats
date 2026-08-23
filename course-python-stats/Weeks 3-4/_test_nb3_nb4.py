@@ -64,8 +64,8 @@ import autograder_nb3 as ag3
 g3 = ag3.Autograder()
 g3._dni = "TEST"  # evita el registro interactivo de nuevo en cada check
 
-# ── Teoria t1-t7: correcta pasa, incorrecta falla ──────────────────
-for n in range(1, 8):
+# ── Teoria t1-t11: correcta pasa, incorrecta falla ─────────────────
+for n in range(1, 12):
     spec = g3._TEORIA[n]
     correct = spec["correct"]
     wrong = next(l for l in "abcd" if l != correct)
@@ -80,12 +80,14 @@ for n in range(1, 8):
     pts, mx = g3._scores[f"t{n}"]
     check(f"nb3 t{n} incorrecta -> 0/{mx}", pts == 0)
 
-# ── Ex1-4: correcta pasa, columna mala falla, r hardcodeado falla ──
+# ── Ex1-6: correcta pasa, columna mala falla, r hardcodeado falla ──
 RONDAS_NB3 = [
     ("ex1", ag3._COL_CORRUPCION, ag3._COL_PUNTAJE, 0.3856130708664784),
     ("ex2", ag3._COL_ESPERANZA, ag3._COL_PUNTAJE, 0.7798831492425831),
     ("ex3", ag3._COL_PBI, ag3._COL_ESPERANZA, 0.8354621150416076),
     ("ex4", ag3._COL_APOYO, ag3._COL_ESPERANZA, 0.7190094590308561),
+    ("ex5", ag3._COL_PBI, ag3._COL_APOYO, 0.7549057272454567),
+    ("ex6", ag3._COL_GENEROSIDAD, ag3._COL_CORRUPCION, 0.32653754340500746),
 ]
 for key, xcol, ycol, rexp in RONDAS_NB3:
     reset_globals(ag3)
@@ -121,7 +123,9 @@ def fake_grade_none(reflexion_id, text):
 
 for rid, method in [("ronda1", "check_reflexion_ronda1"),
                      ("ronda3", "check_reflexion_ronda3"),
-                     ("concepto", "check_reflexion_concepto")]:
+                     ("concepto", "check_reflexion_concepto"),
+                     ("pbi_apoyo", "check_reflexion_pbi_apoyo"),
+                     ("generosidad_corrupcion", "check_reflexion_generosidad_corrupcion")]:
     g3._scores.pop(f"refl_{rid}", None)
     g3._call_grade_reflexion = fake_grade_ok
     g3._grade_reflexion(rid, "Esta es una reflexion real de mas de quince caracteres.")
@@ -140,7 +144,7 @@ for rid, method in [("ronda1", "check_reflexion_ronda1"),
           f"refl_{rid}" not in g3._scores)
 
 # ── _CORE_MAX == suma de max_pts declarados ──────────────────────
-declared_nb3 = 5 * 7 + 20 * 4 + 5 * 3
+declared_nb3 = 5 * 11 + 20 * 6 + 5 * 5
 check(f"nb3 _CORE_MAX ({ag3._CORE_MAX}) == suma declarada ({declared_nb3})",
       ag3._CORE_MAX == declared_nb3)
 

@@ -29,7 +29,7 @@ from the old build without re-checking) — use them as your correct-answer refe
 
 ---
 
-## `nb3_correlacion.ipynb` — suggested `_CORE_MAX` ≈ 130
+## `nb3_correlacion.ipynb` — `_CORE_MAX` = 200 (was 130, see 2026-08-21 update below)
 
 | Check | Cell ID(s) | Type | Expected variables | Correct value | Suggested pts |
 |---|---|---|---|---|---|
@@ -40,15 +40,22 @@ from the old build without re-checking) — use them as your correct-answer refe
 | `check_ex2` | `nb3-ronda2-code/check` | 🔨 build+calc | `x_ex2`, `y_ex2`, `r_ex2` | `Esperanza de vida saludable` vs `Puntaje` → **r ≈ 0.780** | 20 |
 | `check_ex3` | `nb3-ronda3-code/check` | 🔨 build+calc | `x_ex3`, `y_ex3`, `r_ex3` | `PBI per cápita` vs `Esperanza de vida saludable` → **r ≈ 0.835** (strongest pair in the whole unit) | 20 |
 | `check_ex4` | `nb3-ronda4-code/check` | 🔨 build+calc | `x_ex4`, `y_ex4`, `r_ex4` | `Apoyo social` vs `Esperanza de vida saludable` → **r ≈ 0.719** | 20 |
+| `check_ex5` *(new 2026-08-21)* | `nb3-ronda5-code/check` | 🔨 build+calc | `x_ex5`, `y_ex5`, `r_ex5` | `PBI per cápita` vs `Apoyo social` → **r ≈ 0.755** (second-strongest pair among the six variables, after ex3) | 20 |
+| `check_ex6` *(new 2026-08-21)* | `nb3-ronda6-code/check` | 🔨 build+calc | `x_ex6`, `y_ex6`, `r_ex6` | `Generosidad` vs `Percepción de corrupción` → **r ≈ 0.327** (the one variable Generosidad actually correlates with — contrast with its near-zero r against every other variable) | 20 |
+| `check_t8`–`check_t11` *(new 2026-08-21, "Quiz de Cierre")* | `nb3-t8..t11-check` | MC theory | `respuesta_tN` pattern | `t8`: recall which pair had today's highest r (ex3, PBI↔Esperanza). `t9`-`t11`: three brand-new scenarios (ice-cream/drowning, shoe-size/reading, random-pairs multiple-comparisons) that don't reference the happiness dataset at all — testing whether "correlation ≠ causation" transfers beyond this one dataset | 5 ea (20) |
 | `check_mini_a` | `nb3-checkpoint` | checkpoint | — | gates on 80% of the above, no independent XP | 0 |
 
-**Reflections (`check_reflexion_*`, 5 pts ea, 15 total)** — all via the DeepSeek pipeline, teacher-tone rubric should check for (a) actually answers the question asked, (b) avoids causal language ("causa", "provoca", "hace que" — non-negotiable per `Teoria_Semanas3-4_Mision2_Correlacion.md`'s language rule) where the prompt calls for it:
+**⚠️ Numbering note (2026-08-21):** `check_ex5`/`check_ex6`/`check_t8`-`check_t11` in `autograder_nb3.py` are **local to this file** — they do **not** continue the "nb4 picks up numbering where nb3 ends" convention documented at the top of `build_nb3.py`/`build_nb4.py`. `autograder_nb4.py` already has its own `check_ex5`/`check_ex6`/`check_t8`-`check_t10` (different pairs, different questions, different class/file — see the nb4 table below). Since nb3 and nb4 are separate Python classes in separate files loaded into separate notebooks, there is **no runtime collision** — this is a naming coincidence between two independent notebooks, not a bug. It does mean a human comparing this spec's nb3 table against the nb4 table below will see `ex5`/`ex6`/`t8` used twice with different meanings; that's intentional and documented in both autograder files' docstrings. Nb4 itself was **not** renumbered to make room, since it's already built, validated, and live with students working toward its Aug 31 deadline — renumbering it now would risk breaking in-progress student notebooks that already call `grader.check_ex5()` etc. against the existing nb4 methods.
+
+**Reflections (`check_reflexion_*`, 5 pts ea, 25 total)** — all via the DeepSeek pipeline, teacher-tone rubric should check for (a) actually answers the question asked, (b) avoids causal language ("causa", "provoca", "hace que" — non-negotiable per `Teoria_Semanas3-4_Mision2_Correlacion.md`'s language rule) where the prompt calls for it:
 
 | `id` passed to `reflexion_check()` | Cell | What it's grading |
 |---|---|---|
 | `ronda1` | `nb3-ronda1-reflexiona-code` | Did their prediction match Ronda 1's actual scatter/`r`, in their own words |
 | `ronda3` | `nb3-ronda3-reflexiona-code` | Reasoning for *why* PBI↔Esperanza is the strongest pair seen so far (not just restating the number) |
 | `concepto` | `nb3-concepto-reflexiona-code` | Pure concept explanation, no dataset reference required — what `r` tells you and what it never tells you by itself. This is the "explain in your own words" concept-check the user asked for; grade on explanation quality, not on mentioning a specific pair |
+| `pbi_apoyo` *(new 2026-08-21)* | `nb3-ronda5-reflexiona-code` | Whether the student identifies PBI as the common factor behind two strong-but-different relationships (ex3 and ex5), with a plausible reason (more resources → both health and social support), not just causal-language shorthand |
+| `generosidad_corrupcion` *(new 2026-08-21)* | `nb3-ronda6-reflexiona-code` | Whether the student notices the contrast — Generosidad is near-zero with everything else, but not with this pair — and offers a plausible explanation (e.g. lower perceived corruption → more trust → more generosity), without overstating it as a strong relationship |
 
 **Common-wrong-answer test cases to write** (per `COURSE_TEMPLATE.md` §6, all `check_exN` here):
 hardcoded literal `r` value (should fail if dataset changes), swapped x/y columns (should still
@@ -95,14 +102,39 @@ the p-hacking-adjacent habit `check_reflexion_metodologica` is trying to inocula
 
 | File | `_CORE_MAX` |
 |---|---|
-| `nb3_correlacion.ipynb` | 130 |
+| `nb3_correlacion.ipynb` | 200 *(was 130 — see 2026-08-21 update below)* |
 | `nb4_correlacion.ipynb` | 150 |
-| **Combined** | **280** |
+| **Combined** | **350** |
 
 Still above the nominal ~180 `WORKFORCE_CONTRACT.md` §2 figure, but down from the old single
 file's 264 alone (with Semana 4 not even built yet at that point) — and the user's 2026-08-19
 call stands: raw `_CORE_MAX` isn't cross-notebook comparable once scores normalize to 0-100% per
 notebook, so this isn't being treated as a new budget problem.
+
+---
+
+## Update — 2026-08-21: nb3 expanded (Ronda 5/6 + Quiz de Cierre)
+
+After reviewing the built notebook, the user judged `nb3_correlacion.ipynb` too short and asked
+for: (1) at least 2 more scatter+`r` exercises, using variable combos not necessarily involving
+`Puntaje`, each with its own AI-graded reflection; (2) a closing multiple-choice section that
+both recalls today's data and tests transfer to scenarios outside the happiness dataset.
+
+Added (all verified against `2019_es.csv` the same day, same discipline as the rest of this
+spec): `check_ex5` (PBI per cápita vs Apoyo social, r≈0.755), `check_ex6` (Generosidad vs
+Percepción de corrupción, r≈0.327 — the one variable Generosidad actually correlates with, in
+contrast to its near-zero r against every other variable), reflections `pbi_apoyo` and
+`generosidad_corrupcion` (5 pts ea), and a 4-question "Quiz de Cierre" (`check_t8`-`check_t11`,
+5 pts ea): one data-recall question (which pair had today's highest r) and three brand-new
+scenarios that never mention the dataset (ice-cream/drowning-rate confound, shoe-size/reading-
+ability confound, random-pairs multiple-comparisons risk) — per the user's request for "more new
+scenarios, less data-recall" when asked to weigh the mix.
+
+`_CORE_MAX` for nb3 moved from 130 to 200 (55 t1-11 + 120 ex1-6 + 25 reflexion×5). Full detail
+in `autograder_nb3.py`'s docstring and the numbering note above the nb3 reflections table.
+`_test_nb3_nb4.py` was updated in step (new t8-11/ex5-6/reflection assertions, updated
+`declared_nb3`) and re-run: 83/83 assertions pass. `nb4_correlacion.ipynb` / `autograder_nb4.py`
+were **not** touched — see the numbering note above for why.
 
 ---
 

@@ -1,23 +1,36 @@
 // supabase/functions/grade-reflexion/index.ts
 //
-// Califica celdas "💭 Reflexiona" de nb3_semana3_correlacion.ipynb (y
-// notebooks futuros que reusen el mismo patron) via DeepSeek (deepseek-chat).
-// La clave de DeepSeek vive solo aca (Supabase secret DEEPSEEK_API_KEY) --
-// nunca en el notebook, igual que `submissions` nunca expuso una clave con
-// alcance real (solo el anon key, restringido por RLS).
+// Califica celdas "💭 Reflexiona" de la Mision 2 (nb3_correlacion.ipynb /
+// nb4_correlacion.ipynb, y su variante nb3_lite/nb4_lite para la ruta de
+// interpretacion) via DeepSeek (deepseek-chat). La clave de DeepSeek vive
+// solo aca (Supabase secret DEEPSEEK_API_KEY) -- nunca en el notebook,
+// igual que `submissions` nunca expuso una clave con alcance real (solo el
+// anon key, restringido por RLS).
 //
 // Contrato: POST {dni, notebook, curso, reflexion_id, student_text, grado}
 //           -> {score, comment, max_pts}  |  {error: "..."} (4xx/5xx)
 //
-// El caller (autograder_nb3_semana3.py) NO debe interpretar un error como
-// "el alumno saco 0" -- debe reintentar/pedir de nuevo, nunca calificar en
-// base a un fallo de esta funcion.
+// El caller (autograder_nb3.py / autograder_nb4.py / *_lite.py) NO debe
+// interpretar un error como "el alumno saco 0" -- debe reintentar/pedir de
+// nuevo, nunca calificar en base a un fallo de esta funcion.
+//
+// 2026-08-21 (diagnostico en vivo, SOFIA/ATLAS): EXPECTED_NOTEBOOK era un
+// string unico hardcodeado a "nb3_semana3" -- el notebook_id de ANTES del
+// rename explicito del usuario a "nb3"/"nb4" y de la reestructuracion que
+// agrego Seccion C + Mini-Proyecto. Cualquier request desde los notebooks
+// actuales (nb3, nb4, y la ruta nb3_lite/nb4_lite que subclasea los
+// autograders principales) recibia 400 unexpected_notebook_or_curso de
+// inmediato, y el notebook lo mostraba como "problema de conexion" -- no
+// era un fallo de red, era este allowlist desactualizado. Corregido a un
+// Set con los cuatro notebook_id validos actuales. Recordatorio para quien
+// agregue un notebook nuevo que reuse este patron: sumarlo aca tambien, no
+// asumir que el string por defecto alcanza.
 
 const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const EXPECTED_NOTEBOOK = "nb3_semana3";
+const EXPECTED_NOTEBOOKS = new Set(["nb3", "nb4", "nb3_lite", "nb4_lite"]);
 const EXPECTED_CURSO = "STAT_2026";
 
 type ReflexionSpec = {
@@ -30,7 +43,79 @@ type ReflexionSpec = {
 // Preguntas, valores reales (verificados contra 2019_es.csv, nunca
 // estimados -- misma disciplina que el resto del notebook) y criterio de
 // calificacion por celda. Orden = orden de aparicion en el notebook.
+//
+// 2026-08-21: ronda1/concepto (nb3) y subgrupos/interpretacion/metodologica
+// (nb4) son nuevas -- agregadas cuando el notebook se reestructuro para
+// fundir grafica+calculo en un solo ejercicio y agregar Seccion C +
+// Mini-Proyecto (ver WORKFORCE_HANDOFF.md Done log 2026-08-20/21). a1/a2/
+// guiado/corrupcion/esperanza/ronda4/ronda5/explora/causacion quedan de la
+// version anterior (Seccion A/B separadas) -- ya no las envia ningun
+// notebook actual, se dejan sin usar en vez de borrarlas por si algo las
+// referencia todavia.
 const GRADING_NOTES: Record<string, ReflexionSpec> = {
+  ronda1: {
+    question:
+      'En una frase: ¿tu ojo acerto en fuerza y direccion para "Percepción de corrupción", o te sorprendio algo del resultado?',
+    grounding:
+      "r real (Percepción de corrupción vs Puntaje) = 0.386 -- relacion positiva pero debil-a-moderada. A diferencia de la version anterior de esta celda, aqui el estudiante YA calculo el numero (el ejercicio funde grafica+calculo en un solo paso), asi que puede referirse a el directamente.",
+    grading_notes:
+      "Credito si compara su prediccion (celda PREDICE anterior) contra lo que realmente encontro -- fuerza y/o direccion -- de forma especifica, no generica. Sin credito si esta vacia, copia la pregunta, o no hace ninguna comparacion real.",
+    max_pts: 5,
+  },
+  concepto: {
+    question:
+      'En 2-3 oraciones, sin usar ningun par de columnas como ejemplo: ¿que te dice el coeficiente de correlacion, y que es lo que NUNCA te dice por si solo?',
+    grounding:
+      "Pregunta puramente conceptual -- no requiere ningun dato del dataset. Respuesta esperada cubre dos mitades: (1) que SI resume (fuerza y direccion de una relacion lineal) y (2) que NUNCA prueba por si solo (causalidad).",
+    grading_notes:
+      "Credito completo solo si cubre ambas mitades (que mide + que nunca prueba). Penaliza si usa un ejemplo de columnas del dataset (la instruccion pide evitarlo explicitamente), si solo cubre una mitad, o si la respuesta es vacia/generica.",
+    max_pts: 5,
+  },
+  pbi_apoyo: {
+    question:
+      '"PBI per cápita" te volvió a dar un r fuerte (~0.75), esta vez con "Apoyo social" -- la segunda vez hoy que el PBI produce una relación fuerte con una variable distinta. En 1-2 oraciones: ¿qué tienen en común estas dos relaciones fuertes, y te parece razonable que el PBI de un país se relacione consistentemente fuerte con variables tan distintas entre sí?',
+    grounding:
+      "r real (PBI per cápita vs Apoyo social) = 0.755 -- fuerte y positivo, la segunda relación más fuerte entre las seis variables (después de PBI vs Esperanza de vida saludable, r=0.835, visto en Ronda 3). Ambas comparten el PBI como variable común: países con mayor producción económica tienden a tener tanto mejor esperanza de vida saludable como mayor apoyo social percibido -- consistente con la idea de que la riqueza de un país financia tanto salud pública como redes de protección social, sin que eso pruebe una relación causal directa.",
+    grading_notes:
+      "Credito si identifica el PBI como el factor común entre ambas relaciones fuertes (no solo repite que ambas son fuertes) y ofrece una explicación razonable (ej. más recursos/infraestructura). Credito parcial si solo dice que 'tiene sentido' sin explicar por qué. Sin credito si esta vacia/generica o si afirma que el PBI causa directamente estas variables sin ningun matiz.",
+    max_pts: 5,
+  },
+  generosidad_corrupcion: {
+    question:
+      'Hasta ahora, "Generosidad" te dio un r cercano a 0 con casi todo lo que probaste hoy (r≈0.08 con "Puntaje" en la Apertura). Pero con "Percepción de corrupción" el r ya no es tan chico. En 1-2 oraciones: ¿te parece razonable que Generosidad casi no se relacione con nada, excepto con esta variable en particular? ¿Qué explicación se te ocurre?',
+    grounding:
+      "r real (Generosidad vs Percepción de corrupción) = 0.327 -- débil a moderado, notablemente más alto que Generosidad vs Puntaje (0.076), Generosidad vs PBI (-0.080), Generosidad vs Apoyo social (-0.048) o Generosidad vs Esperanza de vida saludable (-0.030), todas prácticamente nulas. Generosidad es, de las seis variables, la que menos se relaciona con el resto -- excepto con esta.",
+    grading_notes:
+      "Credito si reconoce el contraste (Generosidad casi no se relaciona con nada más, pero aquí sí hay algo, aunque moderado -- no fuerte) y propone una explicación plausible (ej. sociedades con menos corrupción percibida generan más confianza, lo que facilita donar/ayudar). Sin credito si no reconoce el contraste, describe el r como fuerte, o la respuesta esta vacia/generica.",
+    max_pts: 5,
+  },
+  subgrupos: {
+    question:
+      'El r general de "Generosidad" vs. "Puntaje" era casi 0. Pero acabas de ver que dentro de Europa es positivo, y dentro de América es negativo. En 2-3 oraciones: ¿que te dice esto sobre confiar en "el patron general" de todo un dataset sin mirar los subgrupos?',
+    grounding:
+      "r real: Generosidad vs Puntaje general = 0.076 (casi nulo); dentro de Europa = 0.530 (positivo, moderado); dentro de América = -0.211 (negativo). El patron general esconde signos opuestos por subgrupo, confirmado contra el dataset real.",
+    grading_notes:
+      "Credito si articula que el patron general (todos los paises juntos) puede esconder relaciones distintas u opuestas dentro de cada subgrupo -- no es sustituto de mirar los subgrupos. Sin credito si concluye que el patron general siempre es confiable, o si la respuesta esta vacia/generica.",
+    max_pts: 5,
+  },
+  interpretacion: {
+    question:
+      'Mira el resultado que imprimiste arriba (tus dos variables y tu r). Sin usar la palabra "causa" ni ninguna variante: ¿que te dice ese r sobre la relacion entre tus dos variables? ¿Y que es lo que NO te dice?',
+    grounding:
+      "Reflexion sobre el PAR PROPIO que el estudiante eligio en el mini-proyecto -- no hay un r fijo esperado aqui, cada estudiante trabaja con un par y numero distintos. Evalua consistencia interna (su interpretacion coincide con la fuerza/direccion que ellos mismos reportaron), no un valor exacto.",
+    grading_notes:
+      "Credito completo si interpreta fuerza y direccion de su PROPIO r de forma coherente con lo que reportaron, evita activamente lenguaje causal, y menciona explicitamente algo que el numero NO prueba. Penaliza si usa 'causa'/equivalente directo, si no menciona ninguna limitacion, o si la respuesta es vacia/generica.",
+    max_pts: 5,
+  },
+  metodologica: {
+    question:
+      'Miraste una matriz con muchisimos pares posibles y elegiste uno. Si hubieras probado 20 pares al azar, es esperable que alguno salga con un r alto solo por casualidad. En 2-3 oraciones: ¿por que no deberias confiar automaticamente en "el par con el r mas alto que encontre" solo porque salio alto?',
+    grounding:
+      "Pregunta conceptual sobre el riesgo de correlacion espuria/comparaciones multiples -- no depende del par especifico que el estudiante eligio, evalua si entiende el riesgo metodologico en general.",
+    grading_notes:
+      "Credito completo si articula que explorar muchos pares aumenta la probabilidad de encontrar un r alto por puro azar (razonamiento de comparaciones multiples), no solo repite 'correlacion no es causalidad'. Credito parcial si solo dice que hace falta una hipotesis/razon sin explicar el mecanismo de azar. Sin credito si esta vacia o no aborda el riesgo en absoluto.",
+    max_pts: 5,
+  },
   a1: {
     question:
       'En una frase: ¿tu ojo acerto en fuerza y direccion para "Percepción de corrupción", o te sorprendio algo del scatter que acabas de construir?',
@@ -169,7 +254,7 @@ Deno.serve(async (req: Request) => {
 
   const { dni, notebook, curso, reflexion_id, student_text, grado } = body;
 
-  if (notebook !== EXPECTED_NOTEBOOK || curso !== EXPECTED_CURSO) {
+  if (!EXPECTED_NOTEBOOKS.has(notebook ?? "") || curso !== EXPECTED_CURSO) {
     return jsonResponse({ error: "unexpected_notebook_or_curso" }, 400);
   }
 

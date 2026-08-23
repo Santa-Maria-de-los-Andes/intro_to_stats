@@ -7,23 +7,42 @@ completo autograder_nb3_semana3.py (obsoleto, _CORE_MAX=264, check_* no
 calzan con el notebook reestructurado). No es un parche del archivo viejo:
 reescrito desde cero contra nb3_correlacion.ipynb.
 
-Cubre: check_t1-t7, check_ex1-ex4, check_mini_a, check_reflexion_ronda1,
-check_reflexion_ronda3, check_reflexion_concepto, resumen()
+Cubre: check_t1-t11, check_ex1-ex6, check_mini_a, check_reflexion_ronda1,
+check_reflexion_ronda3, check_reflexion_concepto, check_reflexion_pbi_apoyo,
+check_reflexion_generosidad_corrupcion, resumen()
 Dataset: 2019_es.csv (156 filas x 10 columnas, World Happiness Report)
 Companion file (Semana 4): autograder_nb4.py
 
 Notas de scoring:
   t1-t7 (Teoria Desbloqueada + t6 post-demo + t7 pre-Ronda3) valen 5 pts c/u = 35.
-  ex1-ex4 (las 4 Rondas, grafica+calcula fusionados en un solo ejercicio,
-  20 pts c/u tal como aparece impreso en el markdown del notebook -- no son
-  negociables aqui, cambiar el numero rompería la consistencia
+  ex1-ex4 (las 4 Rondas originales, grafica+calcula fusionados en un solo
+  ejercicio, 20 pts c/u tal como aparece impreso en el markdown del notebook
+  -- no son negociables aqui, cambiar el numero rompería la consistencia
   notebook<->autograder) = 80.
   3 celdas 💭 Reflexiona (ronda1, ronda3, concepto) valen 5 pts c/u = 15,
   calificadas por IA (ver mas abajo). Bajaron de 7 a 3 en este punto del
   archivo viejo -- ver WORKFORCE_HANDOFF.md Done log 2026-08-20 para el
   porque (el cuello de botella real era el round-trip de IA por reflexion,
   no la dificultad de los ejercicios).
-  _CORE_MAX = 35 (t1-7) + 80 (ex1-4) + 15 (reflexion x3) = 130.
+
+  2026-08-21 -- ampliacion pedida por el usuario ("nb3 es muy corto"): dos
+  Rondas nuevas (ex5 PBI vs Apoyo social, ex6 Generosidad vs Percepcion de
+  corrupcion -- pares reales, verificados contra 2019_es.csv, nunca usados
+  antes en nb3 ni en nb4) con su propia reflexion IA cada una (pbi_apoyo,
+  generosidad_corrupcion), y un "Quiz de Cierre" de 4 preguntas de opcion
+  multiple (t8-t11): 1 pregunta de recordar el r mas fuerte del dia + 3
+  escenarios NUEVOS (helado/ahogamientos, zapatos/lectura, pares al azar)
+  que no usan el dataset de felicidad -- ponen a prueba si el concepto de
+  correlacion-no-es-causalidad se transfiere mas alla de este dataset
+  especifico. t8-t11 son numeracion LOCAL a nb3 (no continuan la convencion
+  "nb4 sigue desde donde nb3 termina" documentada en build_nb3.py -- nb4 ya
+  tiene su propio t8-t10 en su propio archivo, sin colision en tiempo de
+  ejecucion; ver la nota en `_TEORIA` mas abajo y ATLAS_spec_nb3_nb4.md).
+  ex5-ex6 tienen la misma nota: nb4 ya usa esos numeros para sus propios
+  ejercicios, en su propio archivo -- cero colision real, solo una
+  coincidencia de nombre entre dos notebooks distintos.
+
+  _CORE_MAX = 55 (t1-11) + 120 (ex1-6) + 25 (reflexion x5) = 200.
   Sin bonus/reto -- este notebook no declara check_retoN.
 
 Calificacion IA de 💭 Reflexiona: cada celda usa un widget HTML (boton -> JS
@@ -62,7 +81,11 @@ _DEADLINE_UTC   = _dt.datetime(2026, 8, 31, 4, 59, 0, tzinfo=_dt.timezone.utc)
 DEADLINE_PASSED = _dt.datetime.now(_dt.timezone.utc) >= _DEADLINE_UTC
 
 # ─── Scoring ─────────────────────────────────────────────────
-_CORE_MAX = 130   # 35 (t1-7) + 80 (ex1-4) + 15 (reflexion x3)
+# 200 = 55 (t1-11) + 120 (ex1-6) + 25 (reflexion x5)
+# 2026-08-21: extendido de 130 a 200 -- Ronda 5/6 (ex5/ex6 + sus reflexiones
+# pbi_apoyo/generosidad_corrupcion) y el Quiz de Cierre (t8-11) son
+# contenido nuevo, ver ATLAS_spec_nb3_nb4.md.
+_CORE_MAX = 200
 
 # ─── Reflexion (calificada por IA vía Supabase Edge Function) ─
 _REFLEXION_PTS       = 5
@@ -459,11 +482,11 @@ async function agRegister() {{
         if any(e > 0 for e, _ in self._scores.values()) and self._unlock("primer_rayo"):
             unlocked.append(("☀️ Primer Rayo de Sol — ¡Tu primer punto de felicidad conquistado!", "#ff9e2c", "Chispa"))
 
-        # Cazador de Patrones — ex1-4 perfectos (las 4 Rondas de Semana 3)
-        ex_rondas = ["ex1", "ex2", "ex3", "ex4"]
+        # Cazador de Patrones — ex1-6 perfectos (las 6 Rondas de Semana 3)
+        ex_rondas = ["ex1", "ex2", "ex3", "ex4", "ex5", "ex6"]
         if (all(k in self._scores and self._scores[k][0] == self._scores[k][1] for k in ex_rondas)
                 and self._unlock("cazador_patrones")):
-            unlocked.append(("🗺️ Cazador de Patrones — Tus cuatro rondas de Semana 3, perfectas", "#4aa8d8", "Rayo"))
+            unlocked.append(("🗺️ Cazador de Patrones — Tus seis rondas de Semana 3, perfectas", "#4aa8d8", "Rayo"))
 
         # Pensador Conceptual — reflexion de concepto con nota perfecta (5/5)
         if (self._scores.get("refl_concepto", (0, 1))[0] == self._scores.get("refl_concepto", (0, 1))[1]
@@ -769,6 +792,8 @@ async function agRegister() {{
   border:2px solid {c};border-radius:6px;max-width:840px;margin:14px 0;
   box-shadow:0 0 55px {c}44,0 0 110px {c}11,0 12px 50px rgba(0,0,0,.97);">
 
+  <div style="position:absolute;top:14px;left:14px;z-index:16;">{self._logo_tag_sm}</div>
+
   <div style="position:absolute;inset:0;background:{c};border-radius:4px;
     animation:{uid}-flash .55s ease-out forwards;pointer-events:none;z-index:20;"></div>
 
@@ -858,8 +883,10 @@ async function agRegister() {{
             f'<div style="background:#12100a;border:2px solid {color};border-radius:4px;'
             f'max-width:840px;margin:10px 0;padding:18px 20px;'
             f'box-shadow:0 0 20px {color}22,0 4px 16px rgba(0,0,0,.6);">'
-            f'<div style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
-            f'color:{color};letter-spacing:2px;margin-bottom:16px;">🌻 {title}</div>'
+            f'<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">'
+            f'{self._logo_tag_sm}'
+            f'<span style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
+            f'color:{color};letter-spacing:2px;">🌻 {title}</span></div>'
             f'{rows}'
             f'<div style="margin-top:14px;padding-top:10px;border-top:1px solid {color}30;'
             f'display:flex;justify-content:space-between;align-items:center;">'
@@ -911,20 +938,24 @@ async function agRegister() {{
                 pass
             if not silent:
                 display(HTML(
-                    f'<div style="font-family:\'Press Start 2P\',monospace;font-size:8px;'
+                    f'<div style="display:flex;align-items:center;gap:8px;'
+                    f'font-family:\'Press Start 2P\',monospace;font-size:8px;'
                     f'color:#4caf50;background:#020d02;border:1px solid #4caf50;'
                     f'border-radius:3px;padding:10px 16px;max-width:840px;margin-top:6px;">'
-                    f'✅ SCORE ENVIADO — {self._nombre_real} · DNI {self._dni}'
+                    f'{self._logo_tag_sm}'
+                    f'<span>✅ SCORE ENVIADO — {self._nombre_real} · DNI {self._dni}'
                     f'<br><span style="color:#4aa8d8;font-size:7px;">'
-                    f'📊 Calificación actualizada en la base de datos</span></div>'
+                    f'📊 Calificación actualizada en la base de datos</span></span></div>'
                 ))
         except Exception as _ex:
             if not silent:
                 display(HTML(
-                    f'<div style="font-family:\'Press Start 2P\',monospace;font-size:7px;'
+                    f'<div style="display:flex;align-items:center;gap:8px;'
+                    f'font-family:\'Press Start 2P\',monospace;font-size:7px;'
                     f'color:#ff5d5d;background:#1a0005;border:1px solid #ff5d5d;'
                     f'border-radius:3px;padding:10px 16px;max-width:840px;margin-top:6px;">'
-                    f'⚠️ Leaderboard no disponible: {_ex}</div>'
+                    f'{self._logo_tag_sm}'
+                    f'<span>⚠️ Leaderboard no disponible: {_ex}</span></div>'
                 ))
 
     # ═══════════════════════════════════════════════════════════
@@ -1018,6 +1049,79 @@ async function agRegister() {{
                  "como vas a hacer ahora."),
             pts=5,
         ),
+        # ── Quiz de Cierre (t8-t11) — 2026-08-21, ver ATLAS_spec_nb3_nb4.md.
+        # Numeracion LOCAL a nb3: no continua la convencion "nb4 sigue desde
+        # donde nb3 termina" (nb4 ya tiene su propio t8-t10 en su propio
+        # archivo/clase, sin relacion en tiempo de ejecucion con este). Un
+        # humano leyendo ambos specs lado a lado vera "t8" dos veces con
+        # significados distintos -- intencional, documentado, no un bug.
+        8: dict(
+            title="Quiz de Cierre 1 — La correlación más fuerte de hoy",
+            q=("De todos los pares que calculaste hoy (Rondas 1 a 6), ¿cuál tuvo el r "
+               "más alto -- la relación más fuerte?"),
+            opts={"a": "Percepción de corrupción vs. Puntaje (Ronda 1)",
+                  "b": "PBI per cápita vs. Esperanza de vida saludable (Ronda 3)",
+                  "c": "Generosidad vs. Percepción de corrupción (Ronda 6)",
+                  "d": "Apoyo social vs. Esperanza de vida saludable (Ronda 4)"},
+            correct="b",
+            why=("PBI per cápita vs. Esperanza de vida saludable dio r ≈ 0.835 en la "
+                 "Ronda 3 -- el r más alto de los seis pares que calculaste hoy."),
+            pts=5,
+        ),
+        9: dict(
+            title="Quiz de Cierre 2 — Un ejemplo nuevo: helado y ahogamientos",
+            q=("En una ciudad, las ventas de helado y el número de personas que se "
+               "ahogan en la playa tienen un r muy alto, cercano a 0.9, medido mes a "
+               "mes durante todo el año. ¿Cuál es la mejor explicación?"),
+            opts={"a": "Comer helado le da a la gente ganas de nadar en aguas peligrosas",
+                  "b": "Ahogarse hace que la gente compre más helado después",
+                  "c": "Una tercera variable -- el calor del verano -- hace subir tanto "
+                       "las ventas de helado como la cantidad de gente que va a nadar, "
+                       "sin que una cause la otra directamente",
+                  "d": "El r no significa nada aquí porque son dos actividades sin relación"},
+            correct="c",
+            why=("Es un ejemplo clásico de variable de confusión: el calor del verano "
+                 "sube ambas variables a la vez. Un r alto entre helado y ahogamientos "
+                 "no prueba que una cause la otra -- la misma regla que viste hoy con "
+                 "PBI y Puntaje."),
+            pts=5,
+        ),
+        10: dict(
+            title="Quiz de Cierre 3 — Otro ejemplo nuevo: zapatos y lectura",
+            q=("En un grupo de niños de primaria de distintas edades, el tamaño de "
+               "zapato y la habilidad de lectura tienen un r ≈ 0.65 -- niños con "
+               "zapatos más grandes tienden a leer mejor. ¿Qué explica mejor esta "
+               "relación?"),
+            opts={"a": "Tener pies más grandes ayuda al cerebro a leer mejor",
+                  "b": "Leer bien hace que crezcan más los pies",
+                  "c": "La edad es la variable de fondo: los niños mayores tienen pies "
+                       "más grandes Y llevan más años aprendiendo a leer -- ninguna de "
+                       "las dos causa la otra directamente",
+                  "d": "Un r de 0.65 es demasiado bajo para significar algo"},
+            correct="c",
+            why=("Otra variable de confusión clásica: la edad explica ambas cosas a la "
+                 "vez. El tamaño del zapato no tiene ningún efecto sobre la lectura -- "
+                 "solo comparten una causa común."),
+            pts=5,
+        ),
+        11: dict(
+            title="Quiz de Cierre 4 — Probar muchos pares al azar",
+            q=("Un estudiante prueba la correlación entre 30 pares de variables al "
+               "azar en una encuesta enorme (número de zapato preferido, día de la "
+               "semana en que nació, color favorito...) y encuentra que uno de esos "
+               "30 pares da r ≈ 0.61. ¿Qué es lo más razonable pensar?"),
+            opts={"a": "Como el r es alto, encontré una relación real e importante",
+                  "b": "Probar muchos pares al azar aumenta la probabilidad de que al "
+                       "menos uno salga con un r alto solo por casualidad -- conviene "
+                       "desconfiar de este resultado hasta confirmarlo con datos nuevos",
+                  "c": "r nunca puede salir alto por casualidad, siempre significa algo real",
+                  "d": "Hay que usar ese par sin dudar porque el número es alto"},
+            correct="b",
+            why=("Explorar muchos pares sube la probabilidad de que alguno salga alto "
+                 "por puro azar -- el mismo riesgo por el que un r alto encontrado así "
+                 "necesita más evidencia antes de confiar en él."),
+            pts=5,
+        ),
     }
 
     def _show_teoria_locked(self, n):
@@ -1032,9 +1136,11 @@ async function agRegister() {{
             f'<div style="max-width:840px;margin:10px 0;background:#12100a;'
             f'border:2px solid {color};border-radius:4px;padding:14px 18px;'
             f'font-family:\'Segoe UI\',Roboto,sans-serif;">'
-            f'<div style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
-            f'color:#a8a08a;letter-spacing:1px;margin-bottom:8px;">'
-            f'🔒 {spec["title"]} — YA RESPONDIDA</div>'
+            f'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+            f'{self._logo_tag_sm}'
+            f'<span style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
+            f'color:#a8a08a;letter-spacing:1px;">'
+            f'🔒 {spec["title"]} — YA RESPONDIDA</span></div>'
             f'<div style="color:{color};font-size:13px;">{estado}</div>'
             f'<div style="color:#a8a08a;font-size:12px;margin-top:6px;">'
             f'Esta pregunta admite una sola respuesta. Volver a ejecutar la celda no '
@@ -1088,7 +1194,9 @@ async function agRegister() {{
 </style>
 <div id="{uid}-wrap" style="background:#12100a;border:2px solid #4aa8d8;border-radius:4px;
   max-width:840px;margin:10px 0;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.7);">
-  <div style="background:#4aa8d818;border-bottom:1px solid #4aa8d840;padding:10px 16px;">
+  <div style="background:#4aa8d818;border-bottom:1px solid #4aa8d840;padding:10px 16px;
+    display:flex;align-items:center;gap:8px;">
+    {self._logo_tag_sm}
     <span style="font-family:'Press Start 2P',monospace;font-size:9px;color:#4aa8d8;
       letter-spacing:1px;">❓ {spec['title']}</span>
   </div>
@@ -1125,6 +1233,10 @@ async function {uid}_pick(letter) {{
     def check_t5(self): return self._ask_teoria(5)
     def check_t6(self): return self._ask_teoria(6)
     def check_t7(self): return self._ask_teoria(7)
+    def check_t8(self): return self._ask_teoria(8)
+    def check_t9(self): return self._ask_teoria(9)
+    def check_t10(self): return self._ask_teoria(10)
+    def check_t11(self): return self._ask_teoria(11)
 
     # ═══════════════════════════════════════════════════════════
     # REFLEXIÓN — 💭 calificada por IA (DeepSeek vía Supabase Edge Function)
@@ -1173,9 +1285,11 @@ async function {uid}_pick(letter) {{
             f'<div style="max-width:840px;margin:10px 0;background:#12100a;'
             f'border:2px solid {color};border-radius:4px;padding:14px 18px;'
             f'font-family:\'Segoe UI\',Roboto,sans-serif;">'
-            f'<div style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
-            f'color:#a8a08a;letter-spacing:1px;margin-bottom:8px;">'
-            f'🔒 💭 REFLEXIONA — YA RESPONDIDA</div>'
+            f'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+            f'{self._logo_tag_sm}'
+            f'<span style="font-family:\'Press Start 2P\',monospace;font-size:9px;'
+            f'color:#a8a08a;letter-spacing:1px;">'
+            f'🔒 💭 REFLEXIONA — YA RESPONDIDA</span></div>'
             f'<div style="color:{color};font-size:13px;">'
             f'Ya enviaste tu reflexión ({pts}/{max_pts} pts)</div>'
             f'<div style="color:#a8a08a;font-size:12px;margin-top:6px;">'
@@ -1231,7 +1345,9 @@ async function {uid}_pick(letter) {{
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <div id="{uid}-wrap" style="background:#12100a;border:2px solid #4aa8d8;border-radius:4px;
   max-width:840px;margin:10px 0;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.7);">
-  <div style="background:#4aa8d818;border-bottom:1px solid #4aa8d840;padding:10px 16px;">
+  <div style="background:#4aa8d818;border-bottom:1px solid #4aa8d840;padding:10px 16px;
+    display:flex;align-items:center;gap:8px;">
+    {self._logo_tag_sm}
     <span style="font-family:'Press Start 2P',monospace;font-size:9px;color:#4aa8d8;
       letter-spacing:1px;">💭 REFLEXIONA</span>
   </div>
@@ -1373,8 +1489,11 @@ async function {uid}_submit() {{
   font-family:'Segoe UI',Roboto,sans-serif;">
   <div style="background:{border_color}18;border-bottom:1px solid {border_color}40;
     padding:9px 16px;display:flex;justify-content:space-between;align-items:center;">
-    <span style="font-family:'Press Start 2P',monospace;font-size:9px;
-      color:{border_color};letter-spacing:1px;">💭 REFLEXIÓN CALIFICADA</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      {self._logo_tag_sm}
+      <span style="font-family:'Press Start 2P',monospace;font-size:9px;
+        color:{border_color};letter-spacing:1px;">💭 REFLEXIÓN CALIFICADA</span>
+    </div>
     <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:#ff9e2c;
       background:rgba(255,158,44,.1);border:1px solid rgba(255,158,44,.4);
       padding:3px 8px;border-radius:2px;">MAX {max_pts} XP</div>
@@ -1410,6 +1529,22 @@ async function {uid}_submit() {{
             'En 2-3 oraciones, sin usar ningun par de columnas como ejemplo: '
             '¿que te dice el coeficiente de correlacion, y que es lo que '
             'NUNCA te dice por si solo?')
+
+    def check_reflexion_pbi_apoyo(self):
+        return self._ask_reflexion("pbi_apoyo",
+            '"PBI per cápita" te volvio a dar un r fuerte, esta vez con '
+            '"Apoyo social". En 1-2 oraciones: ¿que tienen en comun estas dos '
+            'relaciones fuertes que calculaste hoy, y te parece razonable que '
+            'el PBI se relacione consistentemente fuerte con variables tan '
+            'distintas?')
+
+    def check_reflexion_generosidad_corrupcion(self):
+        return self._ask_reflexion("generosidad_corrupcion",
+            'Generosidad te dio un r cercano a 0 con casi todo lo que '
+            'probaste hoy -- pero aqui ya no es tan chico. En 1-2 oraciones: '
+            '¿te parece razonable que Generosidad casi no se relacione con '
+            'nada mas, excepto con esta variable? ¿Que explicacion se te '
+            'ocurre?')
 
     # ═══════════════════════════════════════════════════════════
     # GRAFICA Y CALCULA — check_ex1-ex4 (scatter + .corr() combinados)
@@ -1465,6 +1600,14 @@ async function {uid}_submit() {{
         """Ex4 — Ronda 4: Apoyo social vs. Esperanza de vida saludable (20 pts)"""
         return self._check_ronda("ex4", 4, _COL_APOYO, _COL_ESPERANZA, 0.7190094590308561)
 
+    def check_ex5(self):
+        """Ex5 — Ronda 5: PBI per cápita vs. Apoyo social (20 pts)"""
+        return self._check_ronda("ex5", 5, _COL_PBI, _COL_APOYO, 0.7549057272454567)
+
+    def check_ex6(self):
+        """Ex6 — Ronda 6: Generosidad vs. Percepción de corrupción (20 pts)"""
+        return self._check_ronda("ex6", 6, _COL_GENEROSIDAD, _COL_CORRUPCION, 0.32653754340500746)
+
     # ═══════════════════════════════════════════════════════════
     # CHECKPOINT — fin de la Semana 3
     # ═══════════════════════════════════════════════════════════
@@ -1484,6 +1627,12 @@ async function {uid}_submit() {{
             "ex2": ("Ejercicio 2 – Ronda 2 (esperanza de vida)", 20),
             "ex3": ("Ejercicio 3 – Ronda 3 (PBI vs. esperanza de vida)", 20),
             "ex4": ("Ejercicio 4 – Ronda 4 (apoyo social vs. esperanza de vida)", 20),
+            "ex5": ("Ejercicio 5 – Ronda 5 (PBI vs. apoyo social)", 20),
+            "ex6": ("Ejercicio 6 – Ronda 6 (generosidad vs. corrupción)", 20),
+            "t8": ("Quiz de Cierre 1 — la correlación más fuerte de hoy", 5),
+            "t9": ("Quiz de Cierre 2 — helado y ahogamientos", 5),
+            "t10": ("Quiz de Cierre 3 — zapatos y lectura", 5),
+            "t11": ("Quiz de Cierre 4 — probar muchos pares al azar", 5),
         }
         self._render_checkpoint("CHECKPOINT — FIN DE LA SEMANA 3", seccion, "#4aa8d8")
 

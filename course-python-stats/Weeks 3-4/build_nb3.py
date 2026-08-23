@@ -35,13 +35,27 @@ Cubre Apertura + Teoria Desbloqueada + Grafica y Calcula (fusion de las
 Secciones A/B originales), segun la reestructuracion 2026-08-20 documentada
 en WORKFORCE_HANDOFF.md (resuelve ticket #13) y WORKFORCE_CONTRACT.md SS2.
 
+2026-08-21: ampliado a pedido del usuario tras revisar la clase ("nb3 es
+muy corto") -- Ronda 5 (PBI vs. Apoyo social) y Ronda 6 (Generosidad vs.
+Percepcion de corrupcion) se agregaron despues de Ronda 4, cada una con su
+propia celda 💭 Reflexiona; y un "Quiz de Cierre" de 4 preguntas de opcion
+multiple (t8-t11) se agrego antes del checkpoint -- 1 pregunta de recordar
+el r mas fuerte del dia + 3 escenarios nuevos, sin relacion con el dataset
+de felicidad, que ponen a prueba si el concepto de correlacion-no-es-
+causalidad se transfiere a contextos distintos. Ver autograder_nb3.py
+docstring para el detalle de puntaje y ATLAS_spec_nb3_nb4.md para la nota
+sobre por que t8-t11/ex5-ex6 son numeracion local a este archivo (no
+continuan la convencion "nb4 sigue desde donde nb3 termina").
+
 Fuente de contenido:
   - Teoria_Semanas3-4_Mision2_Correlacion.md (SS0 Apertura, SS1 Teoria
     Desbloqueada, SS2 Seccion A / Seccion B)
   - 2019_es.csv (World Happiness Report 2019, 156 filas x 10 columnas, SIN
     valores nulos) -- todos los numeros de este notebook se recalcularon
     directamente contra el CSV real 2026-08-20 (ver WORKFORCE_HANDOFF.md
-    Done log de esa fecha para el detalle de validacion).
+    Done log de esa fecha para el detalle de validacion); los pares de la
+    Ronda 5/Ronda 6 y los escenarios del Quiz de Cierre se verificaron de
+    la misma forma el 2026-08-21.
 
 Convenciones: check_tN = una celda, grader.check_tN(); check_exN 🔨
 CONSTRUYE = sin solucion escrita; celdas 🔮 PREDICE = ungraded,
@@ -306,7 +320,7 @@ s3.append(teoria_check("nb3-t6-check", 6))
 s3.append(md("nb3-repeticion-md", """\
 ### 🔁 Practica repetida: mismo patron, distintos pares
 
-Cuatro rondas, mismo patron de siempre (`plt.scatter()` + `.corr()`, ahora
+Seis rondas, mismo patron de siempre (`plt.scatter()` + `.corr()`, ahora
 en un solo ejercicio). No todas las rondas piden reflexion escrita -- las
 que si la piden son las que valen la pena pausar; en las demas, sigue de
 largo apenas veas tu numero.
@@ -446,11 +460,84 @@ s3.append(code("nb3-ronda4-code", """\
 """))
 s3.append(code("nb3-ronda4-check", "grader.check_ex4()"))
 
+# Ronda 5 -- reflexiona (2026-08-21: notebook ampliado, ver build_nb3.py
+# docstring / autograder_nb3.py docstring / ATLAS_spec_nb3_nb4.md)
+s3.append(md("nb3-ronda5-md", """\
+#### Ronda 5 -- PBI per cápita vs. Apoyo social
+
+`PBI per cápita` ya te dio el r más alto de la Ronda 3 (con `Esperanza de
+vida saludable`). Repite el patron con otra variable distinta -- otra vez,
+ninguna de las dos es `Puntaje`.
+"""))
+s3.append(md("nb3-ronda5-ej-md", """\
+##### ✅ Ejercicio 5 -- Grafica y calcula (20 pts)
+
+🔨 `PBI per cápita` (eje X) vs. `Apoyo social` (eje Y).
+
+Variables que espera el autograder: `x_ex5`, `y_ex5`, `r_ex5`.
+"""))
+s3.append(code("nb3-ronda5-code", """\
+# 🔨 CONSTRUYE
+
+# ============================
+#      Tu codigo aqui
+# ============================
+
+
+"""))
+s3.append(code("nb3-ronda5-check", "grader.check_ex5()"))
+
+s3.append(md("nb3-ronda5-reflexiona-md", """\
+##### 💭 Reflexiona -- Ronda 5 (respuesta abierta -- calificada por IA, +5 XP)
+
+`PBI per cápita` te volvio a dar un r fuerte, esta vez con `Apoyo social`.
+En 1-2 oraciones: ¿que tienen en comun estas dos relaciones fuertes que
+calculaste hoy, y te parece razonable que el PBI se relacione
+consistentemente fuerte con variables tan distintas?
+"""))
+s3.append(reflexion_check("nb3-ronda5-reflexiona-code", "pbi_apoyo"))
+
+# Ronda 6 -- reflexiona
+s3.append(md("nb3-ronda6-md", """\
+#### Ronda 6 -- Generosidad vs. Percepción de corrupción
+
+Hasta ahora, `Generosidad` casi no se relaciono con nada (r≈0.08 con
+`Puntaje` en la Apertura). Prueba si pasa lo mismo con `Percepción de
+corrupción`.
+"""))
+s3.append(md("nb3-ronda6-ej-md", """\
+##### ✅ Ejercicio 6 -- Grafica y calcula (20 pts)
+
+🔨 `Generosidad` (eje X) vs. `Percepción de corrupción` (eje Y).
+
+Variables que espera el autograder: `x_ex6`, `y_ex6`, `r_ex6`.
+"""))
+s3.append(code("nb3-ronda6-code", """\
+# 🔨 CONSTRUYE
+
+# ============================
+#      Tu codigo aqui
+# ============================
+
+
+"""))
+s3.append(code("nb3-ronda6-check", "grader.check_ex6()"))
+
+s3.append(md("nb3-ronda6-reflexiona-md", """\
+##### 💭 Reflexiona -- Ronda 6 (respuesta abierta -- calificada por IA, +5 XP)
+
+`Generosidad` te dio un r cercano a 0 con casi todo lo que probaste hoy --
+pero aqui ya no es tan chico. En 1-2 oraciones: ¿te parece razonable que
+`Generosidad` casi no se relacione con nada mas, excepto con esta variable?
+¿Que explicacion se te ocurre?
+"""))
+s3.append(reflexion_check("nb3-ronda6-reflexiona-code", "generosidad_corrupcion"))
+
 # Chequeo de concepto -- reflexiona
 s3.append(md("nb3-concepto-md", """\
 ### 🧠 Chequeo de concepto
 
-Ya calculaste `r` seis veces hoy (Apertura + cuatro Rondas + el ejemplo
+Ya calculaste `r` ocho veces hoy (Apertura + seis Rondas + el ejemplo
 guiado). Antes de cerrar la clase, pon el concepto en tus propias palabras
 -- sin usar ningun dataset ni numero especifico.
 """))
@@ -462,6 +549,22 @@ el coeficiente de correlacion, y que es lo que **nunca** te dice por si
 solo?
 """))
 s3.append(reflexion_check("nb3-concepto-reflexiona-code", "concepto"))
+
+# ─── Quiz de Cierre ───────────────────────────────────────────────────────
+s3.append(md("nb3-quiz-header", """\
+---
+## 🧭 Quiz de Cierre
+
+Ya calculaste seis correlaciones reales hoy. Antes de cerrar: una pregunta
+para recordar lo que viste en esta clase, y tres preguntas con ejemplos
+**nuevos** -- para probar si el concepto de correlacion se te quedo mas
+alla del dataset de felicidad.
+"""))
+
+s3.append(teoria_check("nb3-t8-check", 8))
+s3.append(teoria_check("nb3-t9-check", 9))
+s3.append(teoria_check("nb3-t10-check", 10))
+s3.append(teoria_check("nb3-t11-check", 11))
 
 s3.append(code("nb3-checkpoint", """\
 # ✅ CHECKPOINT -- necesitas 80% en esta seccion para continuar
