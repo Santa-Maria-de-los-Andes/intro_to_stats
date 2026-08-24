@@ -66,6 +66,9 @@ The multi-agent team (in the "spawn a Claude agent per role" sense) driving both
 - `autograder_nb2.py` — grader for a *different*, prerequisite programming course (loops/
   conditionals, "God of War" theme, notebook id `nb2`). Not one of the two statistics courses
   above; kept because `COURSE_TEMPLATE.md`'s architecture was reverse-engineered from it.
+- `nb2.html` — public live leaderboard for that course's `nb2` (polls Supabase every 60s),
+  mirroring `course-python-stats/nb2.html`'s engine reskinned to the God of War palette/levels
+  already documented in `WORKFORCE/02_PIXEL.md`.
 
 ## Working on this repo
 

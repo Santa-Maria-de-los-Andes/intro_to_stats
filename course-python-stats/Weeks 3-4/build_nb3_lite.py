@@ -14,6 +14,16 @@ OBSERVA ya resueltas -- mismo codigo de referencia, mismos r reales
 estudiante ejecuta y lee en vez de escribir. Nunca se le pide "codigo mas
 facil" -- se le quita la escritura, no el dato ni el grafico.
 
+2026-08-23: se agrego el mismo "Quiz de Cierre" de 4 preguntas (t8-t11) que
+nb3_correlacion.ipynb recibio el 2026-08-21 -- 1 pregunta de recordar el r
+mas fuerte del dia + 3 escenarios nuevos sin relacion con el dataset. Esta
+ruta NO recibio las Rondas 5/6 (PBI vs. Apoyo social, Generosidad vs.
+Percepcion de corrupcion) que si se agregaron a nb3_correlacion.ipynb ese
+dia -- el usuario pidio especificamente las preguntas de cierre para esta
+ruta, no rondas nuevas. Por eso t8 (que en la version con codigo pregunta
+por "Rondas 1 a 6") esta sobreescrito en autograder_nb3_lite.py para
+preguntar por "Rondas 1 a 4" en su lugar -- ver ese archivo para el detalle.
+
 No hereda nada de build_nb3.py en tiempo de ejecucion (cada build_nbN.py es
 autocontenido, COURSE_TEMPLATE.md SS3) -- el contenido markdown que se
 reusa (Apertura, Teoria Desbloqueada, dataset intro) se copio a mano desde
@@ -412,6 +422,22 @@ el coeficiente de correlacion, y que es lo que **nunca** te dice por si
 solo?
 """))
 s3.append(reflexion_check("nb3l-concepto-reflexiona-code", "concepto"))
+
+# ─── Quiz de Cierre (2026-08-23, ver autograder_nb3_lite.py docstring) ────
+s3.append(md("nb3l-quiz-header", """\
+---
+## 🧭 Quiz de Cierre
+
+Ya viste cuatro correlaciones reales hoy. Antes de cerrar: una pregunta
+para recordar lo que viste en esta clase, y tres preguntas con ejemplos
+**nuevos** -- para probar si el concepto de correlacion se te quedo mas
+alla del dataset de felicidad.
+"""))
+
+s3.append(teoria_check("nb3l-t8-check", 8))
+s3.append(teoria_check("nb3l-t9-check", 9))
+s3.append(teoria_check("nb3l-t10-check", 10))
+s3.append(teoria_check("nb3l-t11-check", 11))
 
 s3.append(code("nb3l-checkpoint", """\
 # ✅ CHECKPOINT -- necesitas 80% en esta seccion para continuar

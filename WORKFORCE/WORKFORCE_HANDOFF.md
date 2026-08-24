@@ -19,6 +19,28 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 
 ## Done Log
 
+- 2026-08-23 — **`reference/legacy-CS1/nb2.html` built** (PIXEL, user-requested via
+  `WORKFORCE/02_PIXEL.md`): public live leaderboard for the prerequisite CS course's God of War
+  notebook (`autograder_nb2.py`, `notebook_id="nb2"`), which had no public leaderboard page
+  before this. Cloned `course-python-stats/nb2.html`'s engine (podium, live ticker, grade
+  filter bar, 60s auto-refresh, `dedup()`-by-best-score, direct `submissions` query) verbatim
+  and reskinned presentation only, using the palette/levels/achievements already documented in
+  `02_PIXEL.md`'s "Established GoW Design Decisions" section — no new design decisions made.
+  `CURSO_ID='CS_2026'`/`NOTEBOOK_ID='nb2'` match `autograder_nb2.py`'s actual POST payload
+  (that script never sends a `curso` field, so its rows fall through to the `submissions`
+  table's `DEFAULT 'CS_2026'` — confirmed against `supabase_schema.sql` before wiring the
+  query, not assumed). Placed next to `autograder_nb2.py` rather than in `course-python-stats/`
+  since this is the prerequisite CS course, not either statistics module — flagged for whoever
+  next touches `reference/legacy-CS1/`'s README description, since that folder was previously
+  documented as reference-only/not live. **Naming disambiguation, not yet a live conflict**:
+  the Statistics module's `supabase_schema.sql` comments reserve `notebook_id='nb2'` for its own
+  Tarea 2 (Correlación), but that content was actually built under `nb3`/`nb4` (Weeks 3-4 Done
+  log, 2026-08-14 and 2026-08-20 entries) — so this CS `nb2` and the Stats module's reserved-
+  but-unused `nb2` id aren't actually colliding in practice today, and the `curso` filter
+  (`CS_2026` vs `STAT_2026`) would prevent a collision even if something did claim it later.
+  Not validated against live Supabase data (no anon key access in this session) — structurally
+  identical to the already-shipped `nb1.html`/`nb2.html` (stats) pages, same query pattern,
+  same RLS assumptions.
 - 2026-08-21 — **Weeks 3–4 "ruta de interpretación" built** (SOFIA, user-requested): a
   parallel track for two inclusion students who struggle with writing code but test
   strong on interpretation — `build_nb3_lite.py`/`build_nb4_lite.py` generate

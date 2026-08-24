@@ -23,7 +23,18 @@ hace `import autograder_nb3` y hereda de su clase Autograder.
 Notas de scoring:
   t1-t7 (idem autograder_nb3.py) = 35 pts.
   3 reflexiones (ronda1, ronda3, concepto; idem autograder_nb3.py) = 15 pts.
-  _CORE_MAX = 50 (35 + 15). Sin check_ex, sin bonus.
+
+  2026-08-23 -- se agrego el "Quiz de Cierre" (t8-t11) que se sumo a
+  autograder_nb3.py el 2026-08-21, mismo pedido del usuario ("agrega las
+  preguntas de cierre tambien a la version lite"). t9-t11 (los tres
+  escenarios nuevos: helado/ahogamientos, zapatos/lectura, pares al azar)
+  no mencionan el dataset en absoluto, asi que se heredan sin cambios. t8
+  SI se sobreescribe: la version base pregunta por "Rondas 1 a 6" e incluye
+  una opcion sobre la Ronda 6 (Generosidad vs. Percepcion de corrupcion),
+  pero esta ruta solo tiene Rondas 1-4 (sin Ronda 5/6, que en nb3_correlacion
+  son ejercicios 🔨 CONSTRUYE que no existen aqui) -- mismo patron que
+  autograder_nb4_lite.py usa para su t11 (`_TEORIA = {**_base..., 8: dict(...)}`).
+  _CORE_MAX = 70 (35 + 15 + 20). Sin check_ex, sin bonus.
 
 NOTEBOOK_ID/_CORE_MAX: se reasignan como atributos del MODULO autograder_nb3
 (no de este archivo) porque cada metodo heredado (_submit_to_supabase,
@@ -47,11 +58,27 @@ archivo), no con imports compartidos en un solo script.
 import autograder_nb3 as _base
 
 _base.NOTEBOOK_ID = "nb3_lite"
-_base._CORE_MAX   = 50   # 35 (t1-7, sin cambios) + 15 (3 reflexiones, sin cambios)
+_base._CORE_MAX   = 70   # 35 (t1-7) + 15 (3 reflexiones) + 20 (Quiz de Cierre t8-11)
 
 
 class Autograder(_base.Autograder):
-    """Misma teoria/reflexion que autograder_nb3.py -- sin check_ex1-4."""
+    """Misma teoria/reflexion que autograder_nb3.py -- sin check_ex1-6."""
+
+    # t8 se reescribe para esta ruta (solo Rondas 1-4, sin Ronda 5/6) --
+    # t9-t11 (los tres escenarios nuevos, sin dataset) se heredan tal cual.
+    _TEORIA = {**_base.Autograder._TEORIA, 8: dict(
+        title="Quiz de Cierre 1 — La correlación más fuerte de hoy",
+        q=("De todos los pares que viste hoy (Rondas 1 a 4), ¿cuál tuvo el r "
+           "más alto -- la relación más fuerte?"),
+        opts={"a": "Percepción de corrupción vs. Puntaje (Ronda 1)",
+              "b": "PBI per cápita vs. Esperanza de vida saludable (Ronda 3)",
+              "c": "Esperanza de vida saludable vs. Puntaje (Ronda 2)",
+              "d": "Apoyo social vs. Esperanza de vida saludable (Ronda 4)"},
+        correct="b",
+        why=("PBI per cápita vs. Esperanza de vida saludable dio r ≈ 0.835 en la "
+             "Ronda 3 -- el r más alto de los pares que viste hoy."),
+        pts=5,
+    )}
 
     # ═══════════════════════════════════════════════════════════
     # CHECKPOINT -- fin de la Semana 3 (solo teoria; sin rondas de codigo)
@@ -68,6 +95,10 @@ class Autograder(_base.Autograder):
             "t5": ("T5 — Correlación no es causalidad", 5),
             "t6": ("T6 — El límite de .corr()", 5),
             "t7": ("T7 — Ronda 3, antes de calcular", 5),
+            "t8": ("Quiz de Cierre 1 — la correlación más fuerte de hoy", 5),
+            "t9": ("Quiz de Cierre 2 — helado y ahogamientos", 5),
+            "t10": ("Quiz de Cierre 3 — zapatos y lectura", 5),
+            "t11": ("Quiz de Cierre 4 — probar muchos pares al azar", 5),
         }
         self._render_checkpoint("CHECKPOINT — FIN DE LA SEMANA 3", seccion, "#4aa8d8")
 

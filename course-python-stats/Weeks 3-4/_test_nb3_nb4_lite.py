@@ -30,8 +30,30 @@ run("nb3_lite / basic instantiation + _CORE_MAX", """
 import autograder_nb3_lite as m
 g = m.Autograder()
 assert m._base.NOTEBOOK_ID == "nb3_lite", m._base.NOTEBOOK_ID
-assert m._base._CORE_MAX == 50, m._base._CORE_MAX
-print("OK NOTEBOOK_ID=nb3_lite _CORE_MAX=50")
+assert m._base._CORE_MAX == 70, m._base._CORE_MAX
+print("OK NOTEBOOK_ID=nb3_lite _CORE_MAX=70")
+""")
+
+run("nb3_lite / t8 (Quiz de Cierre 1) overridden for 4 rounds, not 6", """
+import autograder_nb3_lite as m
+g = m.Autograder()
+assert g._TEORIA[8]["correct"] == "b"
+assert "Rondas 1 a 4" in g._TEORIA[8]["q"], g._TEORIA[8]["q"]
+assert g._TEORIA[8]["q"] != m._base.Autograder._TEORIA[8]["q"], \
+    "t8 must be overridden, not inherited (base version references Ronda 6, which doesn't exist here)"
+g._grade_teoria(8, "b")
+e, p = g._scores["t8"]
+assert (e, p) == (5, 5), (e, p)
+print("OK t8 overridden for lite (Rondas 1-4) -> 5/5")
+""")
+
+run("nb3_lite / t9-t11 (new-scenario quiz) inherited verbatim from base bank", """
+import autograder_nb3_lite as m
+g = m.Autograder()
+for n in (9, 10, 11):
+    assert m._base.Autograder._TEORIA[n]["q"] == g._TEORIA[n]["q"], n
+    assert m._base.Autograder._TEORIA[n]["correct"] == g._TEORIA[n]["correct"], n
+print("OK t9-t11 inherited unchanged from autograder_nb3.py")
 """)
 
 run("nb3_lite / t1 correct answer scores 5", """
@@ -89,8 +111,15 @@ run("nb3_lite / check_mini_a checkpoint renders without KeyError (no ex keys)", 
 import autograder_nb3_lite as m
 g = m.Autograder()
 g._grade_teoria(1, "b")
-g.check_mini_a()  # must not raise even with t2-t7 never answered
+g.check_mini_a()  # must not raise even with t2-t11 never answered
 print("OK checkpoint renders with partial/no scores")
+""")
+
+run("nb3_lite / _CORE_MAX arithmetic matches declared sum of max_pts", """
+import autograder_nb3_lite as m
+declared = 5 * 11 + 5 * 3  # t1-11 (5 ea) + 3 reflexiones (5 ea)
+assert declared == m._base._CORE_MAX, (declared, m._base._CORE_MAX)
+print(f"OK declared max sum ({declared}) == _CORE_MAX ({m._base._CORE_MAX})")
 """)
 
 

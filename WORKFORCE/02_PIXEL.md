@@ -80,7 +80,7 @@ When reviewing a completed notebook or autograder:
 | Notebook | Theme | Status |
 |----------|-------|--------|
 | NB1 (Bimestre 3, Semana 1) | Pokémon — "Liga Pokémon de Datos" | Complete — palette `#0d0d1a` bg / `#ffcb05` gold / `#ee1515` red / `#5a8dee` blue / `#4caf50` green / `#c04adf` purple; levels from Novato de Pueblo Paleta → Campeón de la Liga Pokémon. Theme originated in `autograder_nb1_semana1.py`; `nb1.html` leaderboard was updated 2026-08-08 to match it (previously carried a mismatched generic "Python Quest" sword theme). |
-| NB2 | God of War | Complete — palette `#080010` / `#cc2200` / `#ffd700` / `#4aa8d8` / `#d4c5a9`; levels from Simple Mortal → Fantasma de Esparta |
+| NB2 | God of War | Complete — palette `#080010` / `#cc2200` / `#ffd700` / `#4aa8d8` / `#d4c5a9`; levels from Simple Mortal → Fantasma de Esparta. Public leaderboard built 2026-08-23 at `reference/legacy-CS1/nb2.html`, cloned from `course-python-stats/nb2.html`'s engine and reskinned to this palette/level set. |
 | NB3 | Epidemias (TLOU + WHO) | In progress — visual identity not yet locked |
 | Bimestre 3 (Statistics, wk 1–8) | Not chosen | **Not started — theme brief pending.** `Bimestre3_Statistics_Python_Module_Guide.md` says to "maintain existing themed narrative (GoW/TLOU) as the wrapper" but leaves open whether that means literally continuing the NB3 epidemic storyline, a fresh GoW-family arc, or a per-week mission structure vs. one throughline — that's a Theme Architect decision, not resolved by this polish pass. See `WORKFORCE_HANDOFF.md`. |
 
