@@ -19,6 +19,11 @@ reference/              Prior/prerequisite-course material kept for context, not
 - `Bimestre3_Statistics_Python_Module_Guide.md` — module guide: objectives, week-by-week shape
 - `EPT U3.docx` — official DRE/UGEL unit-plan document (Área: Educación para el Trabajo)
 - `nb1.html` — public live leaderboard for `nb1_semana1` (polls Supabase every 60s)
+- `nb3.html` — public live leaderboard for `nb3` ("En Busca de la Felicidad," Semana 3
+  Correlación), same polling engine, reskinned to the sunrise palette baked into
+  `Weeks 3-4/autograder_nb3.py`. **Note:** `nb2.html` in this folder does not pair with a
+  `nb2`-named notebook — it actually serves `nb1_semana2` (see the file's own header comment)
+  and `nb2` itself belongs to a different, prerequisite course (`reference/legacy-CS1/nb2.html`).
 - `Weeks 1-2/` — Misión 1: Recuperación de Datos (pandas bootcamp), split into two class
   sessions:
   - `Teoria_Semanas1-2_Mision1_RecuperacionDeDatos.md`, `Preguntas_Teoricas_Semanas1-2.md` —
