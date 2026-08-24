@@ -19,6 +19,51 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 
 ## Done Log
 
+- 2026-08-24 — **`index.html` (course hub) wired up to show `nb3`'s best-score stats, scoped to
+  that notebook only.** The hub's Python track only ever had a quest card for Misión 1
+  (`nb1_semana1` → `nb1.html`); Misión 2/Semana 3 (`nb3`) had no card and its stats-fetching
+  `TRACKS` array never queried `notebook: 'nb3'` at all, so the "En Busca de la Felicidad" ranking
+  was unreachable from the hub even after `nb3.html` shipped. Added a live quest card
+  (`MISIÓN 2 · SEMANA 3`, linking to `course-python-stats/nb3.html`) and a `{ notebook: 'nb3' }`
+  entry to `TRACKS` — `loadTrackStats()` already filters `curso=STAT_2026` +
+  `notebook=track.notebook` per track, so this card's TOP/AVG/participant-count pills reflect
+  only `nb3` submissions, never mixed with `nb1_semana1` or the Sheets track. Also ported the
+  same-day `dni`-collision dedup fix (`normName()` + compound `dni|nombre` key, see the `nb3.py`/
+  `nb3.html` entry below) into this file's own `dedupBest()`, since it directly feeds the number
+  this change was asked to get right — same class of bug, in scope this time because it's the
+  exact stat being surfaced, not an unrelated file. `nb4`/Semana 4 intentionally left off the hub
+  — not requested, and no reason yet to assume its card should look identical to nb3's.
+- 2026-08-24 — **Fixed a real bug the user hit live: `nb3` showed students who hadn't done any
+  work as if they'd already finished.** Root cause in `Weeks 3-4/autograder_nb3.py`'s
+  `_on_register()`: the "resume my progress" lookup restores `self._scores`/`_achievements`/
+  `_streak`/`_prev_level` from the student's best prior Supabase row keyed **only** by
+  `dni=eq.<typed code>` + `notebook=eq.nb3` — and the DNI field (`"🪪 CÓDIGO DE ESTUDIANTE (DNI,
+  Pasaporte, Carnet)"`) has zero format/length/uniqueness validation, so two different students
+  typing the same code (a shared placeholder, a typo, a sibling's DNI, leftover test data) cause
+  the second one's session to silently inherit the first one's full score breakdown the moment
+  they register — before running a single exercise cell. **Fix**: query now also selects
+  `nombre`, and the restore only fires if the stored row's name matches (via the file's own
+  existing `_norm()` helper, already used elsewhere for fuzzy text grading) the name the student
+  just typed; a DNI collision with a different name now correctly falls through to "aún no tienes
+  marca registrada" instead of inheriting a stranger's score. `py_compile` clean.
+  **Same root cause, same-day fix in `course-python-stats/nb3.html`**: its `dedup()` collapses a
+  student's multiple submission attempts to their best score, keyed by `dni` alone — same
+  collision exposure, one layer up. If two different students share a `dni`, the leaderboard
+  silently merged them into one row (the higher scorer's), hiding the other rather than showing
+  either "already finished." Fixed by adding a normalized `nombre` (new `normName()`, a plain
+  Spanish accent map — a JS regex Unicode escape (`̀-ͯ`, for NFKD-style diacritic
+  stripping mirroring `_norm()`) kept getting silently decoded into literal combining-mark
+  characters by a tool layer mid-edit rather than staying as source text, so switched to an
+  explicit áéíóú/ñ map instead, which is arguably more apt for this Spanish-only name set anyway)
+  to the dedup key, so a
+  same-dni collision with a different name now shows as two separate rows with their own real
+  scores instead of one clobbering the other. Verified in isolation with `node -e`: same
+  dni+name across two attempts still collapses to one row (best score kept); same dni with two
+  different names now yields two rows, each its own score — not just asserted, both cases run
+  and printed. **Not yet applied to the three sibling files/pages with the identical pattern**
+  (`autograder_nb1_semana1.py`, `autograder_nb1_semana2.py`, `autograder_nb4.py`, and `nb1.html`'s
+  own `dedup()`) — flagged to the user, not fixed without confirmation since this touches
+  multiple already-live grading scripts.
 - 2026-08-24 — **`course-python-stats/nb3.html` built** (PIXEL, user-requested via
   `WORKFORCE/02_PIXEL.md`, same session as the `nb2.html` build below): public live leaderboard
   for `Weeks 3-4/autograder_nb3.py` (`curso="STAT_2026"`, `notebook="nb3"`), which had no public

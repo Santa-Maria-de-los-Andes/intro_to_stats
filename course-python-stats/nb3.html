@@ -588,11 +588,27 @@ function playerGrado(player) {
   return player.grado || '';
 }
 
-// Deduplicate: keep best score per email
+// Minusculas + sin tildes, para comparar nombres de forma tolerante --
+// espejo de _norm() en autograder_nb3.py.
+function normName(s) {
+  return (s || '').toString().trim().toLowerCase()
+    .replace(/[áàäâ]/g, 'a').replace(/[éèëê]/g, 'e')
+    .replace(/[íìïî]/g, 'i').replace(/[óòöô]/g, 'o')
+    .replace(/[úùüû]/g, 'u').replace(/ñ/g, 'n');
+}
+
+// Deduplicate: keep best score per student (dni/email + nombre). El campo
+// DNI/Pasaporte/Carnet es texto libre sin validacion (ver autograder_nb3.py),
+// asi que dos alumnos distintos pueden compartir el mismo codigo por error
+// (typo, marcador generico). Si solo se agrupara por dni/email, esa colision
+// fusionaria a ambos en una sola fila y el de menor puntaje desaparecería
+// detrás del otro. Agregar el nombre normalizado a la clave mantiene el
+// agrupamiento correcto para el caso real (mismo alumno, varios intentos)
+// sin ocultar a un alumno distinto que solo comparte el código.
 function dedup(rows) {
   const best = {};
   for (const row of rows) {
-    const key = row.dni || row.email;
+    const key = (row.dni || row.email || '') + '|' + normName(row.nombre);
     if (!best[key] || row.pct > best[key].pct ||
         (row.pct === best[key].pct && row.earned > best[key].earned)) {
       best[key] = row;

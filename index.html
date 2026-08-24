@@ -325,6 +325,17 @@
         <span class="px card-btn">▶ VER RANKING</span>
       </a>
 
+      <!-- Semana 3: live -->
+      <a href="course-python-stats/nb3.html" class="quest-card live">
+        <div class="px card-nb-tag">MISIÓN 2 · SEMANA 3</div>
+        <div class="px card-title">🌅 EN BUSCA DE LA FELICIDAD</div>
+        <div class="card-desc">Descubre patrones y correlaciones reales en datos de felicidad mundial. ¿Coincidencia o conexión?</div>
+        <div class="card-stats" id="stats-nb3">
+          <span class="px stat-pill"><span class="spin-dot"></span></span>
+        </div>
+        <span class="px card-btn">▶ VER RANKING</span>
+      </a>
+
     </div>
   </div>
 
@@ -380,8 +391,9 @@ const SUPABASE_ANON_KEY = 'sb_publishable_aBG6GD4wn9CgpSE-47fagQ_sNhnzznu';
 // 'sheets_caso1_semana1'). Mismo curso, notebooks distintos -> sin colision.
 const CURSO_ID = 'STAT_2026';
 const TRACKS = [
-  { notebook: 'nb1_semana1',           statsEl: 'stats-nb1',   ticker: '🐍 PYTHON',  unit: 'ANALISTAS'  },
-  { notebook: 'sheets_caso1_semana1',  statsEl: 'stats-caso1', ticker: '🕵️ SHEETS', unit: 'DETECTIVES' },
+  { notebook: 'nb1_semana1',           statsEl: 'stats-nb1',   ticker: '🐍 PYTHON',   unit: 'ANALISTAS'    },
+  { notebook: 'nb3',                   statsEl: 'stats-nb3',   ticker: '🌅 SEMANA 3', unit: 'EXPLORADORES' },
+  { notebook: 'sheets_caso1_semana1',  statsEl: 'stats-caso1', ticker: '🕵️ SHEETS',  unit: 'DETECTIVES'   },
 ];
 
 const { createClient } = supabase;
@@ -389,10 +401,23 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
 });
 
+// Minusculas + sin tildes, para comparar nombres de forma tolerante --
+// espejo de _norm() en los autograders y de normName() en nb3.html.
+function normName(s) {
+  return (s || '').toString().trim().toLowerCase()
+    .replace(/[áàäâ]/g, 'a').replace(/[éèëê]/g, 'e')
+    .replace(/[íìïî]/g, 'i').replace(/[óòöô]/g, 'o')
+    .replace(/[úùüû]/g, 'u').replace(/ñ/g, 'n');
+}
+
+// dni/email por si solo no es clave confiable -- es texto libre sin
+// validacion de unicidad (ver autograder_nb3.py), asi que dos alumnos
+// distintos que comparten el mismo codigo no deben fusionarse en un solo
+// puntaje (mismo fix que nb3.html, ver WORKFORCE_HANDOFF.md 2026-08-24).
 function dedupBest(rows) {
   const best = {};
   for (const row of rows) {
-    const key = row.dni || row.email;
+    const key = (row.dni || row.email || '') + '|' + normName(row.nombre);
     if (!best[key] || row.pct > best[key].pct) best[key] = row;
   }
   return Object.values(best).sort((a, b) => b.pct - a.pct);
