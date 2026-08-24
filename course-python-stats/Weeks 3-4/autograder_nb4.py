@@ -1142,7 +1142,14 @@ async function {uid}_pick(letter) {{
         """POST a la funcion Edge grade-reflexion. Devuelve (score, comment)
         en exito, None en CUALQUIER fallo (red, timeout, respuesta con forma
         invalida) -- el caller nunca debe interpretar None como "el alumno
-        saco 0", solo como "no se pudo calificar, que reintente"."""
+        saco 0", solo como "no se pudo calificar, que reintente".
+
+        2026-08-24: timeout subido de 15s a 55s tras diagnosticar 502s en
+        vivo durante clase (ver WORKFORCE_HANDOFF.md) -- la funcion Edge
+        ahora reintenta una vez contra DeepSeek con timeout de 20s por
+        intento + 1.5s de pausa (peor caso ~41.5s), asi que un timeout
+        cliente de 15s la cortaba antes de que su propio reintento pudiera
+        terminar. 55s deja margen sobre ese peor caso."""
         try:
             import json as _json, urllib.request as _ur
             payload = _json.dumps({
@@ -1163,7 +1170,7 @@ async function {uid}_pick(letter) {{
                 },
                 method="POST",
             )
-            with _ur.urlopen(req, timeout=15) as resp:
+            with _ur.urlopen(req, timeout=55) as resp:
                 data = _json.loads(resp.read().decode("utf-8"))
             score, comment = data.get("score"), data.get("comment")
             if not isinstance(score, int) or not isinstance(comment, str) or not comment.strip():

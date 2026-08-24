@@ -33,6 +33,23 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const EXPECTED_NOTEBOOKS = new Set(["nb3", "nb4", "nb3_lite", "nb4_lite"]);
 const EXPECTED_CURSO = "STAT_2026";
 
+// 2026-08-24: bajo carga concurrente de clase (varios alumnos calificando
+// reflexiones en simultaneo, misma DEEPSEEK_API_KEY compartida) se vieron
+// 502 intermitentes -- ver WORKFORCE_HANDOFF.md, diagnostico en vivo con
+// logs reales de Supabase. Un solo intento de 15s no distingue entre
+// "DeepSeek tardo un poco mas de la cuenta" y "DeepSeek realmente fallo",
+// asi que ahora se reintenta una vez con una pausa corta antes de rendirse.
+// El caller (autograder_nb3.py/_nb4.py) tiene que esperar al menos
+// DEEPSEEK_TIMEOUT_MS*DEEPSEEK_MAX_ATTEMPTS + pausas -- su propio timeout
+// se subio a 55s para dejar margen (ver esos archivos).
+const DEEPSEEK_TIMEOUT_MS = 20000;
+const DEEPSEEK_MAX_ATTEMPTS = 2;
+const DEEPSEEK_RETRY_DELAY_MS = 1500;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 type ReflexionSpec = {
   question: string;
   grounding: string;
@@ -233,6 +250,132 @@ function jsonResponse(body: unknown, status: number): Response {
   });
 }
 
+type DeepSeekOutcome =
+  | { ok: true; score: number; comment: string }
+  | { ok: false; failReason: string };
+
+// Un solo intento contra DeepSeek. Nunca lanza -- toda falla (red, timeout,
+// status no-2xx, forma de respuesta invalida) vuelve como
+// {ok:false, failReason} para que el caller decida si reintentar y para que
+// quede logueado con detalle real (antes de este cambio, los tres casos
+// eran indistinguibles: todos devolvian el mismo 502 generico).
+async function callDeepSeekOnce(
+  systemPrompt: string,
+  studentText: string,
+  // deno-lint-ignore no-explicit-any
+  tool: any,
+  maxPts: number,
+): Promise<DeepSeekOutcome> {
+  let dsResp: Response;
+  try {
+    dsResp = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        temperature: 0.3,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: studentText },
+        ],
+        tools: [tool],
+        tool_choice: { type: "function", function: { name: "submit_grade" } },
+      }),
+      signal: AbortSignal.timeout(DEEPSEEK_TIMEOUT_MS),
+    });
+  } catch (err) {
+    const isTimeout = err instanceof Error && err.name === "TimeoutError";
+    const msg = err instanceof Error ? err.message : String(err);
+    return {
+      ok: false,
+      failReason: isTimeout ? "deepseek_timeout" : `deepseek_network_error:${msg}`,
+    };
+  }
+
+  if (!dsResp.ok) {
+    let bodySnippet = "";
+    try {
+      bodySnippet = (await dsResp.text()).slice(0, 300);
+    } catch {
+      // el status por si solo ya sirve para el log si esto tambien falla
+    }
+    return { ok: false, failReason: `deepseek_http_${dsResp.status}:${bodySnippet}` };
+  }
+
+  // deno-lint-ignore no-explicit-any
+  let deepseekJson: any;
+  try {
+    deepseekJson = await dsResp.json();
+  } catch {
+    return { ok: false, failReason: "deepseek_bad_json" };
+  }
+
+  // Enforcement, capa 2: no confiar en la forma solo porque DeepSeek
+  // devolvio 200 -- validar tipo/rango antes de usar nada.
+  try {
+    const toolCall = deepseekJson?.choices?.[0]?.message?.tool_calls?.[0];
+    if (toolCall?.function?.name === "submit_grade") {
+      const args = JSON.parse(toolCall.function.arguments);
+      if (
+        typeof args.score === "number" &&
+        Number.isInteger(args.score) &&
+        typeof args.comment === "string" &&
+        args.comment.trim().length > 0
+      ) {
+        return {
+          ok: true,
+          score: Math.max(0, Math.min(maxPts, Math.round(args.score))),
+          comment: args.comment,
+        };
+      }
+    }
+    return { ok: false, failReason: "deepseek_invalid_tool_call_shape" };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { ok: false, failReason: `deepseek_parse_error:${msg}` };
+  }
+}
+
+// Reintenta callDeepSeekOnce hasta DEEPSEEK_MAX_ATTEMPTS veces, con una
+// pausa corta entre intentos -- absorbe rate-limit/latencia transitoria de
+// DeepSeek bajo carga concurrente de clase sin duplicar la logica de arriba.
+// Cada intento fallido se loguea con su motivo real (console.error, visible
+// en los logs de Supabase) en vez de perderse en un 502 generico.
+async function gradeWithRetry(
+  systemPrompt: string,
+  studentText: string,
+  // deno-lint-ignore no-explicit-any
+  tool: any,
+  maxPts: number,
+): Promise<
+  { score: number; comment: string; failReasons: string[] } |
+  { score: undefined; comment: undefined; failReasons: string[] }
+> {
+  const failReasons: string[] = [];
+  for (let attempt = 1; attempt <= DEEPSEEK_MAX_ATTEMPTS; attempt++) {
+    const outcome = await callDeepSeekOnce(systemPrompt, studentText, tool, maxPts);
+    if (outcome.ok) {
+      if (failReasons.length > 0) {
+        console.log(
+          `grade-reflexion: intento ${attempt}/${DEEPSEEK_MAX_ATTEMPTS} OK tras ${failReasons.length} fallo(s) previo(s): ${failReasons.join(" | ")}`,
+        );
+      }
+      return { score: outcome.score, comment: outcome.comment, failReasons };
+    }
+    failReasons.push(outcome.failReason);
+    console.error(
+      `grade-reflexion: intento ${attempt}/${DEEPSEEK_MAX_ATTEMPTS} fallo: ${outcome.failReason}`,
+    );
+    if (attempt < DEEPSEEK_MAX_ATTEMPTS) {
+      await sleep(DEEPSEEK_RETRY_DELAY_MS);
+    }
+  }
+  return { score: undefined, comment: undefined, failReasons };
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
     return jsonResponse({ error: "method_not_allowed" }, 405);
@@ -312,62 +455,28 @@ Califica de 0 a ${spec.max_pts} puntos enteros. El comentario debe ser 1-2 oraci
     },
   };
 
-  // deno-lint-ignore no-explicit-any
-  let deepseekJson: any;
-  try {
-    const dsResp = await fetch("https://api.deepseek.com/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "deepseek-chat",
-        temperature: 0.3,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: student_text },
-        ],
-        tools: [tool],
-        tool_choice: { type: "function", function: { name: "submit_grade" } },
-      }),
-      signal: AbortSignal.timeout(15000),
-    });
-    if (!dsResp.ok) {
-      return jsonResponse({ error: "grading_failed" }, 502);
-    }
-    deepseekJson = await dsResp.json();
-  } catch {
-    return jsonResponse({ error: "grading_failed" }, 502);
-  }
-
-  // Enforcement, capa 2: no confiar en la forma solo porque DeepSeek
-  // devolvio 200 -- validar tipo/rango antes de usar nada.
-  let score: number | undefined;
-  let comment: string | undefined;
-  try {
-    const toolCall = deepseekJson?.choices?.[0]?.message?.tool_calls?.[0];
-    if (toolCall?.function?.name === "submit_grade") {
-      const args = JSON.parse(toolCall.function.arguments);
-      if (
-        typeof args.score === "number" &&
-        Number.isInteger(args.score) &&
-        typeof args.comment === "string" &&
-        args.comment.trim().length > 0
-      ) {
-        score = args.score;
-        comment = args.comment;
-      }
-    }
-  } catch {
-    // score/comment quedan undefined -> tratado como fallo abajo
-  }
+  const { score, comment, failReasons } = await gradeWithRetry(
+    systemPrompt,
+    student_text,
+    tool,
+    spec.max_pts,
+  );
 
   if (score === undefined || comment === undefined) {
-    return jsonResponse({ error: "grading_failed" }, 502);
+    // 2026-08-24 (diagnostico en vivo tras 502s durante clase, ver
+    // WORKFORCE_HANDOFF.md): antes esto siempre devolvia el mismo
+    // {error:"grading_failed"} sin importar la causa real (DeepSeek
+    // ratelimit/error, timeout, o forma de respuesta invalida), asi que ni
+    // siquiera los logs de Supabase distinguian una causa de otra. Ahora se
+    // loguea (console.error, mas abajo en gradeWithRetry) y se devuelve el
+    // ultimo motivo real en el body -- el notebook lo sigue ignorando
+    // (nunca debe interpretar un error como "el alumno saco 0"), pero
+    // queda visible para quien mire los logs de la funcion.
+    return jsonResponse(
+      { error: "grading_failed", detail: failReasons.at(-1) ?? "unknown" },
+      502,
+    );
   }
-
-  score = Math.max(0, Math.min(spec.max_pts, Math.round(score)));
 
   // Auditoria fire-and-forget -- nunca bloquear la respuesta al alumno por
   // esto ni fallar la calificacion si el insert falla.

@@ -19,6 +19,43 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 
 ## Done Log
 
+- 2026-08-24 — **Fixed the `grade-reflexion` 502s diagnosed live during class** (real Supabase
+  Invocations log showed 6/9 requests failing with 502 in a ~5min window, successes landing
+  seconds apart from failures — ruled out a total outage, pointed at DeepSeek-side
+  rate-limiting/latency under concurrent classroom load on the one shared `DEEPSEEK_API_KEY`).
+  **`supabase/functions/grade-reflexion/index.ts`**: the single DeepSeek call was refactored into
+  `callDeepSeekOnce()` (never throws, returns `{ok, ...}` or `{ok:false, failReason}`) +
+  `gradeWithRetry()` (up to `DEEPSEEK_MAX_ATTEMPTS=2`, `DEEPSEEK_RETRY_DELAY_MS=1500` between —
+  absorbs a transient rate-limit/slow-response without giving up on the first blip). Per-attempt
+  DeepSeek timeout raised 15s → `DEEPSEEK_TIMEOUT_MS=20000`. **Real diagnosability gap fixed
+  too**: previously all three failure paths (DeepSeek non-2xx, fetch throw/timeout, invalid
+  tool-call shape) collapsed into the identical `{error:"grading_failed"}` 502 with nothing
+  logged — literally impossible to tell apart even from Supabase's own logs, which is exactly
+  what made this incident hard to pin down. Now every failed attempt `console.error`s its real
+  `failReason` (`deepseek_http_429:...`, `deepseek_timeout`, `deepseek_invalid_tool_call_shape`,
+  etc.), and the final 502 body carries the last real reason in a `detail` field — the notebook
+  client still ignores it entirely (never treat a grading failure as "the student scored 0", by
+  design), but the *next* incident will have a real log trail instead of another identical
+  screenshot to guess from.
+  **Client-side, both `Weeks 3-4/autograder_nb3.py` and `autograder_nb4.py`** (`nb3_lite`/
+  `nb4_lite` inherit `_call_grade_reflexion` unchanged, confirmed no override exists in either —
+  they get this fix for free): `urlopen` timeout raised 15s → 55s. This wasn't optional — leaving
+  it at 15s while the server's own worst case grew to ~41.5s (20s × 2 attempts + 1.5s backoff)
+  would have made the client give up *before* the server's new retry logic could ever finish,
+  turning a fix into a regression for exactly the failure case it targets. 55s leaves comfortable
+  margin above that ~41.5s worst case.
+  **Validated**: brace-balance check on the `.ts` file (no Deno CLI available in this session to
+  fully typecheck — flagging this so whoever deploys it runs `deno check` first); `py_compile`
+  clean on all four Python files; full existing suites re-run clean (`_test_nb3_nb4.py` 83/83,
+  `_test_nb3_nb4_lite.py` all checks) — confirms the timeout-only change didn't touch scoring
+  logic. **Not yet deployed** — editing `index.ts` locally doesn't push it to Supabase; someone
+  with deploy access needs to run `supabase functions deploy grade-reflexion` (or the project's
+  CI/CD equivalent, if one exists — not confirmed in this session) before this takes effect for
+  real students. **Still open, deferred**: this makes 502s a *rarer* symptom of the underlying
+  DeepSeek rate-limit, not a fix for the rate-limit itself — if the school's DeepSeek tier caps
+  concurrent-classroom-sized bursts, the real ceiling only moves, not disappears. Checking
+  DeepSeek's own dashboard/tier for the incident window needs Supabase/DeepSeek account access
+  neither available in this session, flagged to the user directly.
 - 2026-08-24 — **`index.html` (course hub) wired up to show `nb3`'s best-score stats, scoped to
   that notebook only.** The hub's Python track only ever had a quest card for Misión 1
   (`nb1_semana1` → `nb1.html`); Misión 2/Semana 3 (`nb3`) had no card and its stats-fetching
