@@ -56,6 +56,23 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
   concurrent-classroom-sized bursts, the real ceiling only moves, not disappears. Checking
   DeepSeek's own dashboard/tier for the incident window needs Supabase/DeepSeek account access
   neither available in this session, flagged to the user directly.
+  **Same-day follow-up, user-approved**: added a 0-3s random client-side jitter
+  (`time.sleep(random.uniform(0, 3))`) right before the POST in both `_call_grade_reflexion`s —
+  targets the actual root cause of the burst, not just its symptom: the whole class clicks
+  "Enviar" within the same few seconds (same lesson pacing, one shared `DEEPSEEK_API_KEY`), so
+  requests arrive at DeepSeek synchronized rather than spread out. Each Colab kernel is an
+  independent process with no shared state, so jitter is the only coordination-free way to
+  desynchronize a class-wide burst from here — a real queue/semaphore would need a shared backing
+  store (Postgres row lock, Redis, etc.) that doesn't exist for this function today, out of scope
+  for this pass. `nb3_lite`/`nb4_lite` inherit it for free (same non-override confirmation as
+  above). Validated: `py_compile` clean on both edited files; `_test_nb3_nb4.py` re-run 83/83 in
+  ~4.5s wall time (confirms the suite mocks `_call_grade_reflexion` directly rather than calling
+  the real implementation, so the sleep never fires during tests — no suite slowdown, and this
+  also means the jitter itself has zero automated test coverage, purely reasoned from the code).
+  **Considered and deferred, not rejected**: a queue-and-regrade-later fallback (store failed
+  reflections as "pending," regrade via a scheduled job instead of asking the student to retry
+  live) — bigger lift (new table/column, a regrade job, a "pending" UI state that doesn't exist),
+  worth revisiting only if jitter + retry turn out insufficient.
 - 2026-08-24 — **`index.html` (course hub) wired up to show `nb3`'s best-score stats, scoped to
   that notebook only.** The hub's Python track only ever had a quest card for Misión 1
   (`nb1_semana1` → `nb1.html`); Misión 2/Semana 3 (`nb3`) had no card and its stats-fetching

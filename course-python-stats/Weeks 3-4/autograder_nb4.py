@@ -1165,9 +1165,21 @@ async function {uid}_pick(letter) {{
         ahora reintenta una vez contra DeepSeek con timeout de 20s por
         intento + 1.5s de pausa (peor caso ~41.5s), asi que un timeout
         cliente de 15s la cortaba antes de que su propio reintento pudiera
-        terminar. 55s deja margen sobre ese peor caso."""
+        terminar. 55s deja margen sobre ese peor caso.
+
+        2026-08-24 (mismo diagnostico): la causa raiz de esos 502 no era la
+        funcion en si, sino que toda la clase hace clic en "Enviar" casi al
+        mismo segundo (mismo ritmo de leccion, misma DEEPSEEK_API_KEY
+        compartida) -- una ráfaga sincronizada, no trafico parejo. Un jitter
+        aleatorio de 0-3s antes de disparar el POST desincroniza esa ráfaga
+        sin coordinacion entre kernels (cada notebook es un proceso
+        independiente): mismo alumno, misma espera percibida (~3s extra
+        sobre una llamada que igual toma varios segundos), pero la ventana
+        de solicitudes simultaneas contra DeepSeek se reparte en vez de
+        llegar toda junta."""
         try:
-            import json as _json, urllib.request as _ur
+            import json as _json, random as _rnd, time as _time, urllib.request as _ur
+            _time.sleep(_rnd.uniform(0, 3))
             payload = _json.dumps({
                 "dni":          self._dni,
                 "notebook":     NOTEBOOK_ID,
