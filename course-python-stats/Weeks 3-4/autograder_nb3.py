@@ -243,10 +243,21 @@ class Autograder:
                 _best = None
                 try:
                     import urllib.request as _ur2, json as _json2, urllib.parse as _up2
+                    # 2026-08-24 (reporte en vivo del usuario): esta query
+                    # filtraba por dni+notebook pero NO por curso. `notebook`
+                    # no es unico entre cursos (el modulo de Programacion
+                    # tambien usa ids simples como 'nb2'/'nb3'), asi que un
+                    # alumno cuyo DNI coincidiera con una fila de OTRO curso
+                    # heredaba en silencio su score_breakdown/achievements/
+                    # streak/nivel -- se mostraba "ya hecho" con un score que
+                    # nunca tuvo las claves refl_* de esta materia, y ese
+                    # curso ajeno se resometia despues bajo curso=STAT_2026
+                    # (ver _submit_to_supabase), contaminando la tabla real.
                     _qurl = (
                         f"{SUPABASE_URL}/rest/v1/submissions"
                         f"?select=nombre,earned,possible,pct,level_name,level_num,streak,achievements,score_breakdown"
                         f"&dni=eq.{_up2.quote(str(dni), safe='')}"
+                        f"&curso=eq.{CURSO_ID}"
                         f"&notebook=eq.{NOTEBOOK_ID}"
                         f"&order=pct.desc,submitted_at.desc&limit=1"
                     )

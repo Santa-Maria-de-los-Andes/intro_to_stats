@@ -244,10 +244,26 @@ class Autograder:
                 _best = None
                 try:
                     import urllib.request as _ur2, json as _json2, urllib.parse as _up2
+                    # 2026-08-24 (mismo bug reportado en vivo por el usuario
+                    # para autograder_nb3.py, corregido aca en espejo): esta
+                    # query filtraba por dni+notebook pero NO por curso, y
+                    # ademas restauraba progreso con solo un match de dni --
+                    # sin comparar `nombre` como si hace nb3. `notebook` no es
+                    # unico entre cursos (el modulo de Programacion tambien
+                    # usa ids simples como 'nb2'/'nb3'), y el DNI es texto
+                    # libre sin validacion de formato/unicidad, asi que
+                    # cualquiera de las dos colisiones heredaba en silencio
+                    # score_breakdown/achievements/streak/nivel de otro
+                    # curso u otro alumno -- se mostraba "ya hecho" con un
+                    # score que nunca tuvo las claves refl_* de esta materia,
+                    # y esa fila ajena se resometia despues bajo
+                    # curso=STAT_2026 (ver _submit_to_supabase), contaminando
+                    # la tabla real.
                     _qurl = (
                         f"{SUPABASE_URL}/rest/v1/submissions"
-                        f"?select=earned,possible,pct,level_name,level_num,streak,achievements,score_breakdown"
+                        f"?select=nombre,earned,possible,pct,level_name,level_num,streak,achievements,score_breakdown"
                         f"&dni=eq.{_up2.quote(str(dni), safe='')}"
+                        f"&curso=eq.{CURSO_ID}"
                         f"&notebook=eq.{NOTEBOOK_ID}"
                         f"&order=pct.desc,submitted_at.desc&limit=1"
                     )
@@ -257,7 +273,7 @@ class Autograder:
                     })
                     with _ur2.urlopen(_req2, timeout=8) as _resp2:
                         _rows = _json2.loads(_resp2.read())
-                    if _rows:
+                    if _rows and _norm(_rows[0].get("nombre")) == _norm(nombre):
                         _best = _rows[0]
                         self._scores = {
                             k: (int(v.get("e", 0)), int(v.get("p", 0)))
