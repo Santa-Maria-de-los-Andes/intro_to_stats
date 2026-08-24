@@ -245,7 +245,7 @@ class Autograder:
                     import urllib.request as _ur2, json as _json2, urllib.parse as _up2
                     _qurl = (
                         f"{SUPABASE_URL}/rest/v1/submissions"
-                        f"?select=earned,possible,pct,level_name,level_num,streak,achievements,score_breakdown"
+                        f"?select=nombre,earned,possible,pct,level_name,level_num,streak,achievements,score_breakdown"
                         f"&dni=eq.{_up2.quote(str(dni), safe='')}"
                         f"&notebook=eq.{NOTEBOOK_ID}"
                         f"&order=pct.desc,submitted_at.desc&limit=1"
@@ -256,7 +256,14 @@ class Autograder:
                     })
                     with _ur2.urlopen(_req2, timeout=8) as _resp2:
                         _rows = _json2.loads(_resp2.read())
-                    if _rows:
+                    # Solo restaurar progreso si el nombre de esa fila coincide
+                    # con el que el alumno acaba de escribir -- el campo
+                    # DNI/Pasaporte/Carnet es texto libre sin validacion de
+                    # formato ni unicidad, asi que dos alumnos distintos que
+                    # tipean el mismo codigo (un marcador generico, un typo,
+                    # o el DNI de un hermano) no deben heredar en silencio el
+                    # progreso/logros/nivel del otro.
+                    if _rows and _norm(_rows[0].get("nombre")) == _norm(nombre):
                         _best = _rows[0]
                         self._scores = {
                             k: (int(v.get("e", 0)), int(v.get("p", 0)))

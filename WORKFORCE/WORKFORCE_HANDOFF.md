@@ -19,6 +19,27 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 
 ## Done Log
 
+- 2026-08-24 — **`course-python-stats/nb3.html` built** (PIXEL, user-requested via
+  `WORKFORCE/02_PIXEL.md`, same session as the `nb2.html` build below): public live leaderboard
+  for `Weeks 3-4/autograder_nb3.py` (`curso="STAT_2026"`, `notebook="nb3"`), which had no public
+  leaderboard page before this. Same clone-and-reskin approach as `reference/legacy-CS1/nb2.html`
+  — `course-python-stats/nb2.html`'s engine unchanged, presentation reskinned to the palette/
+  levels/achievements already locked *inside* `autograder_nb3.py` itself (`_LEVELS`, `_XP_GRAD`,
+  `_LV_CSS_COLOR`, `_unlock()` achievement keys) — no new design decisions made, just read out of
+  the grader. **Surfaced a real gap while doing this**: that theme ("En Busca de la Felicidad")
+  was never run through PIXEL's Theme Architect process — ATLAS built it directly into the
+  autograder on 2026-08-20/21 (see that date's entries below) while the module-level Theme Brief
+  was still marked "not started" in `02_PIXEL.md`. Updated that file's Current Notebooks table to
+  document the theme as shipped (so PIXEL has a source of truth to design *from* now) and flag
+  the reconciliation question explicitly rather than leaving two stale-vs-real states in the doc.
+  Also clarified in `README.md` that `course-python-stats/nb2.html` does **not** pair with `nb3`'s
+  neighbor `nb2` — that filename actually serves `nb1_semana2` (see that file's own header
+  comment) and real `nb2` lives in the other course entirely (`reference/legacy-CS1/nb2.html`,
+  below) — easy to trip over when eyeballing the folder for "which notebook has no leaderboard
+  yet." `CURSO_ID`/`NOTEBOOK_ID` cross-checked directly against the autograder's Supabase POST
+  payload (module docstring: "mismo proyecto/tabla que nb1, curso=STAT_2026, notebook=nb3"), not
+  assumed from the filename. Not validated against live Supabase data (no anon key access in this
+  session) — structurally identical to the already-shipped `nb1.html`/legacy `nb2.html` pages.
 - 2026-08-23 — **`reference/legacy-CS1/nb2.html` built** (PIXEL, user-requested via
   `WORKFORCE/02_PIXEL.md`): public live leaderboard for the prerequisite CS course's God of War
   notebook (`autograder_nb2.py`, `notebook_id="nb2"`), which had no public leaderboard page
