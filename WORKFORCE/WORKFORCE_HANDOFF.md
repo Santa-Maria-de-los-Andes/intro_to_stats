@@ -11,13 +11,49 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 | # | Ticket | Owner | Notes |
 |---|---|---|---|
 
-| 7 | Statistically vet Weeks 3–4, 6, 7 candidate datasets and Week 5 debunk material once SOFIA drafts them | GAUSS | **Weeks 3–4 now drafted 2026-08-14** (see Done log) — dataset not yet downloaded/vetted, this is the blocking half of the ticket for that unit now. Weeks 1–2 datasets vetted and approved 2026-08-05. Weeks 6, 7, and Week 5 debunk material still not drafted. |
+| 7 | Statistically vet Weeks 3–4, 6, 7 candidate datasets and Week 5 debunk material once SOFIA drafts them | GAUSS | **Weeks 3–4 now drafted 2026-08-14** (see Done log) — dataset not yet downloaded/vetted, this is the blocking half of the ticket for that unit now. Weeks 1–2 datasets vetted and approved 2026-08-05. Weeks 6, 7, and Week 5 debunk material still not drafted. **2026-08-29:** `proyecto_investigacion.ipynb`'s student-chosen datasets (menu still pending — see that Done log entry) will ship without formal GAUSS vetting given the timeline; accepted scope cut since nothing in that notebook is autograded (no exact-value answer key at risk). Flagging here as a fast-follow sanity-check once the dataset menu is finalized. |
 | 8 | Draft statistically defensible model answers for the capstone's "descriptive analysis with interpretation" and "correlation analysis with causation critique" criteria (20 pts each) | GAUSS + ATLAS | Needed before ATLAS's Rubric Validation Report can sign off those two criteria as more than a point value. |
 | 12 | Rewrite debug-cell hint comments so they prompt investigation ("read the error, identify the type") rather than naming the bug directly — currently several debug cells hand over the diagnosis in the comment, undercutting the "build error-reading skill" purpose of `check_debugN` (`COURSE_TEMPLATE.md` §4) | SOFIA | Raised in SOFIA's Mode 3 review 2026-08-05 (see Done log), still not fully applied. **Partial incidental progress 2026-08-11**: while renumbering Semana 2's debug cells (see that Done log entry), `debug0` (Seccion C, the `=` vs `==` bug, old `debug2`) had its hint de-scaffolded from naming the bug outright to "ejecuta, lee el mensaje completo, e identifica que tipo de error es" — a side effect of the renumbering pass, not a deliberate sweep. Semana 2's `debug1` (Seccion C, `and`/`or`, old `debug3`) and Semana 1's `debug1` still hand over the diagnosis; not touched. |
 
 ---
 
 ## Done Log
+
+- 2026-08-29 — **nb4's Rondas 5–6 and Mini-Proyecto cut; new
+  `proyecto_investigacion.ipynb` built to replace the Mini-Proyecto with a
+  larger, real self-directed research project (user decision).**
+  `course-python-stats/Weeks 3-4/build_nb4.py` and `autograder_nb4.py`:
+  removed Rondas 5–6 (`check_ex5`/`check_ex6`/`check_t8`/`check_t9`/
+  `check_reflexion_ronda6` — pure repetition of Semana 3's scatter+`.corr()`
+  pattern, judged low-value for supervised class time) and the Mini-Proyecto
+  (`check_intex1` + `check_reflexion_interpretacion` +
+  `check_reflexion_metodologica`). Kept Debug 1, Ejercicio 7 (matrix-wide
+  exploration, excludes circular `Puesto`), and all of Sección C (subgroup
+  `.corr()`, Oceanía n=2 trap) — confirmed via `Teoria_Semanas3-4_Mision2_
+  Correlacion.md` and `ATLAS_spec_nb3_nb4.md` that Sección C is a
+  deliberately-engineered bridge to Semana 5, not filler. `_CORE_MAX`:
+  150 → 60; both checkpoints (`check_mini_b`/`check_mini_c`) still gate
+  correctly on the remaining exercises. Achievement `descubridor` (gated on
+  `intex1`) removed; `cartografo_patrones` repointed from
+  `[ex5,ex6,ex7,ex8]` to `[ex7,ex8]`.
+  In its place: `course-python-stats/Weeks 3-4/build_proyecto_investigacion.py`
+  → `proyecto_investigacion.ipynb`. Each student/pair picks their own real
+  dataset and claim (menu of candidates still pending — see ticket #7's
+  2026-08-29 note); started in class Semana 4 with supervision, due before
+  Semana 5, presented at Semana 5's opening. No autograder, no `check_*`, no
+  Supabase submission — graded by a human-scored 85-pt rubric printed at the
+  end of the notebook, reusing the Week 8 capstone's own criteria wording
+  from `WORKFORCE_CONTRACT.md` §4 minus the regression/clustering row (out of
+  technical scope until Weeks 6–7). This is the first built instance of the
+  "rubric-graded, not `check_*`-graded" pattern §4 describes for the
+  capstone — no such notebook existed anywhere in the repo before this.
+  **Continuity redirect (supersedes the note that used to live on
+  `check_intex1` / in `ATLAS_spec_nb3_nb4.md`):** whoever designs Semana 5
+  should treat `proyecto_investigacion.ipynb`'s hypothesis + confound
+  write-up (cells `proy-hipotesis-respuesta` and
+  `proy-reflexion-metodo-respuesta`) as the input material — not nb4's
+  now-removed `intex1`. See the matching 2026-08-29 entries in
+  `WORKFORCE_CONTRACT.md`'s Change Log and `ATLAS_spec_nb3_nb4.md`.
 
 - 2026-08-24 — **Fixed the `grade-reflexion` 502s diagnosed live during class** (real Supabase
   Invocations log showed 6/9 requests failing with 502 in a ~5min window, successes landing

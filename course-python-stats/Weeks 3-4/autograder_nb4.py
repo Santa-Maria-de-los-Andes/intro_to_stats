@@ -3,35 +3,38 @@ Autograder — Bimestre 3, Mision 2: Buscando Patrones — SEMANA 4
 EN BUSCA DE LA FELICIDAD EDITION — World Happiness Report 2019
 
 ATLAS build 2026-08-20/21, contra ATLAS_spec_nb3_nb4.md (SOFIA). Companion de
-autograder_nb3.py -- continua su numeracion global (ex5-8, t8-10, debug1,
-intex1) porque narrativamente sigue siendo Mision 2, aunque el archivo ya no
-comparta nb-prefijo con nb3_correlacion.ipynb (rename explicito del usuario
-2026-08-20). Este archivo no tiene predecesor -- Seccion C y el
-Mini-Proyecto nunca habian sido construidos antes de esta reestructuracion
-(ver WORKFORCE_HANDOFF.md Done log 2026-08-20).
+autograder_nb3.py -- originalmente continuaba su numeracion global desde
+ex5/t8 (narrativamente sigue siendo Mision 2, aunque el archivo ya no
+comparta nb-prefijo con nb3_correlacion.ipynb, rename explicito del usuario
+2026-08-20); tras el recorte del 2026-08-29 (ver mas abajo), ex5/ex6/t8/t9/
+intex1 ya no existen y la numeracion visible empieza en debug1/ex7/t10. Este
+archivo no tiene predecesor -- Seccion C nunca habia sido construida antes de
+la reestructuracion de 2026-08-20 (ver WORKFORCE_HANDOFF.md Done log).
 
-Cubre: check_t8-t10, check_ex5-ex8, check_debug1, check_intex1,
-check_mini_b, check_mini_c, check_reflexion_ronda6/subgrupos/
-interpretacion/metodologica, resumen()
+Cubre: check_t10, check_ex7-ex8, check_debug1,
+check_mini_b, check_mini_c, check_reflexion_subgrupos, resumen()
 Dataset: 2019_es.csv (156 filas x 10 columnas, World Happiness Report) --
 mismo archivo que nb3, vuelto a descargar en esta sesion de Colab (el estado
 de nb3 no persiste entre notebooks).
 
-Notas de scoring:
-  t8-t10 (Ronda 5 antes de calcular, Ronda 6 interpreta, trampa de Oceanía
-  n=2 en Sección C) valen 5 pts c/u = 15.
-  ex5/ex6 (Rondas 5-6, grafica+calcula fusionados, 20 pts c/u tal como
-  aparece impreso en el markdown -- no negociable aqui) = 40.
+RECORTE 2026-08-29 (decision del usuario, ver build_nb4.py para el detalle
+completo): se eliminaron check_ex5, check_ex6, check_t8, check_t9,
+check_reflexion_ronda6 (Rondas 5-6 -- repeticion pura del patron de Semana 3)
+y check_intex1 + check_reflexion_interpretacion + check_reflexion_metodologica
+(Mini-Proyecto de integracion -- reemplazado por un proyecto de investigacion
+mas grande, notebook aparte `proyecto_investigacion.ipynb`, sin autograder ni
+Supabase, calificado por rubrica humana). La nota de continuidad de
+`ATLAS_spec_nb3_nb4.md` (el par/r/hipotesis que la Semana 5 usa como material
+de entrada) ahora apunta a ese notebook nuevo, no a `intex1`.
+
+Notas de scoring (post-recorte):
+  t10 (trampa de Oceanía n=2 en Sección C) vale 5.
   debug1 vale 10. ex7 (explora todas las correlaciones con Puntaje) vale 20.
   ex8 (Sección C -- Generosidad vs. Puntaje, filtrado por continente) vale 20.
-  intex1 (Mini-Proyecto de integración -- el estudiante elige su propio par,
-  con hipótesis obligatoria) vale 25, más que un ex1-8 normal porque combina
-  scatter + `.corr()` + elección propia + hipótesis en un solo ejercicio.
-  4 celdas 💭 Reflexiona (ronda6, subgrupos, interpretacion, metodologica)
-  valen 5 pts c/u = 20, calificadas por IA (ver autograder_nb3.py para el
-  mecanismo completo -- idéntico aquí).
-  _CORE_MAX = 15 (t8-10) + 40 (ex5-6) + 10 (debug1) + 20 (ex7) + 20 (ex8)
-            + 20 (reflexion x4) + 25 (intex1) = 150.
+  1 celda 💭 Reflexiona (subgrupos) vale 5, calificada por IA (ver
+  autograder_nb3.py para el mecanismo completo -- idéntico aquí).
+  _CORE_MAX = 5 (t10) + 10 (debug1) + 20 (ex7) + 20 (ex8) + 5 (refl_subgrupos)
+            = 60.
   Sin bonus/reto -- este notebook no declara check_retoN.
 
 Nota tecnica -- Sección C sin `.groupby().apply(lambda...)`: ver
@@ -68,8 +71,7 @@ _DEADLINE_UTC   = _dt.datetime(2026, 9, 7, 4, 59, 0, tzinfo=_dt.timezone.utc)
 DEADLINE_PASSED = _dt.datetime.now(_dt.timezone.utc) >= _DEADLINE_UTC
 
 # ─── Scoring ─────────────────────────────────────────────────
-_CORE_MAX = 150   # 15 (t8-10) + 40 (ex5-6) + 10 (debug1) + 20 (ex7) + 20 (ex8)
-                  # + 20 (reflexion x4) + 25 (intex1)
+_CORE_MAX = 60   # 5 (t10) + 10 (debug1) + 20 (ex7) + 20 (ex8) + 5 (refl_subgrupos)
 
 # ─── Reflexion (calificada por IA vía Supabase Edge Function) ─
 _REFLEXION_PTS       = 5
@@ -167,23 +169,6 @@ _COL_GENEROSIDAD  = "Generosidad"
 _COL_CORRUPCION   = "Percepción de corrupción"
 
 _SEIS_COLUMNAS      = [_COL_PBI, _COL_APOYO, _COL_ESPERANZA, _COL_LIBERTAD, _COL_GENEROSIDAD, _COL_CORRUPCION]
-_TODAS_COLUMNAS_MINI = _SEIS_COLUMNAS + [_COL_PUNTAJE]
-
-# Pares ya trabajados en Semana 3 / Semana 4 antes del Mini-Proyecto -- el
-# estudiante debe elegir un par NUEVO (ver Teoria_Semanas3-4_Mision2_Correlacion.md
-# §2 Sección D, requisito de GAUSS contra el riesgo de correlación espuria).
-_USED_PAIRS = [
-    frozenset([_norm(_COL_CORRUPCION), _norm(_COL_PUNTAJE)]),
-    frozenset([_norm(_COL_ESPERANZA), _norm(_COL_PUNTAJE)]),
-    frozenset([_norm(_COL_APOYO), _norm(_COL_PUNTAJE)]),
-    frozenset([_norm(_COL_LIBERTAD), _norm(_COL_PUNTAJE)]),
-    frozenset([_norm(_COL_GENEROSIDAD), _norm(_COL_PUNTAJE)]),
-    frozenset([_norm(_COL_PBI), _norm(_COL_PUNTAJE)]),
-    frozenset([_norm(_COL_PBI), _norm(_COL_ESPERANZA)]),
-    frozenset([_norm(_COL_APOYO), _norm(_COL_ESPERANZA)]),
-    frozenset([_norm(_COL_LIBERTAD), _norm(_COL_CORRUPCION)]),
-    frozenset([_norm(_COL_PBI), _norm(_COL_GENEROSIDAD)]),
-]
 
 
 def _col_match(val, expected_colname, df=None):
@@ -500,11 +485,11 @@ async function agRegister() {{
         if any(e > 0 for e, _ in self._scores.values()) and self._unlock("primer_rayo"):
             unlocked.append(("☀️ Primer Rayo de Sol — ¡Tu primer punto de felicidad conquistado!", "#ff9e2c", "Chispa"))
 
-        # Cartografo de Patrones — ex5,ex6,ex7,ex8 perfectos
-        ex_todos = ["ex5", "ex6", "ex7", "ex8"]
+        # Cartografo de Patrones — ex7,ex8 perfectos
+        ex_todos = ["ex7", "ex8"]
         if (all(k in self._scores and self._scores[k][0] == self._scores[k][1] for k in ex_todos)
                 and self._unlock("cartografo_patrones")):
-            unlocked.append(("🗺️ Cartógrafo de Patrones — Todas tus rondas de Semana 4, perfectas", "#4aa8d8", "Rayo"))
+            unlocked.append(("🗺️ Cartógrafo de Patrones — Matriz completa y subgrupos, perfectos", "#4aa8d8", "Rayo"))
 
         # Explorador Completo — ex7 (explora todo) perfecto
         if (self._scores.get("ex7", (0, 1))[0] == self._scores.get("ex7", (0, 1))[1]
@@ -515,11 +500,6 @@ async function agRegister() {{
         if (self._scores.get("debug1", (0, 1))[0] == self._scores.get("debug1", (0, 1))[1]
                 and "debug1" in self._scores and self._unlock("depurador_feliz")):
             unlocked.append(("🔧 Depurador Feliz — Encontraste el error sin perder la calma", "#ffb703", "Amanecer"))
-
-        # Descubridor — intex1 (mini-proyecto) perfecto
-        if (self._scores.get("intex1", (0, 1))[0] == self._scores.get("intex1", (0, 1))[1]
-                and "intex1" in self._scores and self._unlock("descubridor")):
-            unlocked.append(("🔍 Descubridor — Encontraste tu propio patrón, con hipótesis y todo", "#ff9e2c", "Sol Pleno"))
 
         # Medalla del Camino — ambos checkpoints de Semana 4 alcanzados
         if len(self._checkpoints) >= 2 and self._unlock("medalla_camino"):
@@ -991,41 +971,10 @@ async function agRegister() {{
                 ))
 
     # ═══════════════════════════════════════════════════════════
-    # TEORÍA — check_t8 .. check_t10 (formulario interactivo HTML)
+    # TEORÍA — check_t10 (formulario interactivo HTML)
     # ═══════════════════════════════════════════════════════════
 
     _TEORIA = {
-        8: dict(
-            title="T8 — Ronda 5, antes de calcular",
-            q=("`Libertad para tomar decisiones` y `Percepción de corrupción` son dos "
-               "variables distintas, aunque ambas describen algo sobre las instituciones "
-               "de un país. Antes de calcular su r: ¿por qué NO deberías asumir que van a "
-               "tener una relación tan fuerte como la de `PBI per cápita` vs. `Esperanza de "
-               "vida saludable` (r≈0.84) que calculaste la clase pasada?"),
-            opts={"a": "Porque medir instituciones nunca produce correlaciones fuertes",
-                  "b": "Porque cada par de variables tiene su propia relación real -- que dos variables 'suenen' relacionadas con lo mismo no fija qué tan fuerte es su r, hay que calcularlo",
-                  "c": "Porque Libertad y Corrupción son en realidad la misma variable con otro nombre",
-                  "d": "Porque .corr() no funciona bien con variables de percepción"},
-            correct="b",
-            why=("Cada par de columnas tiene su propia relación real, calculada directamente "
-                 "-- que dos variables compartan un tema (aquí, instituciones) no predice qué "
-                 "tan fuerte va a ser su r."),
-            pts=5,
-        ),
-        9: dict(
-            title="T9 — Ronda 6, interpreta tu resultado",
-            q=("Calculaste r ≈ -0.08 entre `PBI per cápita` y `Generosidad`. ¿Cuál es la "
-               "lectura correcta de un r tan cercano a 0?"),
-            opts={"a": "Confirma que no existe ninguna relación posible entre el dinero y la generosidad, bajo ninguna medida",
-                  "b": "Con estos datos y esta medida lineal, no se detecta una relación consistente -- no es lo mismo que 'nunca hay relación bajo ninguna circunstancia'",
-                  "c": "El cálculo salió mal -- dos variables económicas siempre deberían correlacionar",
-                  "d": "Un r negativo siempre significa que hay un error en los datos"},
-            correct="b",
-            why=("`.corr()` solo mide relación lineal en este dataset -- un r cercano a 0 "
-                 "dice 'no detecté esta relación aquí, así', no 'esta relación no existe en "
-                 "ningún sentido'."),
-            pts=5,
-        ),
         10: dict(
             title="T10 — La trampa de Oceanía",
             q=("Si filtras `df_felicidad` para quedarte solo con los países de Oceanía, vas "
@@ -1146,8 +1095,6 @@ async function {uid}_pick(letter) {{
             ans = input("Tu respuesta (a/b/c/d): ").strip().lower()
             self._grade_teoria(n, ans)
 
-    def check_t8(self): return self._ask_teoria(8)
-    def check_t9(self): return self._ask_teoria(9)
     def check_t10(self): return self._ask_teoria(10)
 
     # ═══════════════════════════════════════════════════════════
@@ -1443,12 +1390,6 @@ async function {uid}_submit() {{
 </div>'''
         display(HTML(card_html))
 
-    def check_reflexion_ronda6(self):
-        return self._ask_reflexion("ronda6",
-            '"PBI per cápita" y "Generosidad" dan un r muy cercano a 0. ¿Te '
-            'parece razonable que el dinero de un pais casi no prediga que '
-            'tan generosa es su gente? ¿Por que si o por que no?')
-
     def check_reflexion_subgrupos(self):
         return self._ask_reflexion("subgrupos",
             'El r general de "Generosidad" vs. "Puntaje" era casi 0. Pero '
@@ -1456,67 +1397,6 @@ async function {uid}_submit() {{
             'América es negativo. En 2-3 oraciones: ¿que te dice esto sobre '
             'confiar en "el patron general" de todo un dataset sin mirar '
             'los subgrupos?')
-
-    def check_reflexion_interpretacion(self):
-        return self._ask_reflexion("interpretacion",
-            'Mira el resultado que imprimiste arriba (tus dos variables y '
-            'tu r). Sin usar la palabra "causa" ni ninguna variante: ¿que te '
-            'dice ese r sobre la relacion entre tus dos variables? ¿Y que es '
-            'lo que NO te dice?')
-
-    def check_reflexion_metodologica(self):
-        return self._ask_reflexion("metodologica",
-            'Miraste una matriz con muchisimos pares posibles y elegiste '
-            'uno. Si hubieras probado 20 pares al azar, es esperable que '
-            'alguno salga con un r alto solo por casualidad. En 2-3 '
-            'oraciones: ¿por que no deberias confiar automaticamente en "el '
-            'par con el r mas alto que encontre" solo porque salio alto?')
-
-    # ═══════════════════════════════════════════════════════════
-    # RONDAS 5-6 — continuación del patrón grafica+calcula
-    # ═══════════════════════════════════════════════════════════
-
-    def _check_ronda(self, key, header_n, x_col, y_col, r_exp, pts=20):
-        self._header(f"EJERCICIO {header_n} — Grafica y Calcula 🗺️", icon="🗺️", pts=pts)
-        checks = []
-        df = _get("df_felicidad")
-        x_val = _get(f"x_{key}")
-        y_val = _get(f"y_{key}")
-        r_val = _get(f"r_{key}")
-
-        if x_val is None:
-            checks.append((False, f"x_{key}", f"No definida — usa '{x_col}' en el eje X"))
-        elif _col_match(x_val, x_col, df):
-            checks.append((True, f"x_{key} == '{x_col}'", "✓"))
-        else:
-            checks.append((False, f"x_{key}", f"Debe ser '{x_col}', obtuve '{x_val}'"))
-
-        if y_val is None:
-            checks.append((False, f"y_{key}", f"No definida — usa '{y_col}' en el eje Y"))
-        elif _col_match(y_val, y_col, df):
-            checks.append((True, f"y_{key} == '{y_col}'", "✓"))
-        else:
-            checks.append((False, f"y_{key}", f"Debe ser '{y_col}', obtuve '{y_val}'"))
-
-        if r_val is None:
-            checks.append((False, f"r_{key}",
-                           f"No definida — usa df_felicidad['{x_col}'].corr(df_felicidad['{y_col}'])"))
-        elif not _is_number(r_val):
-            checks.append((False, f"r_{key}", f"Debe ser número, recibí {type(r_val).__name__}"))
-        elif _approx(r_val, r_exp, tol=0.01):
-            checks.append((True, f"r_{key} ≈ {r_exp:.3f}", "✓"))
-        else:
-            checks.append((False, f"r_{key}", f"Debe ser ≈{r_exp:.3f}, obtuve {r_val}"))
-
-        return self._award(key, checks, pts)
-
-    def check_ex5(self):
-        """Ex5 — Ronda 5: Libertad para tomar decisiones vs. Percepción de corrupción (20 pts)"""
-        return self._check_ronda("ex5", 5, _COL_LIBERTAD, _COL_CORRUPCION, 0.4388433064150672)
-
-    def check_ex6(self):
-        """Ex6 — Ronda 6: PBI per cápita vs. Generosidad (20 pts)"""
-        return self._check_ronda("ex6", 6, _COL_PBI, _COL_GENEROSIDAD, -0.07966231348976406)
 
     def check_debug1(self):
         """Debug1 — nombre de columna mal escrito: Punaje -> Puntaje (10 pts)"""
@@ -1605,10 +1485,6 @@ async function {uid}_submit() {{
         """Checkpoint — mitad de Semana 4 (antes de Sección C)"""
         self._checkpoints.add("mini_b")
         seccion = {
-            "t8": ("T8 — Ronda 5, antes de calcular", 5),
-            "ex5": ("Ejercicio 5 – Libertad vs. Percepción de corrupción", 20),
-            "ex6": ("Ejercicio 6 – PBI per cápita vs. Generosidad", 20),
-            "t9": ("T9 — Ronda 6, interpreta tu resultado", 5),
             "debug1": ("Debug 1 – Corrige el error de columna", 10),
             "ex7": ("Ejercicio 7 – Explora todas las correlaciones", 20),
         }
@@ -1650,67 +1526,6 @@ async function {uid}_submit() {{
         return self._award("ex8", checks, 20)
 
     # ═══════════════════════════════════════════════════════════
-    # MINI-PROYECTO — Integración 1 (elección propia + hipótesis)
-    # ═══════════════════════════════════════════════════════════
-
-    def check_intex1(self):
-        """Integración 1 — Mini-Proyecto: hallazgo propio del estudiante (25 pts)"""
-        self._header("INTEGRACIÓN 1 — Tu Propio Hallazgo 🔍", icon="🔍", pts=25)
-        checks = []
-        df = _get("df_felicidad")
-        mini_var_x = _get("mini_var_x")
-        mini_var_y = _get("mini_var_y")
-        mini_r = _get("mini_r")
-        mini_hipotesis = _get("mini_hipotesis")
-
-        valid_norms = {_norm(c) for c in _TODAS_COLUMNAS_MINI}
-        x_norm = _norm(mini_var_x) if isinstance(mini_var_x, str) else None
-        y_norm = _norm(mini_var_y) if isinstance(mini_var_y, str) else None
-
-        pair_ok = False
-        if mini_var_x is None or mini_var_y is None:
-            checks.append((False, "mini_var_x / mini_var_y",
-                           "No definidas — elige dos columnas de la matriz de arriba"))
-        elif (isinstance(mini_var_x, str) and _norm(mini_var_x) == _norm(_COL_PUESTO)) or \
-             (isinstance(mini_var_y, str) and _norm(mini_var_y) == _norm(_COL_PUESTO)):
-            checks.append((False, "mini_var_x / mini_var_y",
-                           "'Puesto' no vale -- su correlación con Puntaje es circular, no un hallazgo"))
-        elif x_norm not in valid_norms or y_norm not in valid_norms:
-            checks.append((False, "mini_var_x / mini_var_y",
-                           f"Deben ser columnas reales del dataset, obtuve '{mini_var_x}' / '{mini_var_y}'"))
-        elif x_norm == y_norm:
-            checks.append((False, "mini_var_x / mini_var_y", "Debes elegir DOS columnas distintas"))
-        elif frozenset([x_norm, y_norm]) in _USED_PAIRS:
-            checks.append((False, "mini_var_x / mini_var_y",
-                           "Este par ya se trabajó en una ronda anterior de Semana 3/4 -- elige un par que no hayas usado todavía"))
-        else:
-            checks.append((True, "mini_var_x / mini_var_y — par nuevo y válido", "✓"))
-            pair_ok = True
-
-        if pair_ok and df is not None:
-            col_x_real = next(c for c in _TODAS_COLUMNAS_MINI if _norm(c) == x_norm)
-            col_y_real = next(c for c in _TODAS_COLUMNAS_MINI if _norm(c) == y_norm)
-            r_real = df[col_x_real].corr(df[col_y_real])
-            if mini_r is None:
-                checks.append((False, "mini_r", "No definida"))
-            elif not _is_number(mini_r):
-                checks.append((False, "mini_r", f"Debe ser número, recibí {type(mini_r).__name__}"))
-            elif _approx(mini_r, r_real, tol=0.01):
-                checks.append((True, f"mini_r ≈ {r_real:.3f}", "✓  Coincide con tu propio par"))
-            else:
-                checks.append((False, "mini_r", f"Debe ser ≈{r_real:.3f} (el r real de tu par), obtuve {mini_r}"))
-        else:
-            checks.append((False, "mini_r", "No se pudo validar -- corrige mini_var_x/mini_var_y primero"))
-
-        if _is_nontrivial_text(mini_hipotesis):
-            checks.append((True, "mini_hipotesis", "✓  Hipótesis registrada"))
-        else:
-            checks.append((False, "mini_hipotesis",
-                           "Escribe una hipótesis real (no dejes '___') de por qué crees que estas dos variables podrían estar relacionadas"))
-
-        return self._award("intex1", checks, 25)
-
-    # ═══════════════════════════════════════════════════════════
     # CHECKPOINT — fin de la Semana 4 / Misión 2
     # ═══════════════════════════════════════════════════════════
 
@@ -1729,7 +1544,6 @@ async function {uid}_submit() {{
         seccion = {
             "t10": ("T10 — La trampa de Oceanía", 5),
             "ex8": ("Ejercicio 8 – Generosidad por continente", 20),
-            "intex1": ("Integración 1 – Tu propio hallazgo", 25),
         }
         self._render_checkpoint("CHECKPOINT — FIN DE LA MISIÓN 2", seccion, "#ff9e2c")
 
@@ -1746,7 +1560,7 @@ async function {uid}_submit() {{
         if pct >= 96:
             final_msg = f"🏆 EN LA CIMA DEL BIENESTAR. {n.upper()}, tu nombre entra al Salón de la Fama de la Misión 2."
         elif pct >= 81:
-            final_msg = f"☀️ CASI AMANECE. {n}, encontraste tu propio patrón. La Semana 5 lo va a poner a prueba."
+            final_msg = f"☀️ CASI AMANECE. {n}, ya sabes cuando desconfiar del patrón general. Ahora a tu proyecto propio."
         elif pct >= 61:
             final_msg = f"🧭 EXPLORADOR DE PATRONES. {n}, ya sabes leer un patrón por subgrupo. ¡Sigue así!"
         elif pct >= 41:
@@ -1761,7 +1575,6 @@ async function {uid}_submit() {{
             "cartografo_patrones": "🗺️ Cartógrafo de Patrones",
             "explorador_completo": "🧭 Explorador Completo",
             "depurador_feliz":     "🔧 Depurador Feliz",
-            "descubridor":         "🔍 Descubridor",
             "medalla_camino":      "🌻 Medalla del Camino",
             "racha_bienestar":     "🔥 Racha de Bienestar",
             "felicidad_plena":     "🏆 Felicidad Plena",

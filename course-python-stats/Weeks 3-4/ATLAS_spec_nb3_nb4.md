@@ -66,7 +66,7 @@ students will mistype them here too).
 
 ---
 
-## `nb4_correlacion.ipynb` — suggested `_CORE_MAX` ≈ 145
+## `nb4_correlacion.ipynb` — `_CORE_MAX` = 60 (was 150, see 2026-08-29 update below)
 
 | Check | Cell ID(s) | Type | Expected variables | Correct value | Suggested pts |
 |---|---|---|---|---|---|
@@ -86,15 +86,19 @@ students will mistype them here too).
 | `check_reflexion_metodologica` | `nb4-miniproyecto-reflexiona2-code` | 💭 reflection | — | **This is the GAUSS-required anti-spurious-correlation check** — grade on whether they articulate that scanning many pairs makes a high r likelier by chance alone (multiple-comparisons reasoning), not just "correlation isn't causation" restated | 5 |
 | `check_mini_c` | `nb4-checkpoint-c` | checkpoint | — | gates on 80% of the above | 0 |
 
-**Continuity requirement (not a `check_*`, but load-bearing):** whatever storage format
-`check_intex1` ends up validating (`mini_var_x`/`mini_var_y`/`mini_r`/`mini_hipotesis`) is what
-Week 5's causation-debunking session reuses as its input material, per
-`Teoria_Semanas3-4_Mision2_Correlacion.md`'s explicit continuity note. Don't change the variable
-names without telling whoever builds Week 5.
+**Continuity requirement (not a `check_*`, but load-bearing) — updated 2026-08-29:**
+`check_intex1` and its two reflections were removed from this notebook (see the 2026-08-29 update
+below). Week 5's causation-debunking session should instead reuse
+`course-python-stats/Weeks 3-4/proyecto_investigacion.ipynb`'s hypothesis + confound write-up
+(cells `proy-hipotesis-respuesta` and `proy-reflexion-metodo-respuesta`) as its input material.
+Don't change that notebook's cell IDs without telling whoever builds Week 5. *(Original note, for
+history: this used to point at `mini_var_x`/`mini_var_y`/`mini_r`/`mini_hipotesis` from
+`check_intex1`, per `Teoria_Semanas3-4_Mision2_Correlacion.md`'s continuity note — superseded.)*
 
-**PIXEL note (carried over from `04_GAUSS.md`'s risk flag, still applies):** don't frame
-`check_intex1`/its achievement as "you win if you found the highest r" — that directly rewards
-the p-hacking-adjacent habit `check_reflexion_metodologica` is trying to inoculate against.
+**PIXEL note (carried over from `04_GAUSS.md`'s risk flag, still applies — now to the project
+notebook instead):** don't frame the project notebook's hypothesis step as "you win if you found
+the highest r" — that directly rewards the p-hacking-adjacent habit its anti-p-hacking prompt
+(`proy-reflexion-metodo-md`, Pregunta 1) is trying to inoculate against.
 
 ---
 
@@ -103,8 +107,8 @@ the p-hacking-adjacent habit `check_reflexion_metodologica` is trying to inocula
 | File | `_CORE_MAX` |
 |---|---|
 | `nb3_correlacion.ipynb` | 200 *(was 130 — see 2026-08-21 update below)* |
-| `nb4_correlacion.ipynb` | 150 |
-| **Combined** | **350** |
+| `nb4_correlacion.ipynb` | 60 *(was 150 — see 2026-08-29 update below)* |
+| **Combined** | **260** *(was 350)* |
 
 Still above the nominal ~180 `WORKFORCE_CONTRACT.md` §2 figure, but down from the old single
 file's 264 alone (with Semana 4 not even built yet at that point) — and the user's 2026-08-19
@@ -165,3 +169,44 @@ worth knowing about:
 The old `autograder_nb3_semana3.py` has been deleted (WORKFORCE_HANDOFF.md Done log, 2026-08-21)
 now that both replacements are built and validated — nothing in the current notebooks references
 it anymore.
+
+---
+
+## Update — 2026-08-29: nb4 trimmed (Rondas 5–6 + Mini-Proyecto cut), new project notebook
+
+User decision: nb4's Rondas 5–6 (`check_ex5`, `check_ex6`, `check_t8`, `check_t9`,
+`check_reflexion_ronda6` — pure repetition of nb3's scatter+`.corr()` pattern, judged low-value
+for supervised class time) and the Mini-Proyecto integration exercise (`check_intex1`,
+`check_reflexion_interpretacion`, `check_reflexion_metodologica`) were removed from
+`build_nb4.py`/`autograder_nb4.py`. Kept unchanged: `check_debug1`, `check_ex7` (matrix-wide
+exploration), `check_mini_b`, all of Sección C (`check_t10`, `check_ex8`,
+`check_reflexion_subgrupos`), `check_mini_c`. Both checkpoints still gate correctly on the
+remaining checks (`check_mini_b`'s `seccion` dict now lists only `debug1`/`ex7`; `check_mini_c`'s
+now lists only `t10`/`ex8`).
+
+`_CORE_MAX`: 150 → 60 (5 `t10` + 10 `debug1` + 20 `ex7` + 20 `ex8` + 5 `refl_subgrupos`) —
+verified against the sum of remaining `_award()`/`_award_reflexion()` calls in the built file.
+Achievement `descubridor` (gated on `intex1`) removed; `cartografo_patrones` repointed from
+`[ex5,ex6,ex7,ex8]` to `[ex7,ex8]`. `_USED_PAIRS`/`_TODAS_COLUMNAS_MINI` (only consumed by
+`check_intex1`) removed as dead code. `_test_nb3_nb4.py` was updated in step (removed the
+now-dead `t8`/`t9`, `ex5`/`ex6`, `intex1`, and `ronda6`/`interpretacion`/`metodologica` reflection
+assertions; `declared_nb4` recomputed to `5+10+20+20+5=60`) and re-run: 68/68 assertions pass.
+`_test_nb3_nb4_lite.py` was **not** touched — see the `nb4_lite` note below, it still tests the
+untrimmed lite track.
+
+In place of the Mini-Proyecto: a new notebook, `build_proyecto_investigacion.py` →
+`proyecto_investigacion.ipynb`, same folder. Each student/pair picks their own real dataset and
+claim (candidate menu still pending from the user — placeholder cell `proy-elige-dataset-md`
+marks the TODO) instead of a pair within `2019_es.csv`. No autograder, no `check_*`, no Supabase
+— graded by an 85-pt human-scored rubric printed in the notebook itself
+(`proy-rubrica-md`), reusing `WORKFORCE_CONTRACT.md` §4's capstone criteria wording minus the
+regression/clustering row. See the Continuity requirement note above (now updated) for where
+Semana 5 should pull its input material from instead of `check_intex1`. Full rationale:
+`WORKFORCE_HANDOFF.md`'s 2026-08-29 Done log entry and `WORKFORCE_CONTRACT.md`'s matching Change
+Log entry.
+
+`nb4_lite_correlacion.ipynb` / `autograder_nb4_lite.py` (the interpretation-track sibling) were
+**not** touched by this update — flagging here since they were built to mirror nb4's content
+verbatim (`WORKFORCE_CONTRACT.md` §2, 2026-08-21 entry) and are now out of sync with the trimmed
+nb4. Whoever owns that track next should decide whether to trim it to match or leave it as the
+fuller "everything nb4 used to cover" option for inclusion students.

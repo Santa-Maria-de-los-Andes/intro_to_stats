@@ -10,7 +10,7 @@ build_nbN.py es autocontenido, no importa de otro build script
 (COURSE_TEMPLATE.md SS3).
 
 check_ex/check_debug/check_tN SIGUEN la numeracion global desde donde nb3
-termina (ex5-8, t8-10, debug1, intex1) -- narrativamente esto sigue siendo
+termina (ex7-8, t10, debug1) -- narrativamente esto sigue siendo
 "Mision 2, segunda clase", aunque el archivo ya no comparta nb-prefijo con
 nb3_correlacion.ipynb (rename explicito del usuario 2026-08-20). Ver
 `ATLAS_spec_nb3_nb4.md` para el detalle completo que ATLAS necesita.
@@ -18,12 +18,22 @@ nb3_correlacion.ipynb (rename explicito del usuario 2026-08-20). Ver
 Contenido nuevo en este archivo (no existia antes del rebuild 2026-08-20):
 Seccion C (correlacion por subgrupo de continente, via filtrado booleano +
 `.corr()` -- NO `.groupby().apply(lambda...)`, fuera del temario comprometido,
-ver WORKFORCE_CONTRACT.md SS5) y el Mini-Proyecto de integracion (el
-estudiante elige su propio par, con hipotesis obligatoria + pregunta
-anti-p-hacking, requisitos de 04_GAUSS.md via
-Teoria_Semanas3-4_Mision2_Correlacion.md SS2 Seccion D). Todos los numeros
-(incluidos los de Seccion C por continente) se calcularon directamente
-contra 2019_es.csv 2026-08-20.
+ver WORKFORCE_CONTRACT.md SS5). Todos los numeros (incluidos los de Seccion C
+por continente) se calcularon directamente contra 2019_es.csv 2026-08-20.
+
+RECORTE 2026-08-29 (decision del usuario): las Rondas 5-6 (repeticion pura
+del patron grafica+calcula de la Semana 3, ex5/ex6/t8/t9/reflexion_ronda6) y
+el Mini-Proyecto de integracion (intex1 + sus dos reflexiones) se eliminaron
+de este archivo. Motivo: las Rondas 5-6 no aportaban una habilidad nueva
+(bajo valor de supervision en clase), y el Mini-Proyecto se reemplaza por un
+proyecto de investigacion mas grande y realmente propio del estudiante
+(propio dataset, no solo propio par dentro de 2019_es.csv) --
+`build_proyecto_investigacion.py` / `proyecto_investigacion.ipynb`, mismo
+folder. Ese notebook nuevo, no `intex1`, es ahora el material de entrada de
+la Semana 5 -- ver WORKFORCE_HANDOFF.md Done log 2026-08-29 y la nota de
+continuidad actualizada en `ATLAS_spec_nb3_nb4.md`. Seccion C (subgrupos) se
+mantiene intacta: es la habilidad distinta y deliberadamente disenada como
+puente a la Semana 5, no una repeticion.
 """
 import json
 
@@ -68,15 +78,17 @@ s4 = []
 
 s4.append(md("nb4-titulo", """\
 # Mision 2: Buscando Patrones
-### Semana 4 -- Subgrupos y tu Propio Hallazgo
+### Semana 4 -- Subgrupos
 
 **Donde quedamos:** en la Semana 3 aprendiste a leer un patron con el ojo y a
-ponerle un numero exacto (`.corr()`). Hoy: dos rondas mas para terminar de
-solidificar el patron, un vistazo a que pasa **dentro de cada continente**
-(el patron general no siempre cuenta toda la historia), y para cerrar, tu
-propio mini-proyecto -- vas a elegir un par de variables, calcular su
-relacion, y defender por que crees que estan relacionadas. Ese hallazgo es el
-material que vas a usar la **Semana 5**, asi que guardalo bien.
+ponerle un numero exacto (`.corr()`). Hoy: un debug, una exploracion de
+**todas** las correlaciones del dataset a la vez, y un vistazo a que pasa
+**dentro de cada continente** (el patron general no siempre cuenta toda la
+historia).
+
+Tu propio proyecto de investigacion -- con tu propio dataset -- arranca en
+clase aparte de este notebook. Ese es el hallazgo que vas a usar la
+**Semana 5**, asi que guardalo bien.
 """))
 
 s4.append(code("nb4-setup", """\
@@ -92,68 +104,6 @@ import matplotlib.pyplot as plt
 df_felicidad = pd.read_csv('2019_es.csv')
 
 print("Dataset cargado.")"""))
-
-# ─── Rondas 5-6 (continuan el patron) ────────────────────────────────────
-s4.append(md("nb4-repeticion-md", """\
-## 📈🔢 Dos rondas mas para cerrar el patron
-
-Mismo patron que la Semana 3: `plt.scatter()` + `.corr()`, un ejercicio,
-ninguna de las dos columnas es `Puntaje`.
-"""))
-
-s4.append(md("nb4-ronda5-md", """\
-#### Ronda 5 -- Libertad para tomar decisiones vs. Percepción de corrupción
-"""))
-s4.append(teoria_check("nb4-t8-check", 8))
-s4.append(md("nb4-ronda5-ej-md", """\
-##### ✅ Ejercicio 5 -- Grafica y calcula (20 pts)
-
-🔨 `Libertad para tomar decisiones` (eje X) vs. `Percepción de corrupción`
-(eje Y).
-
-Variables que espera el autograder: `x_ex5`, `y_ex5`, `r_ex5`.
-"""))
-s4.append(code("nb4-ronda5-code", """\
-# 🔨 CONSTRUYE
-
-# ============================
-#      Tu codigo aqui
-# ============================
-
-
-"""))
-s4.append(code("nb4-ronda5-check", "grader.check_ex5()"))
-
-s4.append(md("nb4-ronda6-md", """\
-#### Ronda 6 -- PBI per cápita vs. Generosidad
-"""))
-s4.append(md("nb4-ronda6-ej-md", """\
-##### ✅ Ejercicio 6 -- Grafica y calcula, la ultima ronda (20 pts)
-
-🔨 `PBI per cápita` (eje X) vs. `Generosidad` (eje Y).
-
-Variables que espera el autograder: `x_ex6`, `y_ex6`, `r_ex6`.
-"""))
-s4.append(code("nb4-ronda6-code", """\
-# 🔨 CONSTRUYE
-
-# ============================
-#      Tu codigo aqui
-# ============================
-
-
-"""))
-s4.append(code("nb4-ronda6-check", "grader.check_ex6()"))
-s4.append(teoria_check("nb4-t9-check", 9))
-
-s4.append(md("nb4-ronda6-reflexiona-md", """\
-##### 💭 Reflexiona (respuesta abierta -- calificada por IA, +5 XP)
-
-`PBI per cápita` y `Generosidad` dan un r muy cercano a 0. ¿Te parece
-razonable que el dinero de un pais casi no prediga que tan generosa es su
-gente? ¿Por que si o por que no?
-"""))
-s4.append(reflexion_check("nb4-ronda6-reflexiona-code", "ronda6"))
 
 # ─── Debug ────────────────────────────────────────────────────────────
 s4.append(md("nb4-debug1-md", """\
@@ -292,74 +242,6 @@ dataset sin mirar los subgrupos?
 """))
 s4.append(reflexion_check("nb4-seccionc-reflexiona-code", "subgrupos"))
 
-# ─── Mini-Proyecto ────────────────────────────────────────────────────
-s4.append(md("nb4-miniproyecto-header", """\
----
-## 🔍 Mini-Proyecto -- Encuentra tu Propio Patron
-
-Ya trabajaste ocho pares distintos hoy y la Semana pasada, todos elegidos por
-el curso. Ahora te toca a ti: vas a explorar **todas** las combinaciones
-posibles entre las 7 columnas numericas del dataset (no solo contra
-`Puntaje`) y elegir un par que **no hayas usado ya** en ninguna ronda
-anterior.
-
-**Este hallazgo es tu material de entrada para la Semana 5** -- vas a
-defenderlo (o a que te lo cuestionen) la proxima clase, asi que elige algo
-que realmente te parezca interesante.
-"""))
-
-s4.append(code("nb4-miniproyecto-matriz", """\
-# 👀 OBSERVA: la matriz completa de correlaciones entre TODAS las columnas numericas
-df_felicidad.corr(numeric_only=True)"""))
-
-s4.append(md("nb4-miniproyecto-ej-md", """\
-#### ✅ Integracion 1 -- Tu hallazgo (25 pts)
-
-🔨 Elige un par de columnas de la matriz de arriba que **no** hayas usado en
-ninguna ronda de Semana 3 o Semana 4 (revisa: ya usaste Corrupción-Puntaje,
-Esperanza-Puntaje, Apoyo social-Puntaje, Libertad-Puntaje,
-Generosidad-Puntaje, PBI-Puntaje, PBI-Esperanza, Apoyo social-Esperanza,
-Libertad-Corrupción, PBI-Generosidad). Construye el scatter, calcula el r, y
-escribe **una hipotesis**: ¿por que crees que esas dos variables podrian
-estar relacionadas? No alcanza con reportar el numero mas alto que
-encontraste -- necesitas una razon.
-
-Variables que espera el autograder: `mini_var_x`, `mini_var_y` (nombres de
-columna, string), `mini_r` (el coeficiente), `mini_hipotesis` (tu texto,
-string, al menos una oracion).
-"""))
-s4.append(code("nb4-miniproyecto-code", """\
-# 🔨 CONSTRUYE
-
-# ============================
-#      Tu codigo aqui
-# ============================
-
-
-print(f"{mini_var_x} vs. {mini_var_y} -> r = {mini_r:.3f}")
-print(f"Hipotesis: {mini_hipotesis}")"""))
-s4.append(code("nb4-miniproyecto-check", "grader.check_intex1()"))
-
-s4.append(md("nb4-miniproyecto-reflexiona1-md", """\
-#### 💭 Reflexiona -- interpreta tu hallazgo (respuesta abierta -- calificada por IA, +5 XP)
-
-Mira el resultado que imprimiste arriba (tus dos variables y tu r). Sin usar
-la palabra "causa" ni ninguna variante: ¿que te dice ese r sobre la relacion
-entre tus dos variables? ¿Y que es lo que **no** te dice?
-"""))
-s4.append(reflexion_check("nb4-miniproyecto-reflexiona1-code", "interpretacion"))
-
-s4.append(md("nb4-miniproyecto-reflexiona2-md", """\
-#### 💭 Reflexiona -- piensa en el metodo (respuesta abierta -- calificada por IA, +5 XP)
-
-Miraste una matriz con muchisimos pares posibles y elegiste uno. Si hubieras
-probado 20 pares al azar, es esperable que **alguno** salga con un r alto
-solo por casualidad. En 2-3 oraciones: ¿por que no deberias confiar
-automaticamente en "el par con el r mas alto que encontre" solo porque salio
-alto?
-"""))
-s4.append(reflexion_check("nb4-miniproyecto-reflexiona2-code", "metodologica"))
-
 s4.append(code("nb4-checkpoint-c", """\
 # ✅ CHECKPOINT -- necesitas 80% en esta seccion para continuar
 grader.check_mini_c()"""))
@@ -369,9 +251,11 @@ s4.append(md("nb4-cierre", """\
 ## 🏁 Fin de la Mision 2 -- Semanas 3-4
 
 Aprendiste a leer un patron, a ponerle un numero, a desconfiar de ese numero,
-y a encontrar tus propios patrones en datos que nadie te guio. Guarda tu par
-de variables, tu r, y tu hipotesis del mini-proyecto -- la **Semana 5** va a
-poner a prueba exactamente eso.
+y a desconfiar del patron general cuando no mira los subgrupos. Ahora te toca
+a ti: tu proyecto de investigacion, con tu propio dataset, es donde vas a
+encontrar (y defender) un patron que nadie te dio ya armado. Guarda tu par de
+variables, tu r, y tu hipotesis -- la **Semana 5** va a poner a prueba
+exactamente eso.
 """))
 s4.append(code("nb4-resumen", "grader.resumen()"))
 

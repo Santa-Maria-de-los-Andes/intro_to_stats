@@ -168,7 +168,7 @@ reset_globals(ag4)
 g4 = ag4.Autograder()
 g4._dni = "TEST"
 
-for n in range(8, 11):
+for n in [10]:
     spec = g4._TEORIA[n]
     correct = spec["correct"]
     wrong = next(l for l in "abcd" if l != correct)
@@ -182,26 +182,6 @@ for n in range(8, 11):
     g4._grade_teoria(n, wrong)
     pts, mx = g4._scores[f"t{n}"]
     check(f"nb4 t{n} incorrecta -> 0/{mx}", pts == 0)
-
-RONDAS_NB4 = [
-    ("ex5", ag4._COL_LIBERTAD, ag4._COL_CORRUPCION, 0.4388433064150672),
-    ("ex6", ag4._COL_PBI, ag4._COL_GENEROSIDAD, -0.07966231348976406),
-]
-for key, xcol, ycol, rexp in RONDAS_NB4:
-    reset_globals(ag4)
-    r_real = DF[xcol].corr(DF[ycol])
-    setg(**{f"x_{key}": xcol, f"y_{key}": ycol, f"r_{key}": r_real})
-    g4._scores.pop(key, None)
-    getattr(g4, f"check_{key}")()
-    pts, mx = g4._scores[key]
-    check(f"nb4 {key} solucion correcta -> {mx}/{mx}", pts == mx)
-
-    reset_globals(ag4)
-    setg(**{f"x_{key}": xcol, f"y_{key}": ycol, f"r_{key}": 0.5})
-    g4._scores.pop(key, None)
-    getattr(g4, f"check_{key}")()
-    pts, mx = g4._scores[key]
-    check(f"nb4 {key} r hardcodeado (0.5) -> pts < max", pts < mx)
 
 # ── Debug1 ──────────────────────────────────────────────────────
 reset_globals(ag4)
@@ -259,52 +239,8 @@ g4.check_ex8()
 pts, mx = g4._scores["ex8"]
 check("nb4 ex8 con r general sin filtrar (error comun) -> pts < max", pts < mx)
 
-# ── Integracion 1 (mini-proyecto) ──────────────────────────────────
-reset_globals(ag4)
-setg(mini_var_x=ag4._COL_APOYO, mini_var_y=ag4._COL_LIBERTAD,
-     mini_r=DF[ag4._COL_APOYO].corr(DF[ag4._COL_LIBERTAD]),
-     mini_hipotesis="Creo que estan relacionadas porque la libertad percibida podria "
-                     "reforzar el apoyo social percibido en sociedades mas abiertas.")
-g4._scores.pop("intex1", None)
-g4.check_intex1()
-pts, mx = g4._scores["intex1"]
-check(f"nb4 intex1 par nuevo valido -> {mx}/{mx}", pts == mx)
-
-reset_globals(ag4)
-# par YA usado en una ronda anterior (PBI vs Puntaje) -- debe rechazarse
-setg(mini_var_x=ag4._COL_PBI, mini_var_y=ag4._COL_PUNTAJE,
-     mini_r=DF[ag4._COL_PBI].corr(DF[ag4._COL_PUNTAJE]),
-     mini_hipotesis="Hipotesis real de mas de quince caracteres para probar el rechazo.")
-g4._scores.pop("intex1", None)
-g4.check_intex1()
-pts, mx = g4._scores["intex1"]
-check("nb4 intex1 par ya usado (PBI-Puntaje) -> rechazado, pts < max", pts < mx)
-
-reset_globals(ag4)
-# Puesto -- circular, debe rechazarse
-setg(mini_var_x=ag4._COL_PUESTO, mini_var_y=ag4._COL_PUNTAJE,
-     mini_r=DF[ag4._COL_PUESTO].corr(DF[ag4._COL_PUNTAJE]),
-     mini_hipotesis="Hipotesis real de mas de quince caracteres para probar el rechazo.")
-g4._scores.pop("intex1", None)
-g4.check_intex1()
-pts, mx = g4._scores["intex1"]
-check("nb4 intex1 con 'Puesto' (circular) -> rechazado, pts < max", pts < mx)
-
-reset_globals(ag4)
-# hipotesis placeholder -- debe perder esos puntos
-setg(mini_var_x=ag4._COL_APOYO, mini_var_y=ag4._COL_LIBERTAD,
-     mini_r=DF[ag4._COL_APOYO].corr(DF[ag4._COL_LIBERTAD]),
-     mini_hipotesis="___")
-g4._scores.pop("intex1", None)
-g4.check_intex1()
-pts, mx = g4._scores["intex1"]
-check("nb4 intex1 hipotesis placeholder -> pts < max", pts < mx)
-
 # ── Reflexiones nb4 ─────────────────────────────────────────────
-for rid, method in [("ronda6", "check_reflexion_ronda6"),
-                     ("subgrupos", "check_reflexion_subgrupos"),
-                     ("interpretacion", "check_reflexion_interpretacion"),
-                     ("metodologica", "check_reflexion_metodologica")]:
+for rid, method in [("subgrupos", "check_reflexion_subgrupos")]:
     g4._scores.pop(f"refl_{rid}", None)
     g4._call_grade_reflexion = fake_grade_ok
     g4._grade_reflexion(rid, "Esta es una reflexion real de mas de quince caracteres.")
@@ -312,7 +248,7 @@ for rid, method in [("ronda6", "check_reflexion_ronda6"),
     check(f"nb4 refl_{rid} con IA simulada -> 4/{mx}", pts == 4 and mx == 5)
 
 # ── _CORE_MAX == suma de max_pts declarados ──────────────────────
-declared_nb4 = 5 * 3 + 20 * 2 + 10 + 20 + 20 + 5 * 4 + 25
+declared_nb4 = 5 + 10 + 20 + 20 + 5
 check(f"nb4 _CORE_MAX ({ag4._CORE_MAX}) == suma declarada ({declared_nb4})",
       ag4._CORE_MAX == declared_nb4)
 

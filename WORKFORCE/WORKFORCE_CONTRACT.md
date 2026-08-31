@@ -50,7 +50,7 @@ now exist in the Semana 4 file. Full rebuild rationale and validation in `WORKFO
 | Weeks | Focus | Learning Target | XP Budget |
 |---|---|---|---|
 | 1–2 | Pandas bootcamp (2 notebooks, "Mission 1: Data Recovery" Semana 1 / Semana 2) | Load, explore, filter, describe a dataset | ~150 (under review — see `WORKFORCE_HANDOFF.md` ticket #11) |
-| 3–4 | Correlation (2 notebooks, "Misión 2: Buscando Patrones" Semana 3 / Semana 4) | Calculate and visualize correlation in one step; `.groupby()`/filter by subgroup; own-choice mini-project | ~180 nominal — actual suggested total ≈275 across both files (see `ATLAS_spec_nb3_semana3-4.md`); not treated as a hard budget per the user's 2026-08-19 call that per-notebook % normalization makes the raw `_CORE_MAX` non-comparable across notebooks |
+| 3–4 | Correlation (2 notebooks, "Misión 2: Buscando Patrones" Semana 3 / Semana 4) | Calculate and visualize correlation in one step; `.groupby()`/filter by subgroup | ~180 nominal — actual `_CORE_MAX` = 200 (nb3) + 60 (nb4, trimmed 2026-08-29) = 260 combined; not treated as a hard budget per the user's 2026-08-19 call that per-notebook % normalization makes the raw `_CORE_MAX` non-comparable across notebooks. Supersedes the earlier "≈275 across both files" figure, which predates the 2026-08-29 trim. |
 
 **New (2026-08-21): Weeks 3–4 gained a parallel "ruta de interpretación" track**
 (`nb3_lite_correlacion.ipynb` / `nb4_lite_correlacion.ipynb`, from new sibling build
@@ -72,6 +72,7 @@ duplicating it — only the exercise-completion layer differs. Distinct `noteboo
 comparison. `_CORE_MAX` = 50 (nb3_lite) / 55 (nb4_lite), both theory+reflection only
 (no `ex`/`debug`/`intex` code points). Full design rationale and open questions in
 `WORKFORCE_HANDOFF.md`'s 2026-08-21 Done log entry.
+| 3–4→5 bridge | **New (2026-08-29):** `proyecto_investigacion.ipynb` (own dataset, own claim, no autograder) | Started in class Semana 4, due before Semana 5; presentation opens Semana 5. Replaces nb4's cut Mini-Proyecto — see 2026-08-29 Change Log entry and `WORKFORCE_HANDOFF.md` Done log | 85 pts, human-graded rubric (not XP) |
 | 5 | Causation reality check | Distinguish correlation from causation; identify confounders | ~100 |
 | 6 | Linear regression | Interpret a fitted regression, not derive it | ~150 |
 | 7 | K-means clustering | Interpret clusters, not derive the algorithm | ~120 |
@@ -158,6 +159,23 @@ assembles the notebook** (`COURSE_TEMPLATE.md` §12).
 
 ## Change Log
 
+- 2026-08-29 — §2 updated: nb4's Rondas 5–6 (pure repeat of Semana 3's
+  scatter+`.corr()` pattern) and its Mini-Proyecto (`intex1` + two
+  reflections) were cut — user decision, both distinct-skill content
+  (Debug 1, Ejercicio 7, Sección C's subgroup work) and the checkpoints were
+  kept. nb4 `_CORE_MAX`: 150 → 60. In their place: a new notebook,
+  `proyecto_investigacion.ipynb` (`course-python-stats/Weeks 3-4/`), where
+  each student/pair picks their own real dataset and claim — started in
+  class Semana 4 with supervision, due before Semana 5, presented at Semana
+  5's opening. It has no autograder/Supabase integration; it's graded by a
+  human-scored 85-pt rubric reusing the Week 8 capstone's own criteria
+  language (§4) minus the regression/clustering row — the first built
+  instance of the "rubric-graded, not `check_*`-graded" exception §4
+  describes, ahead of the capstone itself. **Continuity note superseding the
+  one that used to live on `check_intex1`:** whoever designs Semana 5 should
+  treat this new notebook's hypothesis + confound write-up as the input
+  material, not nb4's (now-removed) `intex1`. Full rationale in
+  `WORKFORCE_HANDOFF.md`'s 2026-08-29 Done log entry.
 - 2026-08-21 — §2 updated: added the Weeks 3–4 "ruta de interpretación" track
   (`nb3_lite_correlacion.ipynb` / `nb4_lite_correlacion.ipynb`) for inclusion students —
   same content, code-writing removed. See §2's new paragraph and `WORKFORCE_HANDOFF.md`'s
