@@ -746,14 +746,20 @@ async function loadLeaderboard() {
 
     if (error) throw error;
 
-    if (!data || data.length === 0) {
+    // Excluir envios de prueba del autograder (dni/email 'TEST') del leaderboard publico
+    const realData = (data || []).filter(row =>
+      (row.dni   || '').toString().trim().toUpperCase() !== 'TEST' &&
+      (row.email || '').toString().trim().toUpperCase() !== 'TEST'
+    );
+
+    if (realData.length === 0) {
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('error-state').style.display   = 'block';
       document.getElementById('error-msg').textContent        = 'Aún no hay atletas registrados. ¡Sé el primero en llegar al podio!';
       return;
     }
 
-    allPlayers = dedup(data);  // un renglon por alumno, mejor puntaje primero
+    allPlayers = dedup(realData);  // un renglon por alumno, mejor puntaje primero
     buildFilterButtons(allPlayers);
     setFilter(activeFilter);   // re-apply current filter (or 'all' on first load)
   } catch (err) {
