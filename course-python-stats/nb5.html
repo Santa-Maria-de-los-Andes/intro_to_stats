@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Oráculo de Datos · I.E. Santa María de los Andes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: #120a1f;
+      color: #e4dcf5;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Scanlines overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,.04) 3px,
+        rgba(0,0,0,.04) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* ── Pixel font shorthand ── */
+    .px { font-family: 'Press Start 2P', monospace; }
+
+    /* ── Keyframes ── */
+    @keyframes glow-violet {
+      0%,100% { text-shadow: 0 0 14px rgba(177,133,240,.8), 2px 2px 0 #3d2270; }
+      50%      { text-shadow: 0 0 32px rgba(177,133,240,1), 0 0 60px rgba(155,93,229,.5), 2px 2px 0 #3d2270; }
+    }
+    @keyframes blink     { 50% { opacity: 0; } }
+    @keyframes float     { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    @keyframes xp-fill   { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes slide-in  { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes shimmer   { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes pulse-ring {
+      0%   { box-shadow: 0 0 0 0 rgba(177,133,240,.45); }
+      70%  { box-shadow: 0 0 0 10px rgba(177,133,240,0); }
+      100% { box-shadow: 0 0 0 0 rgba(177,133,240,0); }
+    }
+    @keyframes ticker { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+    @keyframes spin-dot { to { transform: rotate(360deg); } }
+    @keyframes count-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Layout ── */
+    .page { max-width: 960px; margin: 0 auto; padding: 0 16px 40px; }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      padding: 32px 16px 24px;
+      border-bottom: 2px solid #b185f040;
+      margin-bottom: 24px;
+    }
+    .header-title {
+      font-size: clamp(14px, 3vw, 22px);
+      color: #b185f0;
+      animation: glow-violet 2.5s ease-in-out infinite;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+    }
+    .header-sub {
+      font-size: 8px;
+      color: #9b5de5;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Live ticker ── */
+    .ticker-wrap {
+      overflow: hidden;
+      background: #170f2c;
+      border: 1px solid #b185f030;
+      border-radius: 2px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+    }
+    .ticker-label {
+      flex-shrink: 0;
+      background: #b185f0;
+      color: #170f2c;
+      font-size: 7px;
+      padding: 0 10px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      letter-spacing: 1px;
+    }
+    .ticker-inner {
+      white-space: nowrap;
+      animation: ticker 28s linear infinite;
+      font-size: 8px;
+      color: #b185f0;
+      padding: 0 40px;
+    }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: #170f2c;
+      border: 1px solid #b185f030;
+      border-radius: 4px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+    .stat-label { font-size: 7px; color: #4a4270; letter-spacing: 1px; margin-bottom: 10px; }
+    .stat-value { font-size: clamp(14px, 3vw, 22px); color: #b185f0; }
+    .stat-value.green { color: #9b5de5; }
+    .stat-value.cyan  { color: #5dd9ff; }
+
+    /* ── Podium ── */
+    .podium-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+      align-items: end;
+    }
+    .podium-card {
+      border-radius: 4px;
+      padding: 16px 12px 14px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .podium-card.rank1 {
+      background: linear-gradient(160deg, #170a2e, #2a1252);
+      border: 2px solid #b185f0;
+      box-shadow: 0 0 28px rgba(177,133,240,.22), 0 8px 24px rgba(0,0,0,.6);
+      order: 2;
+      animation: pulse-ring 2.5s ease-in-out infinite;
+    }
+    .podium-card.rank2 {
+      background: linear-gradient(160deg, #0d0e12, #171922);
+      border: 2px solid #d8d8e6;
+      box-shadow: 0 0 16px rgba(216,216,230,.14), 0 6px 18px rgba(0,0,0,.5);
+      order: 1;
+    }
+    .podium-card.rank3 {
+      background: linear-gradient(160deg, #140d04, #241a08);
+      border: 2px solid #cd7f32;
+      box-shadow: 0 0 12px rgba(205,127,50,.12), 0 6px 18px rgba(0,0,0,.5);
+      order: 3;
+    }
+    .podium-crown { font-size: 28px; margin-bottom: 6px; animation: float 3s ease-in-out infinite; }
+    .podium-rank  { font-size: 7px; color: #4a4270; letter-spacing: 1px; margin-bottom: 8px; }
+    .podium-name  { font-size: clamp(7px, 1.5vw, 10px); color: #e4dcf5; margin-bottom: 10px; word-break: break-all; }
+    .podium-pct   { font-size: clamp(16px, 3.5vw, 26px); margin-bottom: 8px; }
+    .podium-card.rank1 .podium-pct { color: #b185f0; text-shadow: 0 0 14px rgba(177,133,240,.6); }
+    .podium-card.rank2 .podium-pct { color: #d8d8e6; }
+    .podium-card.rank3 .podium-pct { color: #cd7f32; }
+    .podium-level { font-size: 7px; color: #8899bb; line-height: 1.6; }
+
+    /* ── Rank list ── */
+    .rank-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .rank-row {
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      background: #170f2c;
+      border: 1px solid #2a2048;
+      border-radius: 3px;
+      padding: 10px 14px;
+      animation: slide-in .35s ease both;
+      transition: border-color .2s;
+    }
+    .rank-row:hover { border-color: #b185f050; }
+
+    .rank-num {
+      font-size: 10px;
+      color: #4a4270;
+      text-align: center;
+      width: 40px;
+    }
+
+    .rank-info { min-width: 0; }
+    .rank-name { font-size: clamp(7px, 1.2vw, 9px); color: #e4dcf5; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rank-level { font-size: 7px; color: #8899bb; margin-bottom: 6px; }
+
+    .xp-track {
+      width: 100%;
+      height: 7px;
+      background: #1a1230;
+      border: 1px solid #2a2048;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .xp-fill {
+      height: 100%;
+      border-radius: 2px;
+      transform-origin: left;
+      animation: xp-fill .9s cubic-bezier(.4,0,.2,1) both;
+    }
+
+    .rank-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .rank-pct   { font-size: clamp(10px, 2vw, 14px); }
+    .rank-badges { display: flex; gap: 5px; }
+    .badge {
+      font-size: 7px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+    .badge-ach  { background: rgba(177,133,240,.12); border: 1px solid #b185f040; color: #b185f0; }
+    .badge-str  { background: rgba(238,21,21,.10);   border: 1px solid #ee151540; color: #ff6b57; }
+
+    /* ── Level colors (mirrors _LV_CSS_COLOR / _LEVELS in Week 6/autograder_nb5.py) ── */
+    .lv1 { color: #6a5ea8; }
+    .lv2 { color: #ffd166; }
+    .lv3 { color: #b185f0; }
+    .lv4 { color: #5dd9ff; }
+    .lv5 { color: #9b5de5; }
+    .lv6 { background: linear-gradient(90deg,#9b5de5,#ffd166,#5dd9ff);
+           -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+           background-size: 200%; animation: shimmer 3s linear infinite; }
+
+    .xp-lv1 { background: linear-gradient(90deg,#33402c,#6f8f57); }
+    .xp-lv2 { background: linear-gradient(90deg,#5a3d99,#ffd166); }
+    .xp-lv3 { background: linear-gradient(90deg,#3d2270,#b185f0); }
+    .xp-lv4 { background: linear-gradient(90deg,#0d3a52,#5dd9ff); }
+    .xp-lv5 { background: linear-gradient(90deg,#4a2680,#9b5de5); }
+    .xp-lv6 { background: linear-gradient(90deg,#9b5de5,#ffd166,#5dd9ff); background-size: 200%; animation: shimmer 3s linear infinite; }
+
+    /* ── Loading / empty states ── */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .spin-dot {
+      width: 14px; height: 14px;
+      border: 2px solid #b185f040;
+      border-top-color: #b185f0;
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin-dot .8s linear infinite;
+      margin-bottom: 16px;
+    }
+    .loading-text { font-size: 8px; color: #4a4270; letter-spacing: 1px; }
+
+    .empty { text-align: center; padding: 60px 20px; }
+    .empty-icon { font-size: 40px; margin-bottom: 16px; }
+    .empty-text { font-size: 8px; color: #4a4270; line-height: 2; }
+
+    /* ── Section header ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .section-title { font-size: 8px; color: #5dd9ff; letter-spacing: 1px; }
+
+    /* ── Refresh button ── */
+    .refresh-btn {
+      background: none;
+      border: 1px solid #b185f050;
+      color: #b185f080;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px;
+      padding: 5px 10px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .refresh-btn:hover { border-color: #b185f0; color: #b185f0; }
+
+    /* ── Countdown ── */
+    .countdown { font-size: 7px; color: #4a4270; }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #2a2048;
+    }
+    .footer-logo {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      background: #120a1f;
+      border: 2px solid #b185f0;
+      border-radius: 6px;
+      padding: 18px 32px;
+      box-shadow: 0 0 28px rgba(177,133,240,.18), 0 0 60px rgba(177,133,240,.06);
+    }
+    .footer-logo-img {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 10px rgba(177,133,240,.4));
+      animation: float 4s ease-in-out infinite;
+    }
+    .footer-logo-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      background: linear-gradient(135deg,#b185f0,#9b5de5,#b185f0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 200%;
+      animation: shimmer 3s linear infinite;
+      letter-spacing: 3px;
+    }
+    .footer-sub { font-size: 7px; color: #201636; margin-top: 10px; letter-spacing: 1px; }
+
+    /* ── School banner ── */
+    .school-banner {
+      width: 100%;
+      background: #170f2c;
+      border-bottom: 1px solid #b185f028;
+      padding: 0 20px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+    .school-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .school-emblem {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 4px rgba(177,133,240,.35));
+    }
+    .school-emblem img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .school-name-text {
+      font-family: 'Segoe UI', Georgia, serif;
+      font-size: clamp(10px, 1.8vw, 13px);
+      color: #c8bce0;
+      letter-spacing: 0.5px;
+      font-style: italic;
+    }
+    .school-name-text strong {
+      font-style: normal;
+      color: #e4dcf5;
+      font-weight: 600;
+    }
+    .school-right {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px;
+      color: #b185f050;
+      letter-spacing: 1px;
+    }
+
+    /* ── Footer school block ── */
+    .footer-school {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .footer-school-name {
+      font-family: 'Segoe UI', Georgia, serif;
+      font-size: 13px;
+      color: #9088b8;
+      font-style: italic;
+      letter-spacing: 0.5px;
+    }
+    .footer-school-name strong { color: #b8a8d8; font-style: normal; }
+
+    /* ── Grade filter bar ── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      padding: 12px 14px;
+      background: #170f2c;
+      border: 1px solid #b185f030;
+      border-radius: 4px;
+    }
+    .filter-label {
+      font-size: 7px;
+      color: #4a4270;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+    .filter-btn {
+      background: none;
+      border: 1px solid #2a2048;
+      color: #8899bb;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px;
+      padding: 5px 10px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover { border-color: #b185f050; color: #b185f080; }
+    .filter-btn.active {
+      background: #b185f018;
+      border-color: #b185f0;
+      color: #b185f0;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .school-right { display: none; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .stats-row .stat-card:last-child { grid-column: span 2; }
+      .podium-wrap { grid-template-columns: 1fr; }
+      .podium-card { order: unset !important; }
+      .rank-row { grid-template-columns: 32px 1fr auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── School identity banner (sticky top) ── -->
+<div class="school-banner">
+  <div class="school-left">
+    <div class="school-emblem">
+      <img src="../shared/icono%20SMA.png" alt="SMA">
+    </div>
+    <span class="school-name-text">
+      <strong>I.E. Santa María de los Andes</strong>
+    </span>
+  </div>
+  <div class="school-right">MISIÓN 3: EL ORÁCULO · 2026</div>
+</div>
+
+<div class="page">
+
+  <!-- ── Header ── -->
+  <div class="header">
+    <div class="px header-title">🔮 EL ORÁCULO DE DATOS 🔮</div>
+    <div class="px header-sub">TABLA DE VIDENTES — MISIÓN 3: EL ORÁCULO · SEMANA 6</div>
+    <div class="ticker-wrap">
+      <div class="px ticker-label">LIVE</div>
+      <div class="px ticker-inner" id="ticker">Consultando las líneas del oráculo…</div>
+    </div>
+  </div>
+
+  <!-- ── Stats row ── -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card">
+      <div class="px stat-label">VIDENTES</div>
+      <div class="px stat-value" id="stat-players">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="px stat-label">MEJOR MARCA</div>
+      <div class="px stat-value green" id="stat-top">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="px stat-label">PROMEDIO CLASE</div>
+      <div class="px stat-value cyan" id="stat-avg">—</div>
+    </div>
+  </div>
+
+  <!-- ── Loading ── -->
+  <div class="loading" id="loading-state">
+    <div class="spin-dot"></div>
+    <div class="px loading-text">CONSULTANDO EL ORÁCULO…</div>
+  </div>
+
+  <!-- ── Error ── -->
+  <div class="empty" id="error-state" style="display:none;">
+    <div class="empty-icon">⚠️</div>
+    <div class="px empty-text" id="error-msg">Error al cargar datos.</div>
+  </div>
+
+  <!-- ── Main content (hidden until data loads) ── -->
+  <div id="main-content" style="display:none;">
+
+    <!-- Grade filter -->
+    <div class="filter-bar" id="filter-bar">
+      <span class="px filter-label">GRADO:</span>
+      <button class="filter-btn active" data-grade="all" onclick="setFilter('all')">TODOS</button>
+    </div>
+
+    <!-- Podium -->
+    <div class="section-header">
+      <div class="px section-title">🏆 PODIO DE VIDENTES</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="px countdown" id="countdown"></span>
+        <button class="refresh-btn" onclick="loadLeaderboard()">↺ REFRESH</button>
+      </div>
+    </div>
+    <div class="podium-wrap" id="podium"></div>
+
+    <!-- Full ranking -->
+    <div class="section-header" style="margin-top:28px;">
+      <div class="px section-title">📈 TABLA DE POSICIONES</div>
+    </div>
+    <div class="rank-list" id="rank-list"></div>
+
+  </div>
+
+  <!-- ── Footer ── -->
+  <div class="footer">
+    <div class="footer-logo">
+      <img class="footer-logo-img" src="../shared/icono%20SMA.png" alt="I.E. Santa María de los Andes">
+      <span class="footer-logo-label">SMA</span>
+    </div>
+    <div class="footer-school">
+      <span class="footer-school-name">
+        <strong>I.E. Santa María de los Andes</strong>
+      </span>
+    </div>
+    <div class="px footer-sub" style="margin-top:14px;">EL ORÁCULO DE DATOS · AUTOGRADER LEADERBOARD</div>
+  </div>
+
+</div>
+
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── Config ──────────────────────────────────────────────────
+const SUPABASE_URL      = 'https://uwykikwutjtkpffwmdiq.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_aBG6GD4wn9CgpSE-47fagQ_sNhnzznu';
+// Debe coincidir con CURSO_ID / NOTEBOOK_ID en "Week 6/autograder_nb5.py"
+// (STAT_2026 / nb5, "El Oráculo de Datos" — Mision 3, Semana 6, regresion
+// lineal: ejemplo guiado sobre 2019_es.csv/World Happiness + Ejercicios 1-2
+// sobre athlete_events_es.csv/120 Years of Olympic History). nb5 es el
+// primer notebook de esta mision -- sin nb6/nb7 predecesor que reusar --
+// pero `submissions` sigue siendo una tabla compartida entre cursos (ver
+// supabase_schema.sql): el curso legado de Programacion (CS_2026) reusa ids
+// de notebook simples ('nb2', 'nb3', posiblemente futuros 'nb5'), asi que el
+// filtro por CURSO_ID es tan obligatorio como el de NOTEBOOK_ID -- sin el,
+// una fila de Python Semana 5 con el mismo notebook_id podria colarse aca.
+// autograder_nb5.py aplica el mismo filtro curso+notebook en su propia query
+// de restauracion de progreso, asi que ambos lados coinciden.
+const CURSO_ID    = 'STAT_2026';
+const NOTEBOOK_ID = 'nb5';
+
+// ── Init ────────────────────────────────────────────────────
+const { createClient } = supabase;
+// persistSession:false — esta pagina es un leaderboard publico y debe usar
+// siempre la anon key, nunca una sesion de auth guardada en localStorage
+// por otra pagina del mismo origen (github.io comparte localStorage entre repos).
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+});
+
+// ── Helpers ─────────────────────────────────────────────────
+const LV_CLASS = ['','lv1','lv2','lv3','lv4','lv5','lv6'];
+const XP_CLASS = ['','xp-lv1','xp-lv2','xp-lv3','xp-lv4','xp-lv5','xp-lv6'];
+
+function lvClass(n)  { return LV_CLASS[Math.min(n, 6)] || 'lv1'; }
+function xpClass(n)  { return XP_CLASS[Math.min(n, 6)] || 'xp-lv1'; }
+
+function playerName(player) {
+  if (player.nombre) return player.nombre;
+  return (player.email || 'anon').split('@')[0];
+}
+
+function playerGrado(player) {
+  return player.grado || '';
+}
+
+// Minusculas + sin tildes, para comparar nombres de forma tolerante --
+// espejo de _norm() en autograder_nb5.py.
+function normName(s) {
+  return (s || '').toString().trim().toLowerCase()
+    .replace(/[áàäâ]/g, 'a').replace(/[éèëê]/g, 'e')
+    .replace(/[íìïî]/g, 'i').replace(/[óòöô]/g, 'o')
+    .replace(/[úùüû]/g, 'u').replace(/ñ/g, 'n');
+}
+
+// Deduplicate: keep best score per student (dni/email + nombre). El campo
+// DNI/Pasaporte/Carnet es texto libre sin validacion (ver autograder_nb5.py),
+// asi que dos alumnos distintos pueden compartir el mismo codigo por error
+// (typo, marcador generico). Si solo se agrupara por dni/email, esa colision
+// fusionaria a ambos en una sola fila y el de menor puntaje desaparecería
+// detrás del otro. Agregar el nombre normalizado a la clave mantiene el
+// agrupamiento correcto para el caso real (mismo alumno, varios intentos)
+// sin ocultar a un alumno distinto que solo comparte el código.
+function dedup(rows) {
+  const best = {};
+  for (const row of rows) {
+    const key = (row.dni || row.email || '') + '|' + normName(row.nombre);
+    if (!best[key] || row.pct > best[key].pct ||
+        (row.pct === best[key].pct && row.earned > best[key].earned)) {
+      best[key] = row;
+    }
+  }
+  return Object.values(best).sort((a, b) => {
+    if (b.pct   !== a.pct)   return b.pct   - a.pct;
+    if (b.earned !== a.earned) return b.earned - a.earned;
+    // Tiebreaker: whoever reached this score FIRST wins
+    return new Date(a.submitted_at) - new Date(b.submitted_at);
+  });
+}
+
+// ── Render helpers ───────────────────────────────────────────
+function renderPodiumCard(player, rank) {
+  if (!player) return '<div></div>';
+  const crowns   = ['', '🥇', '🥈', '🥉'];
+  const rankCls  = ['', 'rank1', 'rank2', 'rank3'];
+  const achCount = Array.isArray(player.achievements) ? player.achievements.length : 0;
+  const name     = playerName(player);
+  return `
+    <div class="podium-card ${rankCls[rank]}">
+      <div class="podium-crown">${crowns[rank]}</div>
+      <div class="px podium-rank">#${rank}</div>
+      <div class="px podium-name">${name}</div>
+      <div class="px podium-pct">${player.pct}%</div>
+      <div class="px podium-level ${lvClass(player.level_num)}">${player.level_name}</div>
+      <div style="margin-top:10px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+        <span class="px badge badge-ach">🎖️ ${achCount}</span>
+        ${player.streak >= 2 ? `<span class="px badge badge-str">🔥×${player.streak}</span>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderRankRow(player, rank, delay) {
+  const achCount = Array.isArray(player.achievements) ? player.achievements.length : 0;
+  const name     = playerName(player);
+  return `
+    <div class="rank-row" style="animation-delay:${delay}ms;">
+      <div class="px rank-num">${rank}</div>
+      <div class="rank-info">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+          <div class="px rank-name" style="margin-bottom:0;">${name}</div>
+          <span class="px badge badge-ach">🎖️ ${achCount}</span>
+          ${player.streak >= 2 ? `<span class="px badge badge-str">🔥×${player.streak}</span>` : ''}
+        </div>
+        <div class="px rank-level ${lvClass(player.level_num)}" style="margin-bottom:6px;">${player.level_name}</div>
+        <div class="xp-track">
+          <div class="xp-fill ${xpClass(player.level_num)}" style="width:${player.pct}%;animation-delay:${delay}ms;"></div>
+        </div>
+      </div>
+      <div class="rank-meta">
+        <div class="px rank-pct ${lvClass(player.level_num)}">${player.pct}%</div>
+      </div>
+    </div>`;
+}
+
+// ── Filter state ─────────────────────────────────────────────
+let allPlayers    = [];
+let activeFilter  = 'all';
+
+function buildFilterButtons(players) {
+  const grades = [...new Set(
+    players.map(p => p.grado).filter(Boolean).sort()
+  )];
+  const bar = document.getElementById('filter-bar');
+  // Remove any previously generated grade buttons
+  bar.querySelectorAll('[data-grade]:not([data-grade="all"])').forEach(el => el.remove());
+  grades.forEach(grade => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn px';
+    btn.dataset.grade = grade;
+    btn.textContent = grade;
+    btn.onclick = () => setFilter(grade);
+    bar.appendChild(btn);
+  });
+}
+
+function setFilter(grade) {
+  activeFilter = grade;
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.grade === grade);
+  });
+  const filtered = grade === 'all'
+    ? allPlayers
+    : allPlayers.filter(p => p.grado === grade);
+  renderLeaderboard(filtered);
+}
+
+// ── Main render ──────────────────────────────────────────────
+function renderLeaderboard(players) {
+  const top3    = players.slice(0, 3);
+  const avgPct  = players.length
+    ? Math.round(players.reduce((s, p) => s + p.pct, 0) / players.length)
+    : 0;
+  const topPct  = players.length ? players[0].pct : 0;
+
+  // Stats
+  document.getElementById('stat-players').textContent = players.length;
+  document.getElementById('stat-top').textContent     = topPct + '%';
+  document.getElementById('stat-avg').textContent     = avgPct + '%';
+
+  // Ticker
+  const achLeader = [...players].sort((a,b) =>
+    (b.achievements||[]).length - (a.achievements||[]).length)[0];
+  const streakLeader = [...players].sort((a,b) => (b.streak||0) - (a.streak||0))[0];
+  const tickerParts = [
+    `${players.length} VIDENTES CONSULTARON EL ORÁCULO`,
+    topPct > 0 ? `LÍDER: ${playerName(top3[0])} · ${topPct}%` : '',
+    avgPct > 0 ? `PROMEDIO CLASE: ${avgPct}%` : '',
+    achLeader ? `MÁS LOGROS: ${playerName(achLeader)} · ${(achLeader.achievements||[]).length} 🎖️` : '',
+    streakLeader?.streak >= 2 ? `RACHA MÁS ALTA: ${playerName(streakLeader)} · 🔥×${streakLeader.streak}` : '',
+  ].filter(Boolean).join('   ⚪   ');
+  document.getElementById('ticker').textContent = tickerParts;
+
+  // Podium (order: 2nd · 1st · 3rd for visual podium effect)
+  const podiumEl = document.getElementById('podium');
+  podiumEl.innerHTML = [
+    renderPodiumCard(top3[1], 2),
+    renderPodiumCard(top3[0], 1),
+    renderPodiumCard(top3[2], 3),
+  ].join('');
+
+  // Full ranked list (all players)
+  const listEl = document.getElementById('rank-list');
+  listEl.innerHTML = players.length
+    ? players.map((p, i) => renderRankRow(p, i + 1, i * 40)).join('')
+    : '<div class="empty"><div class="empty-icon">🔍</div><div class="px empty-text">Sin videntes en este grado.</div></div>';
+
+  // Show content
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('error-state').style.display   = 'none';
+  document.getElementById('main-content').style.display  = 'block';
+}
+
+// ── Fetch ────────────────────────────────────────────────────
+async function loadLeaderboard() {
+  try {
+    // Consulta directa a `submissions` (RLS anon_select ya lo permite) filtrada
+    // por curso + notebook -- get_best_submissions todavia no filtra por `curso`
+    // (WORKFORCE_HANDOFF.md ticket #6), asi que no la usamos aca para evitar
+    // mezclar filas de otro curso que reuse el mismo id de notebook.
+    // Cada alumno puede tener varios intentos, asi que dedup() se queda con
+    // el mejor puntaje por alumno (por dni, o por email si no hay dni).
+    const { data, error } = await db
+      .from('submissions')
+      .select('dni,email,nombre,grado,curso,notebook,earned,possible,pct,level_num,level_name,achievements,streak,submitted_at')
+      .eq('curso',    CURSO_ID)
+      .eq('notebook', NOTEBOOK_ID)
+      .order('pct',          { ascending: false })
+      .order('submitted_at', { ascending: true });
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-state').style.display   = 'block';
+      document.getElementById('error-msg').textContent        = 'Aún no hay videntes registrados. ¡Sé el primero en consultar el oráculo!';
+      return;
+    }
+
+    allPlayers = dedup(data);  // un renglon por alumno, mejor puntaje primero
+    buildFilterButtons(allPlayers);
+    setFilter(activeFilter);   // re-apply current filter (or 'all' on first load)
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('error-state').style.display   = 'block';
+    document.getElementById('error-msg').textContent =
+      'Error: ' + (err.message || 'No se pudo conectar a Supabase.');
+  }
+}
+
+// ── Auto-refresh countdown ────────────────────────────────────
+const REFRESH_SEC = 60;
+let secondsLeft   = REFRESH_SEC;
+let countdownId   = null;
+
+function startCountdown() {
+  clearInterval(countdownId);
+  secondsLeft = REFRESH_SEC;
+  countdownId = setInterval(() => {
+    secondsLeft--;
+    const el = document.getElementById('countdown');
+    if (el) el.textContent = `🔄 ${secondsLeft}s`;
+    if (secondsLeft <= 0) {
+      clearInterval(countdownId);
+      loadLeaderboard().then(startCountdown);
+    }
+  }, 1000);
+}
+
+// ── Boot ─────────────────────────────────────────────────────
+loadLeaderboard().then(startCountdown);
+</script>
+</body>
+</html>
