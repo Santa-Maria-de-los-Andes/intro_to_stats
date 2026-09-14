@@ -79,7 +79,7 @@ By the end of this module, students will:
 
 ---
 
-### Week 6: Linear Regression Showcase
+### Week 6-7: Linear Regression Showcase and final project work
 **Learning Target:** Understand what regression predicts and how to interpret results — not the math behind it.
 
 **Narrative Framing:** "We found a relationship. Now: if I know X, can I predict Y?"
@@ -88,22 +88,14 @@ By the end of this module, students will:
 
 **Deliverable:** Working regression model + plain-language interpretation ("For every extra sqm, price increases by ___").
 
----
 
-### Week 7: K-Means Clustering Showcase
-**Learning Target:** Understand what clustering does and when to use it.
-
-**Narrative Framing:** "Instead of predicting a number, we're grouping similar things."
-
-**Example:** Customer segmentation or athlete/player-type clustering.
-
-**Worksheet Extension:** Explore how results change when k changes (e.g., k=3 vs k=5).
-
-**Deliverable:** Clustered dataset with visualization + brief interpretation of each group.
 
 ---
 
-### Week 8: Final Exam
+
+### Week 8: Final Presentation + exam 
+
+
 
 ---
 

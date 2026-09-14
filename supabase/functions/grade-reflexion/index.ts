@@ -30,7 +30,11 @@ const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const EXPECTED_NOTEBOOKS = new Set(["nb3", "nb4", "nb3_lite", "nb4_lite"]);
+// 2026-09-13: agregado "nb5" para Semana 6 (Mision 3, regresion lineal,
+// nb5_regresion.ipynb / autograder_nb5.py) -- mismo bug de allowlist
+// desactualizado documentado arriba para nb3/nb4, corregido aca antes de
+// que nb5 llegue a produccion en vez de despues de un diagnostico en vivo.
+const EXPECTED_NOTEBOOKS = new Set(["nb3", "nb4", "nb3_lite", "nb4_lite", "nb5"]);
 const EXPECTED_CURSO = "STAT_2026";
 
 // 2026-08-24: bajo carga concurrente de clase (varios alumnos calificando
@@ -230,6 +234,83 @@ const GRADING_NOTES: Record<string, ReflexionSpec> = {
       "r real (PBI per cápita vs Puntaje) = 0.794, confirmado. Esta es la celda de critica de causalidad -- la mas importante de las 11 para exigir precision.",
     grading_notes:
       "Credito completo solo si la respuesta EVITA activamente afirmar causalidad directa (no dice 'el dinero produce/causa felicidad' sin matizar) Y propone al menos una explicacion alternativa plausible (variable de confusion, causalidad inversa, o correlacion sin causacion explicita). 'No se sabe' sin ninguna alternativa concreta merece credito parcial, no completo.",
+    max_pts: 5,
+  },
+
+  // 2026-09-13: nb5 (Semana 6, regresion lineal) -- namespaced con prefijo
+  // "nb5_" en vez de reusar ids genericos como "interpretacion"/"ex2"/
+  // "final" (los que ya existen arriba, de nb3/nb4). Esos dos notebooks NO
+  // colisionan hoy porque nunca revisan el `notebook` del request contra el
+  // `reflexion_id` -- pero nb6/nb7 eventualmente van a querer reusar esos
+  // mismos nombres genericos, y ese dia reintroducirian el mismo bug de
+  // grounding cruzado (reflexion de un notebook calificada con el contexto
+  // real de otro). Prefijar ahora, con el primer notebook nuevo desde que
+  // se detecto el riesgo, cuesta nada y lo previene de raiz.
+  nb5_interpretacion: {
+    question:
+      'En el ejemplo guiado, el coeficiente de "PBI per cápita" fue ≈0.77 y el de ' +
+      '"Apoyo social" ≈1.16. En 2-3 oraciones, en lenguaje simple: ¿qué significan ' +
+      'estos números sobre cómo el modelo usa cada variable para predecir el ' +
+      'Puntaje? Evita palabras como "causa" o "provoca".',
+    grounding:
+      "Coeficientes reales del modelo guiado (World Happiness, 6 variables, " +
+      "train_test_split test_size=0.1 random_state=42): PBI per cápita ≈0.77, " +
+      "Apoyo social ≈1.16 -- ambos positivos, el mismo valor que se le muestra " +
+      "al estudiante en el enunciado. Un coeficiente positivo significa que el " +
+      "modelo predice un Puntaje más alto conforme sube esa variable, " +
+      "manteniendo las demás fijas. Apoyo social tiene un coeficiente mayor " +
+      "que PBI, pero eso NO significa automáticamente que sea 'más importante' " +
+      "-- las dos variables están en escalas distintas (PBI per cápita típicamente " +
+      "0-2, Apoyo social típicamente 0-1), así que sus magnitudes no son " +
+      "directamente comparables.",
+    grading_notes:
+      "Credito completo si explica que un coeficiente positivo significa que el " +
+      "Puntaje predicho sube cuando esa variable sube (manteniendo las demás " +
+      "fijas), sin lenguaje causal ('causa'/'provoca'/'hace que' pierden puntos). " +
+      "Credito adicional (no obligatorio) si nota que el coeficiente mayor de " +
+      "Apoyo social no lo hace automáticamente 'más importante' por la " +
+      "diferencia de escalas. Sin credito si es vacía/genérica, usa lenguaje " +
+      "causal, o confunde el coeficiente con el R².",
+    max_pts: 5,
+  },
+  nb5_ex2: {
+    question:
+      'De las combinaciones que probaste para predecir Altura, ¿cuál dio el ' +
+      'mejor R² de prueba? En 1-2 oraciones: ¿por qué crees que esas variables ' +
+      'funcionan mejor para predecir la estatura de un atleta?',
+    grounding:
+      "R² reales por combinación (test_size=0.1, random_state=42, sobre " +
+      "206,165 filas de athlete_events_es.csv): {Edad,Peso} test R²=0.635; " +
+      "{Edad,Sexo_num} test R²=0.247; {Peso,Sexo_num} test R²=0.643; " +
+      "{Edad,Peso,Sexo_num} test R²=0.644. Peso es, con diferencia, el " +
+      "predictor más fuerte -- Edad+Sexo_num sin Peso rinde muy por debajo " +
+      "(0.247). Agregar una tercera variable a Peso+Sexo_num apenas mejora " +
+      "el resultado (0.643→0.644).",
+    grading_notes:
+      "Credito completo si la combinación reportada incluye Peso y la " +
+      "explicación es plausible (relación física directa entre tamaño " +
+      "corporal y peso). Credito parcial si la combinación es válida pero sin " +
+      "Peso, siempre que la explicación sea coherente con lo que probó. Sin " +
+      "credito si la respuesta es vacía/genérica o no explica el 'por qué'.",
+    max_pts: 5,
+  },
+  nb5_final: {
+    question:
+      'Ya construiste modelos de regresión en dos datasets totalmente ' +
+      'distintos (puntajes de felicidad, estaturas de atletas). En 2-4 ' +
+      'oraciones: ¿cuándo usarías una herramienta así? ¿qué preguntas podrías ' +
+      'responder con un modelo de predicción como este?',
+    grounding:
+      "Pregunta de cierre sin un valor único correcto -- evalúa si conecta la " +
+      "herramienta con un caso de uso genuino y, idealmente, con las dos " +
+      "advertencias centrales de la semana: el test R² mide si generaliza, y " +
+      "el modelo solo es confiable dentro del rango con el que se entrenó.",
+    grading_notes:
+      "Credito completo si propone al menos un uso o pregunta concreta y " +
+      "realista (no 'para predecir cosas' genérico). Credito adicional (no " +
+      "obligatorio) si menciona validar con datos nuevos o el riesgo de " +
+      "extrapolar. Sin credito si es vacía, genérica, o no propone ningún caso " +
+      "concreto.",
     max_pts: 5,
   },
 };

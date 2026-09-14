@@ -19,6 +19,298 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 
 ## Done Log
 
+- 2026-09-14 — **Two more user-requested fixes to Week 6's nb5, on top of
+  the 2026-09-13 pre-ship review below.**
+  **(1) Registro widget for the "just write something" cells.** The two
+  `mi_prediccion_x = "___"` bare-variable cells added in the 2026-09-13
+  pre-ship pass (`nb5-visual-predice-code`, `nb5-concepto-linea-pausa-code`)
+  were never scored and never left any trace anywhere — reviewing what a
+  student actually wrote meant opening their Colab individually, same
+  friction the user is trying to get away from. Replaced both with the
+  same HTML/JS submit-widget pattern the AI reflexions already use
+  (`_ask_reflexion`'s textarea+button UI, Colab `kernel.invokeFunction`
+  round-trip), minus the DeepSeek call: new `_ask_registro`/
+  `_grade_registro`/`_award_registro` methods in `autograder_nb5.py`,
+  callback `_ag_registro_answer`, keys `reg_linea_roja` (`check_prediccion_linea`)
+  and `reg_minimiza_distancia` (`check_anota_distancia`). 1 XP each for any
+  non-placeholder submission (same `_is_nontrivial_text` guard as
+  reflexions, `min_len=3` since these are one-line thoughts, not full
+  reflections) — no AI grading, no way to get it "wrong" beyond leaving it
+  blank. **The actual text rides along in `submissions.score_breakdown`**
+  (a new `"text"` key per entry in that existing JSON column — no schema
+  migration) specifically so these can be reviewed with a SQL query across
+  every student at once instead of opening each notebook, which was the
+  user's explicit ask. Added `self._text_answers` to track pending text
+  before it's persisted, and made sure the registration-form restore path
+  repopulates it from a returning student's last `score_breakdown` —
+  otherwise the next `_submit_to_supabase()` call (e.g. from `resumen()`)
+  would have rebuilt `score_breakdown` from a scratch/empty
+  `_text_answers` and silently dropped a prior session's stored text.
+  `_CORE_MAX`: 100 → 102.
+  **(2) A real icon-legend collision, not just a wording nit.**
+  `nb5-guiado-md`'s section header used 🔮 — the *same emoji the shared
+  legend defines as PREDICE* ("write your prediction before seeing the
+  result") — for a section that is not a prediction prompt at all, just
+  the guided example's title. Since 🔮 is genuinely double-booked in this
+  notebook (it's also the mission's own crystal-ball theme/branding —
+  title, level names, achievement icons — which is fine there since that
+  context is never confused with "this cell wants your prediction"), the
+  fix was to swap this one specific *section-header* usage for ✨ rather
+  than touch the branding. Audited every other markdown header against the
+  9-icon legend for the same class of bug (an icon the legend defines,
+  reused for something the legend doesn't mean) — found none: `🧠`/`💥`/
+  `🏟️`/`🎯` headers are all decorative, not legend icons, so they don't
+  make a false claim. Fixed the deeper cause too: 🧩 COMPLETA ("replace
+  `___` with the correct value" — implies one correct answer) was already a
+  mismatch for the concept-1 pause cell before this fix (there is no single
+  correct value, it's an open explanation) — since that cell is now part of
+  fix (1) above and genuinely open-ended with no right answer, gave the
+  legend a new row, 📝 ANOTA, rather than keep stretching 🧩 or 💭 (💭's own
+  legend text explicitly says "AI-graded... +5 XP," which would have been
+  inaccurate for a 1-point non-AI cell). The 🔮/📝 split is intentional: 🔮
+  = before you see the answer (a prediction), 📝 = after (a reflection) —
+  not interchangeable, both now correctly described in `LEYENDA_ICONOS`.
+  **(3) Added `---` separators at 5 major section boundaries**
+  (entering Concept 1, the guided example, "míralo romperse," the Olympics
+  dataset switch, Ejercicio 2, and the bonus Reto) for scannability — no
+  content change, matches the separator convention already used before the
+  quiz/final-reflection/cierre sections.
+  All changes made in `build_nb5.py` first, then the notebook regenerated
+  from it (57 → 58 cells, unchanged from the check_t5 pass — this round
+  edited cell content and metadata, not cell count, except where check_t5
+  itself added one). `_test_nb5.py`: 40 → 46 assertions (registro
+  score/lock/placeholder behavior, `_text_answers` capture, and the same
+  `check_*` → `_ask_registro` id-wiring check already used for reflexions).
+  `WORKFORCE_CONTRACT.md` §2 table and Change Log updated to `_CORE_MAX`=102.
+  **(4) Two new visuals for Concepts 2 and 3, user chose from proposed
+  options.** Concept 2 (R²) already had a 3-panel synthetic-scatter demo
+  from the 2026-09-13 pass; user asked to also add a stacked-bar view
+  (`nb5-concepto-r2-barra-code`, right after `nb5-concepto-r2-md`) showing
+  the same three R² values from that section's own bullet list (1.0/0.72/
+  0.0) as literal "% explicado vs. % sin explicar" bars — a second
+  representation of the same numbers already in the text, not new content.
+  Concept 3 (train/test) had no visual at all — added
+  `nb5-concepto-traintest-visual-code` right after `nb5-concepto-traintest-md`:
+  100 synthetic points split 90/10 (`np.random.RandomState(3).permutation`),
+  train colored cyan and test colored gold (matching the notebook's own
+  accent palette), literally showing the split the text just described.
+  User declined the alternative "overfitting demo" (polynomial overfits
+  train, fails test) for now — noted as a good candidate to revisit nearer
+  T3's quiz question if a stronger visual is wanted there later. Both cells
+  reuse `np`/`plt`/`LinearRegression` already imported by earlier cells in
+  the same kernel (no new imports needed at the top of the notebook).
+  `nb5_regresion.ipynb`: 58 → 60 cells. `_test_nb5.py` unaffected (pure
+  content, no `check_*`/scoring change) — still 46/46.
+- 2026-09-13 — **Lecture guide built: `course-python-stats/Week 6/Guion_Clase_Semana6_Regresion.md`**
+  (SOFIA + GAUSS, user-requested outline for the live class preceding `nb5_regresion.ipynb`'s
+  practice session). Not a new notebook/autograder artifact — a ~45-minute teacher-facing script
+  covering exactly the four beats the user asked for (engaging hook, best-fit line, train/test
+  split, R², coefficient interpretation), sequenced to match the notebook's own concept order so
+  the lecture primes the notebook rather than duplicating it verbatim. **Hook** ("Duelo de
+  Oráculos"): a live human-vs-model prediction exercise using real, verified rows from
+  `2019_es.csv` (Finlandia/Estados Unidos/España/México/Chile/Argentina/Japón PBI+Puntaje, Perú's
+  PBI shown with Puntaje hidden as the guess target, revealed as 5.697) — same PBI↔Puntaje
+  cliffhanger the notebook opens with, but experienced before it's read. Deliberately uses Japón
+  (PBI≈Finlandia's but Puntaje ~2 points lower) to seed the "the pattern isn't perfect" question
+  that Concept 2 (R²) later answers, instead of introducing that idea cold. **Numbers reused, not
+  invented**: r≈0.794 (Misión 2 finding), guided-example test R²≈0.71, PBI per
+  cápita/Apoyo social coefficients ≈0.77/≈1.16 — all pulled directly from `autograder_nb5.py`'s
+  already-validated theory/reflection text (2026-09-13 build entry below), not recomputed or
+  guessed for this doc. **GAUSS pass baked in as a checklist**, not a separate report: a
+  "don't say / say instead" table at the end enforces this module's non-negotiables — R² framed as
+  "% of variation explained" (never "accuracy"), coefficients framed with the "por cada unidad
+  adicional... manteniendo las demás constantes" template (never causal language), explicit
+  warning that a larger coefficient isn't automatically "more important" (scale-dependent), and a
+  reminder that a decent R² doesn't certify predictions outside the training range — matching
+  `04_GAUSS.md`'s per-week Week 6 risk row exactly. Closing block deliberately withholds the
+  extrapolation "watch it break" reveal (teases it instead) so the notebook's own demo isn't
+  spoiled. No changes to `nb5_regresion.ipynb`, `autograder_nb5.py`, or `_CORE_MAX` — this is a
+  standalone teaching aid, not a graded artifact, and isn't referenced by any `!wget` setup cell.
+- 2026-09-13 — **Week 6 built: `nb5_regresion.ipynb`, "Misión 3: El Oráculo
+  de Datos"** — direct user request with a full section-by-section spec
+  (Apertura callback to nb4's PBI↔Puntaje finding, visual-concept-before-
+  code opener, guided World Happiness regression example, an
+  extrapolation-breaks-it demo, two autograded Olympics-Altura exercises,
+  4 theory questions, a closing reflection, two checkpoints). New folder
+  `course-python-stats/Week 6/` (singular, matching the `Week 5/` pattern
+  rather than `Weeks N-M/`, since this is one notebook/one session, not a
+  multi-week split): `build_nb5.py` → `nb5_regresion.ipynb` (53 cells,
+  revised same-day per user feedback below),
+  `autograder_nb5.py`, `_test_nb5.py`.
+  First notebook of Misión 3 — `check_ex`/`check_t`/`check_reto` numbering
+  starts fresh at 1 rather than continuing Misión 2's (`WORKFORCE_CONTRACT.md`
+  §2/§3), since there's no predecessor nb-file in this mission to continue
+  from.
+  **Datasets**: `2019_es.csv` (World Happiness, already used by nb3/nb4)
+  for an ungraded guided example only; `athlete_events_es.csv` (Olympics,
+  already used by nb1_semana2) for the graded exercises, predicting
+  `Altura`.
+  **Scope decision (documented in `autograder_nb5.py`'s docstring and
+  `build_nb5.py`'s header comment, not a silent cut)**: the user's spec
+  listed `{Edad, Peso, Sexo, Deporte}` as the predictor menu for Altura.
+  `Deporte` has 66 categories — one-hot encoding it is outside the
+  technical spine committed in `WORKFORCE_CONTRACT.md` §5 (no
+  `pd.get_dummies`/`OneHotEncoder` anywhere in this course). Recut the menu
+  to `{Edad, Peso, Sexo_num}` — `Sexo` becomes a 0/1 column in one guided
+  (not student-written) preprocessing cell, with an explicit in-notebook
+  note on why `Deporte` was left out rather than silently dropped. This
+  narrows "2-4 predictors" to "2-3 predictores" in the exercise text.
+  **Reproducibility choice**: both exercises require `test_size=0.1,
+  random_state=42` (same split the guided example uses) so a specific
+  predictor combination has one verifiable R² pair, not "approximately
+  matching." All R² values were computed directly against the real CSVs
+  on 2026-09-13 (206,165 rows after dropping nulls in
+  Edad/Altura/Peso/Sexo) and hardcoded into `autograder_nb5.py`'s
+  `_R2_LOOKUP`, keyed by frozenset of predictor names, tolerance ±0.02
+  (wider than nb3/nb4's ±0.01 since sklearn-version drift matters more
+  than sampling noise at this N).
+  **Scoring**: `_CORE_MAX` = 95 (20 pts t1-4 theory, 5 refl_interpretacion,
+  40 ex1, 20 ex2, 5 refl_ex2, 5 refl_final, all AI-graded reflections
+  via the existing `grade-reflexion` Edge Function pipeline, mechanism
+  unchanged from nb3/nb4) — since revised to 100 (t5 added, third
+  2026-09-13 entry below) — well under the nominal ~150 `WORKFORCE_CONTRACT.md`
+  §2 figure, same "showcase, not deep dive" reasoning as nb4's 2026-08-29
+  trim, not treated as a new budget problem. `_BONUS_MAX` = 10 (`reto1`,
+  "rompe el modelo" — extrapolate with an absurd input, structural check
+  only since the "how absurd" varies by student's fitted model). First
+  notebook in this course to declare a real `_BONUS_KEYS`/`_BONUS_MAX`
+  split (nb3/nb4 had none) — `_totals()` was written to exclude bonus keys
+  from the core percentage, per `COURSE_TEMPLATE.md` §6's skeleton.
+  **Theme (compressed SOFIA/PIXEL/ATLAS pass, single session)**: "El
+  Oráculo de Datos" — violet/cyan mystic palette, distinct from nb3/nb4's
+  warm sun palette per `COURSE_TEMPLATE.md` §5's per-notebook theming
+  convention (confirmed by checking nb1's own distinct Pokémon palette
+  first, not assumed). 6-tier level curve unchanged (`WORKFORCE_CONTRACT.md`
+  house rule); achievements/rarity labels renamed to fit (`Destello`/
+  `Fulgor`/`Revelación`/`Visión Suprema`). Built by adapting
+  `autograder_nb4.py`'s engine (registration form, `_award`,
+  `_check_achievements`, checkpoint/level-up rendering, Supabase submit,
+  theory/reflection widgets — all reused verbatim) via a scripted
+  palette/text substitution pass, then hand-writing the new `_TEORIA`
+  dict, achievements, and every `check_*` method fresh for this notebook's
+  actual exercises.
+  **Validated** (`Week 6/_test_nb5.py`, ATLAS-style throwaway script,
+  `COURSE_TEMPLATE.md` §3 pattern): 32/32 assertions — every `check_*`
+  tested against a correct solution (R² freshly recomputed from the real
+  CSV in the test script itself, not trusted from the autograder's own
+  lookup, so a drifted lookup would also be caught), a predictor outside
+  the allowed menu, a hardcoded/lazy R², causal-language and placeholder
+  interpretation text, an incomplete bonus submission, and the reflection
+  pipeline's three states (simulated-AI-success, placeholder-no-network-
+  call, network-failure-does-not-score-zero — same contract as nb3/nb4).
+  `_CORE_MAX`/`_BONUS_MAX` arithmetic verified equal to the declared sums.
+  Separately ran every real code cell from the built `.ipynb` itself
+  (setup, guided example, break-it demo, Olympics preprocessing, and a
+  worked solution for both exercises + the bonus) end-to-end against the
+  actual CSVs, then fed those exact values through the live `Autograder`
+  to a 100%-score `resumen()` with no exceptions — confirms the notebook's
+  own code (not just the grader in isolation) is internally consistent
+  with what `autograder_nb5.py` expects.
+  **Not yet done**: not pushed to `main` yet, so `build_nb5.py`'s `!wget`
+  URLs (pointing at `Week%206/autograder_nb5.py` etc. on the `main`
+  branch, matching nb3/nb4's hosting pattern of raw-hosting directly from
+  this repo rather than a separate grader repo) won't resolve for real
+  students until that happens — flagged to the user, not pushed
+  unilaterally. GAUSS dataset vetting for Week 6 (ticket #7) still
+  outstanding — both datasets are reused from already-vetted units
+  (Weeks 1–2, Weeks 3–4), not newly introduced, so the residual risk is
+  low but not formally closed. Deadline set to 21 September 2026, 11:59 PM
+  Peru (two weeks after nb4's, leaving Semana 5 — causation, no autograder
+  — the week between) — a placeholder pending the user's actual class
+  schedule confirmation, not verified against a real syllabus.
+- 2026-09-13 — **Same-day follow-up to Week 6's build above, user-flagged
+  pedagogy fix**: the guided World Happiness example (`nb5-guiado-code`)
+  and the extrapolation "watch it break" demo (`nb5-rompe-code`) were each
+  one pre-written code cell doing 4-6 things at once (define predictors →
+  split → fit → train R² → test R² → coefficients, all in one block) — the
+  user pointed out this is exactly the "gigantic block students never
+  read" pattern `COURSE_TEMPLATE.md` §4's "theory → immediate mini-exercise
+  → check" rule exists to prevent, even for a non-graded guided/OBSERVA
+  section. Split into one cell per step, each preceded by its own short
+  markdown explaining *that* step specifically (not a recap of the whole
+  block): 6 md+code pairs for the guided example (predictors+target →
+  split → fit → train R² → test R² → coefficients), 2 code cells for the
+  break-it demo (show real ranges → build the absurd input and predict),
+  with a one-line markdown transition between them. No values, variable
+  names, or `check_*` contracts changed — `autograder_nb5.py` untouched.
+  `nb5_regresion.ipynb` grew from 40 to 53 cells. Re-validated exactly as
+  before: `_test_nb5.py` 32/32, plus every real code cell from the rebuilt
+  notebook re-executed end-to-end against the actual CSVs (now cell-by-cell
+  instead of block-by-block) with identical R² values to the pre-split
+  version, then through the live grader to a clean `resumen()`.
+- 2026-09-13 — **Third same-day pass on Week 6: pre-ship review caught a
+  real blocker in the `grade-reflexion` wiring, plus cheap content
+  polish.** A review of the just-built nb5 (see the two entries above)
+  found `supabase/functions/grade-reflexion/index.ts`'s `EXPECTED_NOTEBOOKS`
+  allowlist had never been updated for `"nb5"` — the exact bug documented
+  in that file's own 2026-08-21 comment for nb3/nb4, about to repeat itself
+  on day one of nb5. Every one of nb5's three AI-graded reflections
+  (`refl_interpretacion`, `refl_ex2`, `refl_final`) would have 400'd against
+  a real student's DNI, and the notebook shows that as a generic "problema
+  de conexión," not a config error — silent until a live class hit it.
+  **Fixed**: added `"nb5"` to `EXPECTED_NOTEBOOKS`; added three
+  `GRADING_NOTES` entries, deliberately namespaced `nb5_interpretacion` /
+  `nb5_ex2` / `nb5_final` rather than reusing nb3/nb4's generic
+  `interpretacion`/`ex2`/`final` ids (those two never collided only because
+  neither notebook cross-checks `notebook` against `reflexion_id` — nb6/nb7
+  would eventually reuse those same generic names and reintroduce this
+  exact class of bug; prefixing now is free and closes it for good).
+  Updated the three matching call sites in `autograder_nb5.py`
+  (`check_reflexion_interpretacion`/`_ex2`/`_final`). **Test gap also
+  closed locally**: `_test_nb5.py` previously called `_grade_reflexion()`
+  directly with hand-picked ids, so it could never have caught a
+  `check_reflexion_*` → wrong-id typo like this one — added assertions that
+  monkeypatch `_ask_reflexion` and confirm each `check_reflexion_*` method
+  passes the correct `nb5_`-prefixed id. This still can't verify
+  server-side config (the allowlist/`GRADING_NOTES` match) — only a real
+  round-trip against the deployed Edge Function can, and that has **not**
+  been run yet; flagging as the one remaining pre-ship step, same caveat
+  raised when this was first reviewed.
+  **Also while in there (all pure content, no `check_*`/scoring contract
+  changed)**: fixed `nb5-visual-pregunta-md`'s self-contradiction (it told
+  students "no code cell here, just think about it" directly under a
+  legend that defines 🔮 as "write your prediction") by giving it an actual
+  ungraded 🔮 cell (`nb5-visual-predice-code`, bare `"___"` var, zero XP
+  impact, same exempt pattern as nb3's `mi_prediccion_ronda1`); inserted a
+  one-line ungraded 🧩 pause cell between Concept 1 and Concept 2
+  (`nb5-concepto-linea-pausa-code`) so the three back-to-back concept
+  markdown cells aren't a single uninterrupted wall of text; added a
+  3-panel synthetic-data 👀 visual (`nb5-concepto-r2-visual-code`, R²≈1.0/
+  0.5/0.0, each subplot titled with its real `.score()` value) ahead of
+  Concept 2's text so R² gets a picture before the bullet-list definition,
+  matching this course's own "visualize before formalizing" convention;
+  added a one-paragraph debrief after `nb5-ex2-check`
+  (`nb5-ex2-debrief-md`) naming the pattern most students will hit
+  empirically but never get told explicitly — `Peso` alone already carries
+  almost all of Altura's predictable signal, `Sexo_num`/`Edad` add almost
+  nothing on top. Also strengthened `check_ex1`'s `interpretacion_ex1`
+  heuristic (still local/instant, no new DeepSeek call): previously only
+  length ≥15 chars + no causal words, which content-free filler like "the
+  variable I picked affects the outcome" passed cleanly. Now also requires
+  the text to name one of the student's own chosen predictors (accent/case
+  -insensitive) or include a digit.
+  `nb5_regresion.ipynb` grew from 53 to 57 cells (all four insertions made
+  in `build_nb5.py` first, with proper descriptive cell ids, then the
+  notebook regenerated from it — not hand-edited independently, so the two
+  stay in sync).
+  **Scope change, user-approved after being flagged rather than applied
+  silently**: added `check_t5`, a local MCQ (no network) testing the
+  coefficient-scale caveat already stated once in `nb5-guiado-paso6-md`
+  ("Apoyo social" has a bigger coefficient than "PBI per cápita" — does
+  that make it more important? no, they're on different scales) but never
+  assessed. Added to `_TEORIA`, `check_t5()`, `check_mini_b`'s checkpoint
+  table, and the `nb5-teoria-md` quiz header ("4 preguntas... 20 pts" →
+  "5 preguntas... 25 pts"); `_CORE_MAX`: 95 → 100 (`WORKFORCE_CONTRACT.md`
+  §2 table and this file's earlier 2026-09-13 entries updated to match).
+  New cell `nb5-t5-check` inserted after `nb5-t4-check` in both
+  `build_nb5.py` and the regenerated notebook (57 → 58 cells).
+  **Declined for this pass**: moving `interpretacion_ex1` to DeepSeek
+  grading — a fourth network-dependent call inside the 40-pt core exercise,
+  held back until the three `nb5_`-prefixed reflections above have
+  survived a real concurrent-class load (see the 2026-08-24 502 incident on
+  nb3/nb4 in the entries below).
+  `_test_nb5.py` grew from 32 to 40 assertions, all passing (38 from the
+  wiring/content fixes above, +2 for t5's correct/incorrect pair).
 - 2026-08-29 — **nb4's Rondas 5–6 and Mini-Proyecto cut; new
   `proyecto_investigacion.ipynb` built to replace the Mini-Proyecto with a
   larger, real self-directed research project (user decision).**

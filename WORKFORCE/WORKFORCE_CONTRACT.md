@@ -74,7 +74,7 @@ comparison. `_CORE_MAX` = 50 (nb3_lite) / 55 (nb4_lite), both theory+reflection 
 `WORKFORCE_HANDOFF.md`'s 2026-08-21 Done log entry.
 | 3–4→5 bridge | **New (2026-08-29):** `proyecto_investigacion.ipynb` (own dataset, own claim, no autograder) | Started in class Semana 4, due before Semana 5; presentation opens Semana 5. Replaces nb4's cut Mini-Proyecto — see 2026-08-29 Change Log entry and `WORKFORCE_HANDOFF.md` Done log | 85 pts, human-graded rubric (not XP) |
 | 5 | Causation reality check | Distinguish correlation from causation; identify confounders | ~100 |
-| 6 | Linear regression | Interpret a fitted regression, not derive it | ~150 |
+| 6 | Linear regression (1 notebook, "Misión 3: El Oráculo de Datos" — `nb5_regresion.ipynb`, `course-python-stats/Week 6/`) | Interpret a fitted regression (train/test R², extrapolation risk, coefficient scale), not derive it | ~150 nominal — actual `_CORE_MAX` = 102 (2 registro participation + 25 t1-5 + 5 refl_interpretacion + 40 ex1 + 20 ex2 + 5 refl_ex2 + 5 refl_final) + `_BONUS_MAX` = 10 (reto1, "rompe el modelo"). Below nominal by design, same "showcase not deep dive" reasoning as nb4's 2026-08-29 trim — see `WORKFORCE_HANDOFF.md` Done log, 2026-09-13/14 entries. |
 | 7 | K-means clustering | Interpret clusters, not derive the algorithm | ~120 |
 | 8 | Capstone | Integrate stats + (optionally) one ML technique on a real question | 100 pts (rubric, not XP) |
 
@@ -159,6 +159,66 @@ assembles the notebook** (`COURSE_TEMPLATE.md` §12).
 
 ## Change Log
 
+- 2026-09-14 — §2 updated: two more user-requested changes to Week 6's nb5
+  before ship. (1) `mi_prediccion_x = "___"` bare-variable cells (the
+  🔮/🧩 "no se califica" ones from the 2026-09-13 pre-ship pass) replaced
+  with the same HTML/JS submit-widget pattern as the AI reflexions, minus
+  the DeepSeek call — 1 XP each for a non-placeholder submission, raw text
+  stored in `submissions.score_breakdown` (JSON column, no migration) so
+  these can be reviewed by SQL instead of opening every student's Colab.
+  `_CORE_MAX`: 100 → 102. (2) Fixed a real icon-legend collision:
+  `nb5-guiado-md`'s section header reused 🔮 (the legend's own PREDICE
+  icon) for a section that isn't a prediction prompt — swapped for ✨, and
+  the legend gained a new 📝 ANOTA row for the after-the-fact reflection
+  cell (the 🔮/📝 distinction is before-vs-after seeing the answer, not
+  interchangeable). Added `---` separators at 5 major section boundaries
+  for scannability (no content change). `_test_nb5.py`: 40 → 46 assertions.
+  (3) Two new visuals, picked from proposed options: an explained/
+  unexplained stacked-bar for Concept 2's existing R² values, and a
+  90/10 train/test split scatter for Concept 3 (previously text-only).
+  `nb5_regresion.ipynb`: 58 → 60 cells, pure content, no scoring change.
+  Full detail in `WORKFORCE_HANDOFF.md`'s 2026-09-14 Done log entry.
+- 2026-09-13 — Pre-ship review of Week 6 (below) caught a real blocker:
+  `grade-reflexion/index.ts`'s notebook allowlist was never updated for
+  `"nb5"` — same class of bug as the 2026-08-21 nb3/nb4 incident documented
+  in that file, about to repeat on day one. Fixed, plus `nb5_`-prefixed
+  `GRADING_NOTES` entries (namespaced so nb6/nb7 won't collide the way
+  nb3/nb4's generic ids would have), matching `autograder_nb5.py` call
+  sites, a strengthened `interpretacion_ex1` heuristic, and four
+  pure-content notebook fixes (no scoring/contract change). A live
+  round-trip against the deployed Edge Function is still outstanding —
+  local tests can't verify server-side allowlist/key config.
+  **Scope change, user-approved**: also added `check_t5` (a coefficient-
+  scale MCQ — "Apoyo social" has a bigger coefficient than "PBI per
+  cápita," does that make it more important?), assessing the caveat
+  already stated once in `nb5-guiado-paso6-md` but never tested.
+  `_CORE_MAX`: 95 → 100 (t1-4 → t1-5 in `check_mini_b`'s checkpoint too).
+  Declined for this pass: moving `interpretacion_ex1` to DeepSeek grading
+  (a fourth network-dependent call in the 40-pt core exercise, held back
+  until the `nb5_`-prefixed reflections above survive a real concurrent-
+  class load). `_test_nb5.py`: 32 → 40 assertions. Full detail in
+  `WORKFORCE_HANDOFF.md`'s third 2026-09-13 Done log entry.
+- 2026-09-13 — §2 updated: Week 6 ("Misión 3: El Oráculo de Datos") built —
+  first notebook of this mission, `nb5_regresion.ipynb` /
+  `autograder_nb5.py` / `build_nb5.py` in new folder
+  `course-python-stats/Week 6/`, one notebook/one session per direct user
+  request. Reuses `2019_es.csv` (World Happiness) for an ungraded guided
+  example (train/test split, R², coefficient interpretation, an
+  extrapolation-breaks-it demo) and `athlete_events_es.csv` (Olympics) for
+  two autograded exercises predicting `Altura`. Scope decision: the
+  requested predictor menu {Edad, Peso, Sexo, Deporte} was cut to
+  {Edad, Peso, Sexo_num} — `Deporte` has 66 categories and one-hot encoding
+  it is outside §5's technical spine; `Sexo` is converted to a 0/1 column
+  in a guided (not student-written) cell. `_CORE_MAX` = 95, `_BONUS_MAX` =
+  10 (see §2 table). Full detail, scoring rationale, and R²-lookup
+  methodology in `autograder_nb5.py`'s module docstring. Validated via
+  `Week 6/_test_nb5.py` (ATLAS-style, `COURSE_TEMPLATE.md` §3 pattern):
+  32/32 assertions pass, plus a full end-to-end run of the notebook's own
+  code cells against the real CSVs feeding a 100%-score integration test
+  through `resumen()`. Not yet pushed to `main` — the `!wget` URLs in
+  `build_nb5.py`'s setup cell won't resolve for real students until this
+  folder is committed and pushed. See `WORKFORCE_HANDOFF.md` Done log,
+  2026-09-13 entry.
 - 2026-08-29 — §2 updated: nb4's Rondas 5–6 (pure repeat of Semana 3's
   scatter+`.corr()` pattern) and its Mini-Proyecto (`intex1` + two
   reflections) were cut — user decision, both distinct-skill content
