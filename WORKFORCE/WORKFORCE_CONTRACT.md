@@ -75,7 +75,7 @@ comparison. `_CORE_MAX` = 50 (nb3_lite) / 55 (nb4_lite), both theory+reflection 
 | 3–4→5 bridge | **New (2026-08-29):** `proyecto_investigacion.ipynb` (own dataset, own claim, no autograder) | Started in class Semana 4, due before Semana 5; presentation opens Semana 5. Replaces nb4's cut Mini-Proyecto — see 2026-08-29 Change Log entry and `WORKFORCE_HANDOFF.md` Done log | 85 pts, human-graded rubric (not XP) |
 | 5 | Causation reality check | Distinguish correlation from causation; identify confounders | ~100 |
 | 6 | Linear regression (1 notebook, "Misión 3: El Oráculo de Datos" — `nb5_regresion.ipynb`, `course-python-stats/Week 6/`) | Interpret a fitted regression (train/test R², extrapolation risk, coefficient scale), not derive it | ~150 nominal — actual `_CORE_MAX` = 102 (2 registro participation + 25 t1-5 + 5 refl_interpretacion + 40 ex1 + 20 ex2 + 5 refl_ex2 + 5 refl_final) + `_BONUS_MAX` = 10 (reto1, "rompe el modelo"). Below nominal by design, same "showcase not deep dive" reasoning as nb4's 2026-08-29 trim — see `WORKFORCE_HANDOFF.md` Done log, 2026-09-13/14 entries. |
-| 7 | K-means clustering | Interpret clusters, not derive the algorithm | ~120 |
+| 7 | K-means clustering (1 notebook, "Misión 4: El Cartógrafo de Patrones" — `nb6_clustering.ipynb`, `course-python-stats/Week 7/`) | Mostly showcase + interpretation (extra credit for students already ahead), one simple build exercise; interpret clusters, not derive the algorithm | ~120 nominal — actual `_CORE_MAX` = 87 (2 registro participation + 5 cluster_es_genero + 25 t1-5 + 40 ex1 + 5 refl_ex2 + 5 refl_generalizacion + 5 refl_final) + `_BONUS_MAX` = 10 (reto1, "cambia el número de regiones"). Same "showcase not deep dive" trim as nb5 — see `WORKFORCE_HANDOFF.md` Done log, 2026-09-19 entry. Ejercicio 3/refl_generalizacion were added 2026-09-21 (train/test-style generalization check for clustering), then Ejercicio 2 and Ejercicio 3 were both simplified away as graded builds later the same day (user call: this notebook is extra credit and should stay light) — Ejercicio 2 became an ungraded showcase cell, Ejercicio 1 now covers 2-3 predictors in one build, Ejercicio 3 was removed outright (its concept is still taught by the guided demo and assessed by `refl_generalizacion`, kept). `_CORE_MAX` 102→127→87 across the two 2026-09-21 passes. See `WORKFORCE_HANDOFF.md` Done log, both 2026-09-21 entries. |
 | 8 | Capstone | Integrate stats + (optionally) one ML technique on a real question | 100 pts (rubric, not XP) |
 
 Total: ~700 XP + 100 capstone rubric points.
@@ -129,8 +129,16 @@ answer.
 `pd.read_csv`, `.head()`, `.info()`, `.describe()`, boolean filtering (`df[df['col'] > x]`),
 `.groupby()`, `.mean()/.median()/.std()/.corr()`, `matplotlib` scatter/basic charts,
 `sklearn.linear_model.LinearRegression` (`.fit()`/`.predict()`), `sklearn.cluster.KMeans`
-(`.fit_predict()`). No standalone "pandas fundamentals" week — each skill is taught embedded in
-the analysis that needs it.
+(`.fit()`/`.fit_predict()`), `sklearn.preprocessing.StandardScaler` (`.fit_transform()`). No
+standalone "pandas fundamentals" week — each skill is taught embedded in the analysis that needs
+it.
+
+**Added 2026-09-19 (nb6, Week 7):** `sklearn.preprocessing.StandardScaler` was not in the original
+list — only `KMeans` was. Scaling before fitting k-means is a statistical non-negotiable, not an
+optional technique (`04_GAUSS.md`'s Week 7 risk row: "K-means needs feature scaling before
+`.fit_predict()`"); without it, nb6's own guided demo cannot demonstrate the concept it exists to
+teach. Recognized scope addition, not a silent one — see `WORKFORCE_HANDOFF.md`'s 2026-09-19 Done
+log entry for the empirical validation that motivated it.
 
 ---
 
@@ -159,6 +167,118 @@ assembles the notebook** (`COURSE_TEMPLATE.md` §12).
 
 ## Change Log
 
+- 2026-09-21 (later same day) — §2 updated: Week 7 (`nb6_clustering.ipynb`)
+  simplified back down, reverting most of the exercise entry directly
+  below. User re-read the whole notebook and decided Semana 7 is "extra
+  credit for those who have made good strides on previous content," so it
+  should be mostly showcase + interpretation with simple exercises — not
+  three graded `🔨 CONSTRUYE` builds totaling 80 pts. `check_ex2` removed
+  (Ejercicio 2 "agrega Energia" is now an ungraded `👀 OBSERVA` showcase
+  cell shown before Ejercicio 1); `check_ex1` widened to accept 2 OR 3
+  predictors (was exactly 2), so it now covers what used to be two
+  exercises; `check_ex3` (the train/test build from the entry below)
+  removed outright — the guided demo and `refl_generalizacion` already
+  teach/assess the concept without a from-scratch rebuild.
+  `refl_ex2`/`refl_generalizacion` kept their reflection ids (`nb6_ex2`/
+  `nb6_generalizacion`) to avoid an `EXPECTED_NOTEBOOKS` change in
+  `grade-reflexion/index.ts`, but that function's `question`/`grounding`/
+  `grading_notes` text for both was rewritten to match the new framing —
+  **still needs a redeploy** for students to see the updated wording.
+  `_CORE_MAX` 127→87; `mini_a`/`mini_b` checkpoints and
+  `explorador_completo` (now ex1 perfect + all 3 reflections submitted,
+  was ex1+ex2+ex3 perfect) updated to match. Validated
+  (`Week 7/_test_nb6.py`): 47/47 assertions. See `WORKFORCE_HANDOFF.md`'s
+  2026-09-21 Done log entry (the one above the "third exercise" entry).
+
+- 2026-09-21 — §2 updated: Week 7 (`nb6_clustering.ipynb`) extended with a
+  third exercise + reflection. User asked, after nb5 taught train/test for
+  regression, why nb6 (k-means, unsupervised) had no equivalent
+  generalization check — "test accuracy" doesn't apply to an algorithm
+  with no real labels to be right/wrong about (and would contradict
+  Concepto 3's "cluster labels are arbitrary" lesson if forced), so the
+  equivalent was reframed as generalization/stability: fit `KMeans` SOLO
+  on train, `.predict()` (never re-fit) on a held-out test split, compare
+  cluster profiles between the two. Added Concepto 4 (why generalization
+  matters for an unsupervised model, motivated by two concrete use cases —
+  recommend the next song by cluster, segment songs for a marketing
+  decision), a guided train/test demo, Ejercicio 3 ("Prueba tu mapa en
+  territorio nuevo", 20 pts, same structural-check philosophy as ex1/ex2),
+  and a new IA-graded reflection (`refl_generalizacion`, 5 pts;
+  `nb6_generalizacion` rubric added to `grade-reflexion/index.ts`) that
+  ties a train/test profile mismatch to a concrete failure for each use
+  case. `_CORE_MAX` 102→127; `mini_b` checkpoint and the
+  `explorador_completo` achievement (now requires ex1+ex2+ex3, was
+  ex1+ex2) updated to match. Validated (`Week 7/_test_nb6.py`): 56/56
+  assertions, including the new guided demo cell re-run end-to-end against
+  the real CSV — train/test cluster profiles matched almost exactly
+  (e.g. Bailabilidad 0.417 train vs. 0.416 test for one cluster),
+  confirming the pedagogical point rather than asserting it. See
+  `WORKFORCE_HANDOFF.md`'s 2026-09-21 Done log entry.
+
+- 2026-09-19 (same day, second pass) — **Week 7's dataset changed from
+  `vgsales_es.csv` to a real Spotify dataset, superseding the entry
+  directly below.** The user added `course-python-stats/Week 7/spotify.csv`
+  (Kaggle's "Spotify Tracks Dataset," 114,000 tracks x 114 real genres)
+  after the first version of nb6 shipped with vgsales as a stand-in. New
+  `Week 7/translate_to_spanish.py` translates headers and all 114 genres
+  to Spanish → `spotify_es.csv` (the dataset the notebook actually loads).
+  `nb6_clustering.ipynb`/`autograder_nb6.py`/`_test_nb6.py` rebuilt around
+  it: `Bailabilidad`+`Tempo` replace `Año`+`Ventas_Globales` for the guided
+  demo and Ejercicio 1, `Energia` replaces `Ventas_NA` for Ejercicio 2 —
+  same structural-grading design as before (unchanged, still not a
+  value-lookup — see the entry below for why). Re-validated empirically
+  from scratch, not assumed to transfer from the vgsales numbers: unscaled
+  k-means on `{Bailabilidad, Tempo}` still shows the same
+  scale-domination effect (Tempo range ≈30-243 BPM dwarfs Bailabilidad's
+  0-1), and the cluster×`Genero` crosstab is now a *stronger* proof that
+  clusters ≠ genres (top genre per cluster ≈1.9-2.6% of 114 possible, vs.
+  vgsales's ≈22% of 12 possible) since Spotify audio features don't
+  correlate with genre nearly as tightly as sales figures correlate with a
+  game's platform-era. One real difference in findings, reflected honestly
+  rather than copied from nb5/vgsales: adding `Energia` for Ejercicio 2
+  changes the grouping *moderately* (Adjusted Rand Index ≈0.53), not
+  "barely at all" (vgsales's `Ventas_NA` gave ARI≈0.97) — `Energia` is only
+  weakly correlated (r≈0.13/0.24) with the other two features, so it
+  carries genuinely new information. `grade-reflexion/index.ts`'s
+  `nb6_ex2`/`nb6_final` `GRADING_NOTES` grounding numbers updated to match.
+  Full detail, including why vgsales was chosen as a stand-in in the first
+  place, in `WORKFORCE_HANDOFF.md`'s 2026-09-19 Done log (second entry).
+- 2026-09-19 — §2/§5 updated: Week 7 ("Misión 4: El Cartógrafo de
+  Patrones") built — first (and only) notebook of this mission,
+  `nb6_clustering.ipynb` / `autograder_nb6.py` / `build_nb6.py` in new
+  folder `course-python-stats/Week 7/`, one notebook/one session, same
+  pattern as nb5 vs. Misión 3. Direct user request with a full
+  section-by-section beat sheet (visualize-before-formalizing opener,
+  unscaled-then-scaled guided k-means demo, a structural 🧩 check that
+  clusters don't match real game genres, two autograded exercises, 5
+  theory questions, a closing reflection, a bonus "different k" reto, two
+  checkpoints). **Dataset**: `vgsales_es.csv` (already used in
+  `nb1_semana2`, Weeks 1-2 — no new dataset introduced, lower GAUSS-vetting
+  risk per ticket #7) — `Año`+`Ventas_Globales` for the guided demo and
+  Ejercicio 1, `Ventas_NA` added for Ejercicio 2. Chosen over the
+  beat sheet's original danceability/tempo (Spotify) placeholder example
+  because no such CSV exists in this repo; `Año` vs. `Ventas_Globales` was
+  verified empirically (before writing any notebook cell) to reproduce the
+  same "unscaled k-means bands on the larger-magnitude feature" effect.
+  **§5 scope addition**: `sklearn.preprocessing.StandardScaler` added to
+  the technical spine — was missing even though `KMeans` was already
+  listed; scaling is a Week 7 statistical non-negotiable per `04_GAUSS.md`,
+  not optional. **Scoring**: `_CORE_MAX` = 102 (mirrors nb5's total,
+  coincidentally), `_BONUS_MAX` = 10. **Grading design differs from
+  nb3/4/5**: ex1/ex2/reto1 are graded structurally (fitted `KMeans` with
+  the right `n_clusters`, cluster centers in a scaled-data-plausible range)
+  rather than against a hardcoded lookup of exact values — a literal
+  cluster-index lookup would be both fragile across sklearn versions and
+  pedagogically self-contradictory, since Concepto 3 explicitly teaches
+  that the cluster index itself is arbitrary. **Validated**
+  (`Week 7/_test_nb6.py`): 45/45 assertions, plus every real guided/demo
+  code cell from the built `.ipynb` re-run end-to-end against the real CSV
+  and a fully-correct worked solution scored 100% through the live
+  `Autograder` with no exceptions. `supabase/functions/grade-reflexion/
+  index.ts`: `"nb6"` added to `EXPECTED_NOTEBOOKS` and `nb6_ex2`/`nb6_final`
+  added to `GRADING_NOTES` *before* shipping, avoiding the exact allowlist
+  bug nb3/nb4/nb5 each hit first. Full detail in `WORKFORCE_HANDOFF.md`'s
+  2026-09-19 Done log entry.
 - 2026-09-14 — §2 updated: two more user-requested changes to Week 6's nb5
   before ship. (1) `mi_prediccion_x = "___"` bare-variable cells (the
   🔮/🧩 "no se califica" ones from the 2026-09-13 pre-ship pass) replaced

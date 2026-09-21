@@ -24,8 +24,12 @@ tema nuevo, son repaso espaciado de todo el curso hasta ahora, con el énfasis r
 Cada KC tiene **24 preguntas = 8 + 8 + 8**, todas valen **5 pts** → **120 pts por KC**, mismo
 orden de magnitud que el `_CORE_MAX` de los notebooks existentes:
 
-- **A. Opción múltiple (8)** — corregidas localmente, sin red. Mismo formato que `_TEORIA` en
-  los autograders (`q`, 4 opciones, `correct`, `why`).
+- **A. Opción múltiple (8)** — reutiliza verbatim o casi verbatim las preguntas canónicas ya
+  validadas de `Preguntas_Teoricas_Semanas1-2.md` y de `_TEORIA` en `autograder_nb3.py`/
+  `autograder_nb4.py`/`autograder_nb5.py` (cada pregunta cita su fuente), más un par de
+  escenarios nuevos en la misma clase de pregunta (lectura de signo/fuerza de r, variable
+  confusora o causalidad inversa) para sumar variedad sin inventar un concepto nuevo. Corregidas
+  localmente, sin red.
 - **B. Interpretación — calificada por IA (8)** — mismo formato que `ReflexionSpec` en
   `supabase/functions/grade-reflexion/index.ts` (`question`, `grounding`, `grading_notes`,
   `max_pts`). Preguntas abiertas, 1-3 oraciones.
@@ -69,66 +73,75 @@ validación estructural (regex/AST para código) o de valor numérico con tolera
 
 ### A. Opción múltiple (8 × 5 = 40 pts)
 
-**A1.** Una tienda usa las ventas de los últimos 3 años para estimar cuántas unidades pedirá el
-próximo mes. ¿Qué rama de la estadística está usando principalmente?
-a) Descriptiva
-b) Predictiva
-c) Prescriptiva
-d) Ninguna, esto no es estadística
-**Correcta: b)** — está proyectando un valor futuro a partir de patrones existentes.
+**A1.** *(idéntica a `check_t1`, `Preguntas_Teoricas_Semanas1-2.md`)* Un periodista afirma "el
+colegio X es el mejor de la ciudad" citando solo el promedio de notas de sus 5 mejores alumnos.
+¿Qué le falta a esa afirmación para ser un uso correcto de la estadística?
+a) Nada, un promedio siempre es suficiente para comparar
+b) Considerar a todos los estudiantes, no solo una muestra elegida a conveniencia
+c) Usar una gráfica en vez de un número
+d) Cambiar el promedio por la moda
+**Correcta: b)** — la estadística exige mirar el conjunto completo (o una muestra
+representativa), no una selección que ya favorece la conclusión deseada.
 
-**A2.** En un equipo de 15 vendedores, 14 vendieron S/200 cada uno esta semana y uno vendió
-S/3,200 por una venta excepcional. ¿Qué le pasa a la media del equipo comparada con la mediana?
-a) Ambas se mantienen en S/200
-b) La media sube notablemente (a S/400) mientras la mediana se mantiene en S/200, reflejando mejor lo típico
-c) La mediana sube más que la media
-d) Es imposible calcular la media con un valor tan distinto
-**Correcta: b)** — (14×200 + 3200) / 15 = 400; la mediana de 15 valores donde 14 son 200 sigue en 200.
+**A2.** *(idéntica a `check_t3`, `Preguntas_Teoricas_Semanas1-2.md` — prioridad GAUSS)* Un
+programa agrupa a 500 clientes en 4 grupos según sus hábitos de compra similares. ¿Qué rama de
+la estadística describe mejor esto?
+a) Predictiva, porque usa un algoritmo
+b) Descriptiva, porque organiza y resume lo que ya existe en los datos
+c) Prescriptiva, porque recomienda una acción
+d) No es estadística, es solo programación
+**Correcta: b)** — agrupar (clustering) organiza patrones existentes, no proyecta un valor
+futuro. Pregunta diseñada para prevenir archivar k-means (Semana 7) como "predictivo."
 
-**A3.** 200 estudiantes reportan su color favorito. ¿Qué medida de tendencia central tiene
-sentido calcular?
+**A3.** *(idéntica a `check_t4`, `Preguntas_Teoricas_Semanas1-2.md`)* En un salón de 20
+estudiantes, 19 ganan S/10 de propina por una encuesta y uno gana S/500 por un error de
+registro. ¿Qué le pasa a la media del grupo?
+a) No cambia, la media ignora valores extremos
+b) Sube mucho, porque la media se ve arrastrada por valores extremos
+c) Baja mucho
+d) Se vuelve imposible de calcular
+**Correcta: b)**
+
+**A4.** *(idéntica a `check_t6`, `Preguntas_Teoricas_Semanas1-2.md`)* Se tiene una lista con el
+deporte favorito de 200 estudiantes (fútbol, vóley, básquet, natación...). ¿Qué medida de
+tendencia central tiene sentido calcular aquí?
 a) La media
 b) La mediana
 c) La moda
 d) La desviación estándar
 **Correcta: c)** — son datos categóricos, no se pueden sumar ni ordenar de forma numérica.
 
-**A4.** Dos variables dan r ≈ -0.91. ¿Qué significa?
-a) Relación fuerte y positiva
-b) Relación fuerte y negativa — cuando una sube, la otra tiende a bajar
-c) No hay relación entre las dos variables
-d) El cálculo está mal, r no puede ser tan cercano a -1
-**Correcta: b)**
-
-**A5.** "Número de mascotas" y "Puntaje de felicidad" dan r ≈ 0.02 en un dataset. ¿Qué te dice
-ese número?
-a) Es una relación perfecta
-b) Es una relación fuerte y negativa
-c) Hay poca o ninguna relación lineal entre ellas
-d) Se necesitan más datos para poder calcular r
-**Correcta: c)**
-
-**A6.** La variable X tiene r=-0.85 con el resultado, y la variable Y tiene r=0.20. ¿Cuál de las
-dos tiene una relación más fuerte?
-a) Y, porque es positiva
-b) X, porque su distancia a 0 es mayor, sin importar el signo
-c) Ambas son igual de fuertes
-d) No se puede comparar r de distinto signo
-**Correcta: b)** — fuerza = distancia a 0; |−0.85| > |0.20|.
-
-**A7.** Al escribir `df[df['Edad'] < 18]`, ¿qué pasa con el DataFrame original `df`?
-a) Se borran permanentemente las filas que no cumplen la condición
-b) No cambia — se crea una vista/subconjunto nuevo
-c) Se ordena de menor a mayor
-d) Se calcula el promedio de Edad
-**Correcta: b)**
-
-**A8.** En un dataset de videojuegos donde cada fila es un juego y cada columna es un dato del
-juego (año, plataforma, ventas...), ¿cómo se llama correctamente cada fila y cada columna?
+**A5.** *(idéntica a `check_t9`, `Preguntas_Teoricas_Semanas1-2.md`)* En una tabla de datos de
+atletas olímpicos, cada fila representa un atleta y cada columna representa un dato sobre ese
+atleta (edad, altura, deporte...). ¿Cómo se llama correctamente cada fila y cada columna?
 a) Fila = variable, columna = observación
 b) Fila = observación, columna = variable
 c) Ambas son observaciones
 d) Ambas son variables
+**Correcta: b)**
+
+**A6.** *(idéntica a `check_t11`, `Preguntas_Teoricas_Semanas1-2.md`)* Cuando se escribe
+`df[df['edad'] > 30]`, ¿qué se está haciendo conceptualmente?
+a) Borrando permanentemente a los atletas menores de 30 del archivo original
+b) Haciéndole una pregunta específica a los datos: "muéstrame solo los casos que cumplen esta condición"
+c) Calculando el promedio de edad
+d) Ordenando el dataset de mayor a menor
+**Correcta: b)**
+
+**A7.** *(idéntica a T1, `autograder_nb3.py`)* ¿Qué resume el coeficiente de correlación (r)
+entre dos variables numéricas?
+a) Solo qué tan grande es el promedio de una de las variables
+b) Qué tan fuerte y en qué dirección se mueven juntas dos variables
+c) Cuántos valores nulos tiene el dataset
+d) La forma exacta (curva) de una relación
+**Correcta: b)**
+
+**A8.** Una tienda encuentra que "temperatura promedio del día" y "ventas de abrigos" tienen
+r ≈ -0.88. ¿Qué significa?
+a) Relación fuerte y positiva — a más calor, más abrigos se venden
+b) Relación fuerte y negativa — a más calor, tienden a venderse menos abrigos
+c) Es imposible, r no puede ser negativo
+d) No hay ninguna relación entre esas variables
 **Correcta: b)**
 
 ### B. Interpretación — calificada por IA (8 × 5 = 40 pts)
@@ -240,75 +253,56 @@ Responde sí/no y en una frase por qué.
 
 ### A. Opción múltiple (8 × 5 = 40 pts)
 
-**A1.** Filtras un dataset y te quedan solo 2 países. Cualquier par de columnas que pruebes da
-r≈±1.0 casi seguro. ¿Por qué no deberías confiar en ese número?
-a) Porque esos países nunca deberían estar en el dataset
-b) Con solo 2 puntos, una línea recta siempre pasa exactamente por ambos — el r perfecto es un artefacto del tamaño de muestra, no evidencia de una relación fuerte
-c) Porque el signo de r está mal calculado con muestras chicas
-d) Porque `.corr()` no acepta menos de 3 filas
-**Correcta: b)** — mismo caso que la trampa de Oceanía (T10, `autograder_nb4.py`).
-
-**A2.** Un estudiante prueba 25 pares de variables sin ninguna razón teórica y uno de ellos da
-r=0.58. ¿Qué es lo más razonable pensar?
-a) Como el r es alto, encontró una relación real e importante
-b) Probar muchos pares al azar aumenta la probabilidad de que alguno salga alto por pura casualidad — conviene desconfiar sin confirmación adicional
-c) r nunca puede salir alto por casualidad
-d) Hay que usar ese par sin dudar
+**A1.** *(idéntica a T7, `autograder_nb3.py`)* Ya viste que tanto "PBI per cápita" como
+"Esperanza de vida saludable" tienen cada una r ≈ 0.78-0.79 con "Puntaje". ¿Qué puedes concluir
+sobre la correlación ENTRE esas dos variables, sin Puntaje de por medio?
+a) Tiene que ser también ≈0.78, porque ambas se relacionan igual con Puntaje
+b) No se puede saber su valor exacto sin calcularlo directamente — que ambas se relacionen con una tercera variable no fija su relación mutua
+c) Tiene que ser 0, porque ya "usaron" su relación con Puntaje
+d) Tiene que ser negativa, porque son variables distintas
 **Correcta: b)**
 
-**A3.** El consumo de queso per cápita en EE.UU. y las muertes por enredarse en sábanas tienen
-r=0.947 (dato real, 2000-2009, `build_correlaciones_espurias.py`). ¿Qué explica mejor esto?
-a) El queso causa que la gente se enrede
-b) Coincidencia estadística sin relación causal real — ninguna variable causa la otra
-c) Enredarse en sábanas hace que la gente coma más queso
-d) El cálculo debe estar mal porque 0.947 es demasiado alto para ser casualidad
-**Correcta: b)**
-
-**A4.** Los pueblos con más heladerías por habitante tienen más ahogamientos en playas, r alto.
-¿Cuál es la variable de fondo más probable?
-a) Las heladerías causan directamente los ahogamientos
-b) El calor / la temporada de verano sube ambas cosas a la vez, sin que una cause la otra
-c) Los ahogamientos hacen que abran más heladerías
-d) No existe ninguna explicación posible
-**Correcta: b)** — misma lógica que el clásico helado/ahogamientos (T9, `autograder_nb3.py`).
-
-**A5.** Comparando con `.groupby()`, el País A tiene un promedio de esperanza de vida más alto
-que el País B. ¿Qué se puede concluir correctamente?
-a) El País A es "mejor" en todo, y esa es la causa de la diferencia
-b) Existe una diferencia entre los grupos en este dataset — pero esto no explica por qué existe
-c) No se puede concluir nada de una comparación de grupos
-d) El País B debería copiar exactamente lo que hace el País A
-**Correcta: b)**
-
-**A6.** Una relación real y fuerte pero en forma de U (no una línea recta) puede dar un r
-cercano a...
-a) 1, porque `.corr()` siempre detecta cualquier patrón
-b) -1, siempre
-c) 0, porque `.corr()` solo mide relación lineal
-d) Es imposible calcular r en ese caso
+**A3.** *(idéntica al Quiz de Cierre 2 / T9, `autograder_nb3.py`)* En una ciudad, las ventas de
+helado y el número de personas que se ahogan en la playa tienen un r muy alto, cercano a 0.9,
+medido mes a mes durante todo el año. ¿Cuál es la mejor explicación?
+a) Comer helado le da a la gente ganas de nadar en aguas peligrosas
+b) Ahogarse hace que la gente compre más helado después
+c) Una tercera variable — el calor del verano — hace subir tanto las ventas de helado como la cantidad de gente que va a nadar, sin que una cause la otra directamente
+d) El r no significa nada aquí porque son dos actividades sin relación
 **Correcta: c)**
 
-**A7.** r(Percepción de corrupción, Puntaje) = 0.386. Comparado con r(PBI, Esperanza de
-vida)=0.835, ¿cómo la describirías?
-a) Igual de fuerte, ambas cercanas a 1
-b) Positiva, pero notablemente más débil que 0.835 — no fuerte
-c) Negativa
-d) Prácticamente nula, igual que r≈0
+**A4.** *(idéntica al Quiz de Cierre 3 / T10, `autograder_nb3.py`)* En un grupo de niños de
+primaria de distintas edades, el tamaño de zapato y la habilidad de lectura tienen un r ≈ 0.65 —
+niños con zapatos más grandes tienden a leer mejor. ¿Qué explica mejor esta relación?
+a) Tener pies más grandes ayuda al cerebro a leer mejor
+b) Leer bien hace que crezcan más los pies
+c) La edad es la variable de fondo: los niños mayores tienen pies más grandes Y llevan más años aprendiendo a leer — ninguna de las dos causa la otra directamente
+d) Un r de 0.65 es demasiado bajo para significar algo
+**Correcta: c)**
+
+**A5.** *(idéntica al Quiz de Cierre 4 / T11, `autograder_nb3.py`)* Un estudiante prueba la
+correlación entre 30 pares de variables al azar en una encuesta enorme (número de zapato
+preferido, día de la semana en que nació, color favorito...) y encuentra que uno de esos 30
+pares da r ≈ 0.61. ¿Qué es lo más razonable pensar?
+a) Como el r es alto, encontró una relación real e importante
+b) Probar muchos pares al azar aumenta la probabilidad de que al menos uno salga con un r alto solo por casualidad — conviene desconfiar de este resultado hasta confirmarlo con datos nuevos
+c) r nunca puede salir alto por casualidad, siempre significa algo real
+d) Hay que usar ese par sin dudar porque el número es alto
 **Correcta: b)**
 
-**A8.** Una relación con r=0.99 entre dos variables sin ninguna conexión lógica evidente (ej.
-gasto en ciencia y suicidios por ahorcamiento, r=0.992 real) es...
-a) Prueba suficiente de que existe una conexión real, dado lo alto del número
-b) Matemáticamente una correlación muy fuerte, pero un r alto no prueba ni requiere una explicación causal real entre ellas
-c) Imposible — un r tan alto no puede ser casualidad
-d) Evidencia de que el dataset está mal construido
-**Correcta: b)**
+**A8.** El número de bomberos enviados a un incendio y el daño causado tienen correlación
+positiva fuerte. ¿Significa que enviar más bomberos empeora el incendio?
+a) Sí, mandar más bomberos empeora el incendio
+b) No, el tamaño del incendio determina cuántos bomberos se envían
+c) No hay ninguna relación real entre esas variables
+d) Es imposible que estas dos variables tengan correlación
+**Correcta: b)** — causalidad inversa: es el daño/tamaño del incendio el que determina cuántos
+bomberos se mandan, no al revés — distinto del caso de variable confusora (helado/ahogamientos).
 
-### B. Interpretación — calificada por IA (8 × 5 = 40 pts)
+### B. Interpretación — (8 × 5 = 40 pts)
 
 **B1.** *Pregunta:* "La tasa de divorcio en Maine y el consumo de margarina per cápita en EE.UU.
-dieron r=0.992 entre 2000 y 2009 (dato real). En 2-3 oraciones, sin decir que una 'causa' la
-otra: ¿qué tan convincente te parece este r como evidencia de una relación real, y qué le
+dieron r=0.992 entre 2000 y 2009 (dato real). ¿qué tan convincente te parece este r como evidencia de una relación real, y qué le
 falta?"
 *Grounding:* r real = 0.992, `build_correlaciones_espurias.py`.
 *Qué evaluar:* crédito si reconoce que el número por sí solo no es evidencia de una relación
@@ -423,66 +417,73 @@ filas para Oceanía. ¿Qué fracción del dataset total representa ese subgrupo?
 
 ### A. Opción múltiple (8 × 5 = 40 pts)
 
-**A1.** Un modelo da R²=0.60 en el set de prueba. ¿Qué significa?
-a) El 60% de las predicciones individuales fueron exactamente correctas
-b) El modelo explica ~60% de la variación real del resultado; el otro 40% queda sin explicar
-c) Hay 60% de probabilidad de que la relación sea real
-d) El modelo acierta el 60% de las veces si el resultado fuera categórico
+**A1.** *(idéntica a T1, `autograder_nb5.py`)* Tu modelo de regresión da R² = 0.72 en el set de
+prueba. ¿Qué significa exactamente ese número?
+a) El 72% de las predicciones individuales fueron exactamente correctas
+b) El modelo explica (predice) alrededor del 72% de la variación real del resultado — el otro 28% queda sin explicar por estas variables
+c) Hay un 72% de probabilidad de que la relación sea real y no producto del azar
+d) El modelo acierta el 72% de las veces si el resultado fuera categórico (sí/no)
 **Correcta: b)**
 
-**A2.** Un modelo tiene R² de entrenamiento = 0.95 y R² de prueba = 0.40. ¿Qué es lo más
-probable que esté pasando?
-a) El modelo es excelente, ambos números son buenos
-b) Sobreajuste (overfitting): memorizó el set de entrenamiento pero no generaliza a datos nuevos
-c) El R² de prueba está mal calculado
-d) Hace falta más entrenamiento con las mismas variables
+**A2.** *(idéntica a T2, `autograder_nb5.py`)* ¿Por qué el R² calculado sobre el set de prueba
+(test) importa más que el R² calculado sobre el set de entrenamiento (train)?
+a) El R² de prueba siempre da más alto, así que se ve mejor en el reporte
+b) El de entrenamiento mide qué tan bien el modelo memorizó datos que ya vio; el de prueba mide si el modelo funciona con datos nuevos que nunca vio — eso es lo que importa en la práctica
+c) El R² de prueba es más fácil de calcular en código
+d) El R² de entrenamiento solo aplica a clasificación, no a regresión
 **Correcta: b)**
 
-**A3.** Un modelo entrenado con casas de 50 a 200 m² se usa para predecir el precio de una casa
-de 5,000 m². ¿Por qué es arriesgado confiar en esa predicción?
-a) El modelo nunca aprendió el patrón fuera del rango que vio — está extrapolando sin ningún control real
-b) 5,000 m² es un número redondo y eso confunde al modelo
-c) No es arriesgado, un buen R² garantiza cualquier predicción
-d) Los modelos de regresión no pueden predecir casas grandes
-**Correcta: a)**
-
-**A4.** En un modelo, el coeficiente de "Edad" (que va de 0 a 90) es 0.05, y el de "Ingresos
-mensuales en miles" (que va de 0 a 20) es 0.8. ¿Significa que Ingresos es la variable "más
-importante"?
-a) Sí, siempre — el coeficiente más grande siempre gana
-b) No necesariamente — están en escalas distintas, no son directamente comparables sin más contexto
-c) No, los coeficientes nunca sirven para nada
-d) Sí, pero solo porque ambos son positivos
-**Correcta: b)**
-
-**A5.** Calcular el precio promedio de las casas vendidas el año pasado es estadística ___.
-Usar el tamaño de una casa nueva para predecir su precio es estadística ___.
-a) predictiva / descriptiva
-b) descriptiva / predictiva
-c) descriptiva / descriptiva
-d) prescriptiva / predictiva
-**Correcta: b)**
-
-**A6.** Agregas "signo zodiacal" como predictor de un resultado sin ninguna relación real. El
-R² de entrenamiento sube ligeramente, el de prueba baja. ¿Qué pasó?
-a) El signo zodiacal en realidad sí ayuda a predecir
-b) Sobreajuste — el modelo memorizó ruido específico del set de entrenamiento
+**A3.** *(idéntica a T3, `autograder_nb5.py`)* Agregas al modelo una variable que en realidad no
+tiene ninguna relación con lo que estás prediciendo. El R² de entrenamiento sube. El R² de
+prueba baja. ¿Qué te dice esto?
+a) La variable inútil en realidad sí ayuda a predecir, solo que no lo sabías
+b) El modelo empezó a memorizar ruido específico del set de entrenamiento en vez de aprender un patrón real que se generalice — esto se llama sobreajuste (overfitting)
 c) Hubo un error de cálculo
-d) Hay que agregar aún más variables para corregirlo
+d) Hay que agregar todavía más variables para corregirlo
 **Correcta: b)**
 
-**A7.** "R²=0.85 significa que el modelo acertó exactamente el 85% de sus predicciones."
-¿Verdadero o falso?
-a) Verdadero
-b) Falso — R² mide variación explicada, no un porcentaje de aciertos exactos
+**A4.** *(idéntica a T4, `autograder_nb5.py`)* El modelo de felicidad del ejemplo guiado tenía
+un R² de prueba decente (≈0.71). Pero al predecir con PBI per cápita = 10000 (el dato real más
+alto es ≈1.7) dio un Puntaje de miles de puntos, sin sentido. ¿Por qué pasó esto?
+a) El modelo está mal entrenado — con más datos, esa predicción sería razonable
+b) El modelo solo aprendió el patrón dentro del rango de datos que vio; fuera de ese rango, la línea recta simplemente se sigue extendiendo sin ningún control real — eso es extrapolar
+c) PBI per cápita nunca debería usarse como predictor
+d) Un R² alto garantiza predicciones razonables para cualquier valor, incluso fuera del rango de entrenamiento
 **Correcta: b)**
 
-**A8.** Quieres describir qué tan fuerte se mueven juntas dos variables SIN construir ningún
-modelo de predicción. ¿Qué herramienta de las que viste en el curso usarías?
-a) Un modelo de regresión lineal completo
-b) El coeficiente de correlación (`.corr()`)
-c) K-means
-d) `train_test_split`
+**A5.** *(idéntica a T5, `autograder_nb5.py`)* En el ejemplo guiado, el coeficiente de "Apoyo
+social" (≈1.16) fue mayor que el de "PBI per cápita" (≈0.77). ¿Significa esto que "Apoyo social"
+es la variable más importante para predecir el Puntaje?
+a) Sí, siempre — el coeficiente más grande siempre indica la variable más importante
+b) No necesariamente — las variables tienen escalas distintas, así que sus coeficientes no son directamente comparables sin más contexto
+c) No, los coeficientes nunca sirven para comparar variables, bajo ninguna circunstancia
+d) Sí, pero solo porque ambos coeficientes son positivos
+**Correcta: b)**
+
+**A6.** *(idéntica a T6, `autograder_nb3.py`)* Una relación real y fuerte, pero en forma de
+curva (no una línea recta), puede dar un valor de r cercano a...
+a) 1, porque `.corr()` siempre detecta cualquier patrón
+b) -1, siempre
+c) 0, porque `.corr()` solo mide relación lineal
+d) Es imposible calcular r en ese caso
+**Correcta: c)**
+
+**A7.** *(idéntica a `check_t2`, `Preguntas_Teoricas_Semanas1-2.md`)* Un hospital usa el
+historial de pacientes de los últimos 5 años para estimar cuántas camas necesitará el próximo
+mes. ¿Qué rama de la estadística está usando principalmente?
+a) Descriptiva
+b) Predictiva
+c) Prescriptiva
+d) Ninguna, esto no es estadística
+**Correcta: b)**
+
+**A8.** *(idéntica a `check_intex3`, `Preguntas_Teoricas_Semanas1-2.md`)* Un estudiante calculó
+que la edad promedio de los atletas de Baloncesto y la de Gimnasia son distintas. ¿Qué se puede
+concluir correctamente de ese resultado?
+a) Que jugar Baloncesto hace que un atleta envejezca más rápido que la Gimnasia
+b) Que existe una diferencia observada entre los dos grupos en este dataset — pero el dataset por sí solo no explica POR QUÉ existe esa diferencia
+c) Que el cálculo debe estar mal, porque todos los deportes deberían tener la misma edad promedio
+d) Que hay que eliminar uno de los dos deportes del dataset porque no son comparables
 **Correcta: b)**
 
 ### B. Interpretación — calificada por IA (8 × 5 = 40 pts)

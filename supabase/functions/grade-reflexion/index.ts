@@ -34,7 +34,10 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 // nb5_regresion.ipynb / autograder_nb5.py) -- mismo bug de allowlist
 // desactualizado documentado arriba para nb3/nb4, corregido aca antes de
 // que nb5 llegue a produccion en vez de despues de un diagnostico en vivo.
-const EXPECTED_NOTEBOOKS = new Set(["nb3", "nb4", "nb3_lite", "nb4_lite", "nb5"]);
+// 2026-09-19: agregado "nb6" para Semana 7 (Mision 4, k-means clustering,
+// nb6_clustering.ipynb / autograder_nb6.py) -- mismo motivo, corregido
+// antes de que nb6 llegue a produccion.
+const EXPECTED_NOTEBOOKS = new Set(["nb3", "nb4", "nb3_lite", "nb4_lite", "nb5", "nb6"]);
 const EXPECTED_CURSO = "STAT_2026";
 
 // 2026-08-24: bajo carga concurrente de clase (varios alumnos calificando
@@ -311,6 +314,127 @@ const GRADING_NOTES: Record<string, ReflexionSpec> = {
       "obligatorio) si menciona validar con datos nuevos o el riesgo de " +
       "extrapolar. Sin credito si es vacía, genérica, o no propone ningún caso " +
       "concreto.",
+    max_pts: 5,
+  },
+
+  // 2026-09-19: nb6 (Semana 7, k-means clustering) -- mismo prefijo "nb6_"
+  // por la misma razón documentada arriba para nb5 (evitar grounding
+  // cruzado si un notebook futuro reusa un id generico como "ex2"/"final").
+  // Grounding actualizado el mismo día: el usuario proveyó un CSV real de
+  // Spotify (spotify.csv/spotify_es.csv) que reemplazó al sustituto inicial
+  // (vgsales_es.csv, ventas de videojuegos) -- ver WORKFORCE_HANDOFF.md.
+  //
+  // 2026-09-21 (simplificación, mismo día que la adición de abajo -- ver
+  // autograder_nb6.py's docstring y WORKFORCE_HANDOFF.md Done log): el
+  // Ejercicio 2 dejó de ser un build calificado y se convirtió en una
+  // celda de muestra (OBSERVA) que el estudiante ve pero no construye,
+  // mostrada antes del Ejercicio 1. `question`/`grading_notes` reescritos
+  // para pedir una comparación entre esa muestra y el Ejercicio 1 propio
+  // del estudiante, en vez de "tu Ejercicio 1 vs. tu Ejercicio 2". El id
+  // "nb6_ex2" se conserva sin cambios (no requiere tocar
+  // EXPECTED_NOTEBOOKS) -- ver check_reflexion_ex2() en autograder_nb6.py.
+  nb6_ex2: {
+    question:
+      'Arriba viste qué pasó al agregar Energia a Bailabilidad+Tempo (un ' +
+      'cambio moderado, ni total ni trivial). En 1-2 oraciones: ¿usaste ' +
+      'Energia entre tus predictores del Ejercicio 1? Si no la usaste, ' +
+      '¿crees que agregarla cambiaría tu agrupamiento? Si sí la usaste, ' +
+      '¿tu resultado se parece a ese cambio moderado?',
+    grounding:
+      "Modelo real (StandardScaler + KMeans(n_clusters=3, random_state=42) " +
+      "sobre spotify_es.csv, 113,842 filas): al pasar de {Bailabilidad, " +
+      "Tempo} a {Bailabilidad, Tempo, Energia}, el Adjusted Rand Index " +
+      "entre ambos etiquetados es ≈0.53 -- un cambio MODERADO, ni total ni " +
+      "trivial, porque corr(Bailabilidad, Energia)≈0.13 y " +
+      "corr(Tempo, Energia)≈0.24 (ambas correlaciones débiles), así que " +
+      "Energia sí aporta información genuinamente nueva sobre la que ya " +
+      "daban Bailabilidad/Tempo. Esta comparación la vio el estudiante en " +
+      "una celda de muestra (nb6-demo-energia-*), no en un ejercicio " +
+      "propio -- su Ejercicio 1 puede o no haber incluido Energia.",
+    grading_notes:
+      "Credito completo si el estudiante dice explícitamente si usó " +
+      "Energia o no en su Ejercicio 1, y conecta eso con una expectativa o " +
+      "comparación plausible frente al cambio moderado de la muestra (ej. " +
+      "'no la usé, pero por lo que vi seguramente habría cambiado mi mapa " +
+      "un poco' o 'sí la usé, y mi cluster también se distingue por " +
+      "Energia además de Tempo'). Credito parcial si responde en términos " +
+      "genéricos sobre Energia sin conectar con su propio Ejercicio 1. Sin " +
+      "credito si es vacía/genérica o no menciona su propia elección de " +
+      "predictores.",
+    max_pts: 5,
+  },
+  // 2026-09-21: agregado nb6_generalizacion junto con el Ejercicio 3 del
+  // notebook (autograder_nb6.py check_ex3/check_reflexion_generalizacion)
+  // -- una prueba de train/test para clustering (ajustar SOLO con train,
+  // predict() sobre un test held-out, comparar perfiles de cluster), en
+  // vez de "test accuracy" (que no aplica a un algoritmo sin etiquetas
+  // reales -- ver docstring de autograder_nb6.py). Motivada con dos casos
+  // de uso reales: recomendación de la próxima canción por cluster, y
+  // segmentación de canciones para una decisión de marketing.
+  //
+  // 2026-09-21 (simplificación, mismo día): Ejercicio 3 (el build) fue
+  // eliminado -- el ejemplo guiado train/test (nb6-guiado-generaliza-*)
+  // ya enseña el flujo completo sin pedirle al estudiante que lo repita
+  // por su cuenta. `question` reescrita para referirse "al ejemplo guiado
+  // de arriba" en vez de "tu Ejercicio 3"; el id "nb6_generalizacion" no
+  // cambió.
+  nb6_generalizacion: {
+    question:
+      'En el ejemplo guiado de arriba, comparaste el perfil de cada ' +
+      'cluster entre entrenamiento y prueba. Si esos perfiles se hubieran ' +
+      'visto muy distintos entre train y test, ¿qué problema causaría eso ' +
+      'para (a) recomendar la próxima canción por cluster, o (b) ' +
+      'segmentar canciones para una decisión de marketing? En 2-4 ' +
+      'oraciones, explica el problema para al menos uno de los dos usos.',
+    grounding:
+      "Pregunta de cierre sin un valor único correcto -- evalúa si el " +
+      "estudiante conecta 'perfiles de cluster distintos entre train y " +
+      "test' con 'la estructura no generaliza, fue un accidente de la " +
+      "muestra de ajuste', y de ahí con una consecuencia concreta para " +
+      "AL MENOS uno de los dos usos propuestos: (a) recomendación -- una " +
+      "canción nueva asignada por .predict() terminaría agrupada con " +
+      "canciones que en realidad no se le parecen, dando recomendaciones " +
+      "malas; (b) segmentación -- una decisión de negocio (presupuesto de " +
+      "marketing por 'tipo de canción') basada en un agrupamiento que no " +
+      "se sostiene fuera de la muestra original no es confiable ni " +
+      "repetible.",
+    grading_notes:
+      "Credito completo si conecta explícitamente 'perfiles distintos " +
+      "entre train y test' con 'el agrupamiento no generaliza / fue un " +
+      "accidente de la muestra' Y describe una consecuencia concreta para " +
+      "al menos uno de los dos usos (no basta con repetir la pregunta). " +
+      "Credito parcial si identifica el problema de generalización sin " +
+      "conectarlo a ninguno de los dos usos, o si describe una consecuencia " +
+      "plausible sin mencionar por qué ocurriría (la falta de " +
+      "generalización). Sin credito si es vacía, genérica, o confunde esto " +
+      "con la pregunta de la reflexión anterior (cluster vs. género real).",
+    max_pts: 5,
+  },
+  nb6_final: {
+    question:
+      'Ya usaste k-means para agrupar canciones por variables ' +
+      'numéricas, sin decirle al algoritmo nada sobre el género real de ' +
+      'cada canción. En 2-4 oraciones: ¿cuál es el riesgo de tratar un ' +
+      'cluster de k-means como si fuera un género "oficial"? ¿en qué otro ' +
+      'contexto (que no sean canciones) podría pasar algo parecido?',
+    grounding:
+      "Pregunta de cierre sin un valor único correcto -- evalúa si el " +
+      "estudiante identifica que un cluster es un grupo estadístico " +
+      "definido por las variables que se le dieron al algoritmo, no una " +
+      "categoría real verificada, y que tratarlo como oficial/definitivo " +
+      "puede llevar a conclusiones erróneas. Dato real de respaldo: con " +
+      "114 géneros reales en este dataset, el género más común dentro de " +
+      "cualquier cluster de k-means (Bailabilidad+Tempo escalados) nunca " +
+      "supera ≈2.6% de ese cluster. Ejemplos válidos de 'otro contexto': " +
+      "segmentación de clientes, agrupar pacientes por síntomas, " +
+      "clasificar estudiantes por desempeño.",
+    grading_notes:
+      "Credito completo si identifica el riesgo central (un cluster no es " +
+      "una categoría verificada/real, solo un grupo numérico) Y propone un " +
+      "ejemplo concreto fuera de canciones/música. Credito parcial si " +
+      "identifica el riesgo sin ejemplo, o da un ejemplo sin explicar el " +
+      "riesgo. Sin credito si es vacía, genérica, o no conecta con la idea " +
+      "de que las etiquetas de cluster son arbitrarias.",
     max_pts: 5,
   },
 };

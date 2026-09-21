@@ -11,7 +11,7 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 | # | Ticket | Owner | Notes |
 |---|---|---|---|
 
-| 7 | Statistically vet Weeks 3–4, 6, 7 candidate datasets and Week 5 debunk material once SOFIA drafts them | GAUSS | **Weeks 3–4 now drafted 2026-08-14** (see Done log) — dataset not yet downloaded/vetted, this is the blocking half of the ticket for that unit now. Weeks 1–2 datasets vetted and approved 2026-08-05. Weeks 6, 7, and Week 5 debunk material still not drafted. **2026-08-29:** `proyecto_investigacion.ipynb`'s student-chosen datasets (menu still pending — see that Done log entry) will ship without formal GAUSS vetting given the timeline; accepted scope cut since nothing in that notebook is autograded (no exact-value answer key at risk). Flagging here as a fast-follow sanity-check once the dataset menu is finalized. |
+| 7 | Statistically vet Weeks 3–4, 6, 7 candidate datasets and Week 5 debunk material once SOFIA drafts them | GAUSS | **Weeks 3–4 now drafted 2026-08-14** (see Done log) — dataset not yet downloaded/vetted, this is the blocking half of the ticket for that unit now. Weeks 1–2 datasets vetted and approved 2026-08-05. Week 5 debunk material still not drafted. **2026-08-29:** `proyecto_investigacion.ipynb`'s student-chosen datasets (menu still pending — see that Done log entry) will ship without formal GAUSS vetting given the timeline; accepted scope cut since nothing in that notebook is autograded (no exact-value answer key at risk). Flagging here as a fast-follow sanity-check once the dataset menu is finalized. **Week 6 (nb5) reused already-vetted Weeks 1–2/3–4 datasets — see 2026-09-13 Done log, low residual risk, not formally closed.** **2026-09-19: Week 7 (nb6) first used a reused dataset** (`vgsales_es.csv`, Weeks 1–2), **then the same day the user provided a genuinely new one** (`spotify.csv`, the Kaggle Spotify Tracks Dataset — 114,000 tracks, 114 genres) which nb6 was rebuilt around (see the second 2026-09-19 Done log entry). ATLAS ran an empirical dataset-suitability check before building both versions (unscaled-vs-scaled k-means behavior, cluster×Genero crosstab) documented in `autograder_nb6.py`'s docstring, but this is ATLAS's own build-time sanity check, not a formal GAUSS Dataset Vetting Report — a real GAUSS pass is more clearly warranted now than it was for the vgsales stand-in, since Spotify is a genuinely new, unreviewed dataset for this course, not a reuse of an already-vetted one. Still open. |
 | 8 | Draft statistically defensible model answers for the capstone's "descriptive analysis with interpretation" and "correlation analysis with causation critique" criteria (20 pts each) | GAUSS + ATLAS | Needed before ATLAS's Rubric Validation Report can sign off those two criteria as more than a point value. |
 | 12 | Rewrite debug-cell hint comments so they prompt investigation ("read the error, identify the type") rather than naming the bug directly — currently several debug cells hand over the diagnosis in the comment, undercutting the "build error-reading skill" purpose of `check_debugN` (`COURSE_TEMPLATE.md` §4) | SOFIA | Raised in SOFIA's Mode 3 review 2026-08-05 (see Done log), still not fully applied. **Partial incidental progress 2026-08-11**: while renumbering Semana 2's debug cells (see that Done log entry), `debug0` (Seccion C, the `=` vs `==` bug, old `debug2`) had its hint de-scaffolded from naming the bug outright to "ejecuta, lee el mensaje completo, e identifica que tipo de error es" — a side effect of the renumbering pass, not a deliberate sweep. Semana 2's `debug1` (Seccion C, `and`/`or`, old `debug3`) and Semana 1's `debug1` still hand over the diagnosis; not touched. |
 
@@ -19,6 +19,285 @@ escalations. Edited in place; never forked into version-suffixed copies. Compani
 
 ## Done Log
 
+- 2026-09-21 — **Week 7 (nb6) simplified back down: `check_ex2`/`check_ex3` removed as graded
+  builds, same day they were added (see the Done log entry directly below).** User request, after
+  a full re-read of `nb6_clustering.ipynb`: Semana 7 is "extra credit for those who have made good
+  strides on previous content," so it should be mostly showcase + interpretation, with simple
+  exercises — not three separate `🔨 CONSTRUYE` builds (ex1 40 + ex2 20 + ex3 20 = 80 pts of
+  from-scratch code, ex3 in particular re-deriving a full train/test/scale/fit/predict pipeline
+  the guided demo directly above it already walked through). Changes, all in
+  `course-python-stats/Week 7/`: **(1)** Ejercicio 2 ("agrega Energia") stopped being a graded
+  build — it's now an ungraded `👀 OBSERVA` showcase cell (`nb6-demo-energia-*` in `build_nb6.py`),
+  moved to BEFORE Ejercicio 1 so it can inform the student's own predictor choice. **(2)** Ejercicio
+  1 now accepts 2 OR 3 predictors from the menu (was exactly 2), so one build covers what used to
+  be two separate exercises — same 40 pts. **(3)** Ejercicio 3 (the train/test build) removed
+  entirely; the concept is still taught (guided demo, unchanged) and still assessed
+  (`refl_generalizacion`, kept, reworded to reference "the guided demo above" instead of "your
+  Ejercicio 3"). `refl_ex2` also kept (same reason: comparing the student's own Ejercicio 1 against
+  the Energia showcase, not "Ejercicio 1 vs. Ejercicio 2"). Both reflections kept their internal
+  ids (`nb6_ex2`, `nb6_generalizacion`) specifically so `grade-reflexion/index.ts` wouldn't need an
+  `EXPECTED_NOTEBOOKS`-style change — only that function's `question`/`grounding`/`grading_notes`
+  text for those two ids were rewritten to match, which **does still require redeploying
+  `grade-reflexion`** for the new wording to reach production (not done as part of this change).
+  `_CORE_MAX`: 127 → 87 (-20 ex2, -20 ex3, ex1 unchanged at 40). `mini_a`/`mini_b` checkpoints and
+  the `explorador_completo` achievement (was ex1+ex2+ex3 perfect; now ex1 perfect + all three
+  reflections submitted) updated to match. Validated (`Week 7/_test_nb6.py`): 47/47 assertions,
+  including a new 3-predictor pass case for `check_ex1` (previously only tested with exactly 2).
+  Full rationale in `autograder_nb6.py`'s module docstring and `build_nb6.py`'s.
+- 2026-09-21 — **Lecture guide built: `course-python-stats/Week 7/Guion_Clase_Semana7_Clustering.md`**
+  (SOFIA + GAUSS, user-requested outline for the live class preceding `nb6_clustering.ipynb`'s
+  practice session, same convention as the Week 6 guide below). ~45-minute teacher-facing script
+  covering the notebook's own four concepts in order (how k-means iterates, why scaling is
+  non-negotiable, why cluster labels/indices are arbitrary and clusters ≠ real genres, whether a
+  clustering generalizes) plus a hook that explicitly contrasts unsupervised clustering against
+  last week's regression ("no respuesta correcta"), a live embodied centroid-and-reassignment
+  dynamic for Concepto 1, and a GAUSS misconception checklist. **Numbers recomputed, not
+  invented**: re-ran the notebook's exact pipeline against `spotify_es.csv`
+  (`KMeans(n_clusters=3, random_state=42, n_init=10)`, `StandardScaler`,
+  `train_test_split(test_size=0.1, random_state=42)`) to confirm n=113,842 after cleaning, the
+  unscaled-vs-scaled centroid reveal, cluster×Genero purity (all ≈2–3%, consistent with the
+  notebook's ~1/114≈0.9%-by-chance baseline), and near-identical train/test cluster profiles —
+  all match what `nb6_clustering.ipynb` itself computes at runtime, not placeholders.
+- 2026-09-21 — **Week 7 (nb6) got a third exercise + reflection: a
+  train/test-style generalization check for clustering.** User question
+  (in conversation, not a ticket): nb5 (Week 6) taught train/test split
+  specifically to catch overfitting on a known regression target — should
+  nb6 (k-means, unsupervised) have an analogous "test accuracy" exercise
+  now that train/test was already introduced?
+  **Why not literal "test accuracy"**: k-means has no ground-truth label
+  to score right/wrong against, and Concepto 3 of this same notebook
+  explicitly teaches that cluster indices/labels are arbitrary — grading
+  "accuracy" against something like `Genero` would directly contradict
+  that lesson (and the existing `check_cluster_es_genero` 🧩, which proves
+  clusters ≠ real genres). **What transfers instead**: generalization/
+  stability — fit `KMeans` SOLO on a train split, use `.predict()` (never
+  re-fit) on a held-out test split, and check whether cluster *profiles*
+  (not indices) hold up on data the model never saw. Framed with two
+  concrete downstream use cases discussed with the user rather than an
+  abstract "how good is this model" question: (a) song recommendation —
+  assign a brand-new song to a cluster via `.predict()` and recommend
+  other songs from that cluster; if clusters don't generalize, the
+  recommendation is unreliable; (b) segmentation — a business decision
+  (marketing budget by "song type") based on a clustering that looks
+  different every time it's refit on a new sample isn't trustworthy.
+  **Notebook (`build_nb6.py`)**: added Concepto 4 (the "why" above,
+  inserted between Ejercicio 2's reflection and the theory quiz), a guided
+  demo (`nb6-guiado-generaliza-*`, train/test split + scaler fit on train
+  only + `KMeans` fit on train only + `.predict()` on test, comparing
+  cluster profiles), Ejercicio 3 (`nb6-ex3-*`, 20 pts, student repeats the
+  pattern with their own 2-3 predictors), and a new reflection
+  (`nb6-ex3-reflexiona-*`, +5 XP, ties a hypothetical train/test mismatch
+  to a concrete failure for recommendation or segmentation).
+  **Autograder (`autograder_nb6.py`)**: new `check_ex3` (structural, same
+  philosophy as ex1/ex2 — verifies a fitted+scaled `KMeans` on train plus
+  a plausibly-sized array of valid cluster labels for the test set, never
+  a hardcoded value lookup) and `check_reflexion_generalizacion`. New
+  helper `_menciona_train_test_o_numero`. `_CORE_MAX` 102→127 (+20 ex3,
+  +5 refl_generalizacion). `mini_b` checkpoint's tracked section and the
+  `explorador_completo` achievement (now ex1+ex2+ex3, was ex1+ex2) updated
+  to match. **`supabase/functions/grade-reflexion/index.ts`**: added the
+  `nb6_generalizacion` rubric (question/grounding/grading_notes) next to
+  the existing `nb6_ex2`/`nb6_final` entries. **Validated**
+  (`Week 7/_test_nb6.py`, extended with `train_test_split` + new
+  `check_ex3` assertions — correct solution, undersized test array,
+  unscaled model, float instead of int labels, out-of-range cluster
+  label, generic interpretation, empty submission): 56/56 assertions pass.
+  The new guided demo cell was also re-run directly against the real
+  `spotify_es.csv` outside the test harness to confirm the pedagogical
+  point actually holds on this dataset (not just that the code runs):
+  train vs. test cluster means came out nearly identical (e.g.
+  Bailabilidad 0.417 train / 0.416 test, Tempo 93.47 train / 93.19 test
+  for one cluster), so the "generalizes" claim the notebook makes is
+  empirically true, not asserted on faith. `WORKFORCE_CONTRACT.md` §2's
+  Week 7 row and Change Log updated to match.
+
+- 2026-09-19 (same day, second pass) — **Week 7's nb6 rebuilt around a
+  real Spotify dataset, superseding the entry directly below.** The user
+  added `course-python-stats/Week 7/spotify.csv` (Kaggle's "Spotify Tracks
+  Dataset" — 114,000 tracks, 21 columns, 114 genres x 1,000 tracks each)
+  and asked for column names and genres to be translated to Spanish and
+  the notebook rebuilt around it. This is exactly the dataset the original
+  beat sheet had asked for (danceability/tempo) — the vgsales substitution
+  documented in the entry below was only ever a stand-in for the fact that
+  no such CSV existed in the repo yet.
+  **New `Week 7/translate_to_spanish.py`** (same pattern as
+  `Weeks 1-2/translate_to_spanish.py`): renames all 21 columns to Spanish
+  (`Bailabilidad`, `Energia`, `Tempo`, `Genero`, etc.) and translates all
+  114 genre values — genre names already used as-is in Spanish-language
+  music contexts (rock, pop, k-pop, death-metal, hip-hop...) were kept in
+  their international form rather than translated literally (translating
+  "hip-hop" word-for-word would not read as real Spanish); demonyms
+  (brazil→Brasil, british→Británica) and descriptive pseudo-genres
+  (children→Infantil, chill→Relajante, sleep→Para Dormir) were genuinely
+  translated. Drops the leftover `Unnamed: 0` index column. Output:
+  `spotify_es.csv` (114,000 rows, 20 columns) — the file the notebook
+  actually loads; the original `spotify.csv` (English) is kept alongside
+  it, same convention as `vgsales.csv`/`vgsales_es.csv`.
+  **Rebuilt**: `build_nb6.py` → `nb6_clustering.ipynb` (still 46 cells,
+  content only), `autograder_nb6.py` (docstring, predictor menu constants,
+  the 12-genre list → all 114 translated genres, T2/T3/T5 theory questions,
+  every error message referencing old column names), `_test_nb6.py`.
+  **New real findings from re-running the empirical validation against
+  this dataset from scratch** (not assumed to carry over from vgsales):
+  after dropping 1 row with no artist/track name and 157 rows with
+  `Tempo` = 0 (a detection failure, not a real 0-BPM track — 113,842 rows
+  remain), unscaled k-means on `{Bailabilidad, Tempo}` (k=3,
+  `random_state=42`) still shows the same scale-domination effect
+  (`Tempo` ≈30-243 BPM vs. `Bailabilidad` 0-1: raw cluster centers move
+  91→167 BPM but only 0.50→0.61 in `Bailabilidad`); scaled, the 3 clusters
+  come out size-balanced (≈52k/35k/27k) and now separate on both axes
+  (`Bailabilidad` 0.42/0.48/0.71). The cluster×`Genero` crosstab is an
+  even sharper proof against "clusters = genres" than vgsales gave: with
+  114 real genres, the most common genre inside any cluster never exceeds
+  ≈2.6% of that cluster (vs. vgsales's ≈22% of 12 genres) — barely above
+  the ≈0.9% base rate pure chance would give. **One finding genuinely
+  differs from nb5/vgsales, reported honestly instead of reused**: adding
+  `Energia` for Ejercicio 2 changes the grouping *moderately* (Adjusted
+  Rand Index ≈0.53 between the 2-feature and 3-feature scaled
+  clusterings) rather than "barely at all" — `Energia` is only weakly
+  correlated with `Bailabilidad` (r≈0.13) and `Tempo` (r≈0.24), so unlike
+  vgsales's `Ventas_NA` (r≈0.94 with `Ventas_Globales`, ARI≈0.97 →
+  redundant), it carries real new information. The `check_ex2` debrief
+  markdown and `grade-reflexion/index.ts`'s `nb6_ex2` grounding were
+  written to match this actual result.
+  **Structural-grading design unchanged** (still the right call, re-
+  confirmed against this dataset): `_parece_escalado`'s `tol=50` threshold
+  — set for vgsales's more extreme scaled-outlier centroids (up to ≈17) —
+  was re-checked against Spotify's much gentler scaled centroids (never
+  above ≈1.3 with k=3 or k=4) and still discriminates correctly with a
+  huge margin in both directions; no change needed to that helper.
+  **Validated**: `_test_nb6.py` 45/45 (same assertions, ground truth
+  refit against `spotify_es.csv`), every real guided/demo cell from the
+  rebuilt `.ipynb` re-run end-to-end against the actual CSV, and a
+  fully-correct worked solution scored 100% through the live `Autograder`
+  with no exceptions. `supabase/functions/grade-reflexion/index.ts`:
+  `nb6_ex2`/`nb6_final` `GRADING_NOTES` grounding numbers updated to the
+  real Spotify figures above (ARI≈0.53, corr≈0.13/0.24, ≈2.6% max genre
+  share) — brace/paren-balance checked, `"nb6"` was already in
+  `EXPECTED_NOTEBOOKS` from the entry below so no allowlist change needed
+  here.
+  **Not yet done**: same open items as the entry below (not pushed to
+  `main`, no `nb6.html`, GAUSS dataset vetting for Week 7 still an ATLAS
+  build-time check rather than a formal report — arguably more warranted
+  now since this is a genuinely new dataset, not a reused one).
+- 2026-09-19 — **Week 7 built: `nb6_clustering.ipynb`, "Misión 4: El
+  Cartógrafo de Patrones"** — direct user request with a full
+  section-by-section beat sheet (visualize-before-formalizing opener with
+  an ungraded 🔮 prediction on a raw unlabeled scatter, plain-language
+  k-means mechanism, guided demo fit unscaled then rescaled with
+  `StandardScaler`, a printed cluster×Género crosstab feeding a structural
+  🧩 check that clusters do NOT match real game genres, two autograded
+  exercises, 5 theory questions, a closing AI-graded reflection, a bonus
+  "rerun with a different k" reto, two checkpoints). New folder
+  `course-python-stats/Week 7/`: `build_nb6.py` → `nb6_clustering.ipynb`
+  (46 cells), `autograder_nb6.py`, `_test_nb6.py`.
+  First (and only) notebook of Misión 4 — `check_ex`/`check_t`/`check_reto`
+  numbering starts fresh at 1, same "one notebook, one session" pattern as
+  nb5 vs. Misión 3 (`WORKFORCE_CONTRACT.md` §2).
+  **Dataset**: `vgsales_es.csv` (16,598 video games, already used in
+  `nb1_semana2` — Weeks 1-2), reused rather than introducing a new one.
+  The user's original beat sheet used danceability/tempo (a Spotify-style
+  dataset) purely as an illustrative example of "two features on very
+  different scales" — no such CSV exists anywhere in this repo, and
+  downloading one from the internet would have introduced an unvetted
+  dataset (ticket #7) with no reproducibility guarantee. `Año` (release
+  year, magnitude ≈2000) and `Ventas_Globales` (global sales in millions,
+  magnitude <1 for most rows) reproduce the same "unscaled distance
+  dominated by the larger-magnitude feature" effect — verified empirically
+  *before* writing a single notebook cell, not assumed: unscaled k-means
+  (k=3, `random_state=42`) on these two columns produces clusters that are
+  almost pure `Año` bands (1980-2000 / 2001-2007 / 2008-2020); scaled
+  k-means on the same columns surfaces a genuine 76-game "blockbuster"
+  cluster (Ventas_Globales ≥ 8.84M) that the unscaled version couldn't see
+  at all. `Ventas_NA` was added for Ejercicio 2 (chosen over `Ventas_JP`,
+  which is 63% zeros — too zero-inflated to cluster meaningfully).
+  **Bonus finding used directly in the notebook's pedagogy**: `Género`
+  (12 real genres: Acción, Deportes, Rol, ...) was never given to k-means
+  as a predictor, but is used in a guided cross-tab to show live that no
+  cluster's most-common genre exceeds ~23% of that cluster — concrete,
+  real-number evidence for Concepto 3 ("cluster labels are arbitrary until
+  you interpret them") and directly operationalizes `04_GAUSS.md`'s Week 7
+  risk row ("interpretation text must not treat cluster labels as
+  fixed/meaningful IDs") as a gradeable, objective-answer exercise
+  (`check_cluster_es_genero`) instead of just a warning in prose.
+  **§5 scope addition (documented in `WORKFORCE_CONTRACT.md`, not silent)**:
+  `sklearn.preprocessing.StandardScaler` added to the technical spine —
+  the committed spine listed `KMeans` but never `StandardScaler`, even
+  though scaling before fitting is the Week 7 statistical non-negotiable
+  `04_GAUSS.md` names explicitly; without it the notebook's own Concepto 2
+  demo has nothing to show.
+  **Grading design deliberately differs from nb3/4/5's exact-value lookup
+  pattern**: `check_ex1`/`check_ex2`/`check_reto1` verify structural
+  properties (a real, fitted `KMeans` with the right `n_clusters`; cluster
+  centers falling in a plausible range for *standardized* data rather than
+  the raw `Año`/`Ventas_*` range) instead of a hardcoded lookup keyed by
+  predictor combination. This is deliberate, not a shortcut: unlike
+  `LinearRegression` (closed-form, deterministic regardless of sklearn
+  version), the specific index number k-means assigns to "the blockbuster
+  cluster" is not portable across sklearn versions/`n_init` settings — the
+  same fact Concepto 3 teaches. Hardcoding "the blockbuster cluster is
+  index 2" would have been both fragile and pedagogically self-defeating.
+  The scaled-vs-unscaled structural check itself needed one empirical
+  correction while building: an initial `tol=8.0` on
+  `max(abs(cluster_centers_))` rejected a genuinely-correctly-scaled
+  reference solution, because a small cluster of extreme sales outliers
+  can legitimately average out to a z-score of 10-17 (verified directly
+  against the real data before shipping) — raised to `tol=50.0`, still
+  ~40x below the raw `Año` magnitude that flags an unscaled fit.
+  **Scoring**: `_CORE_MAX` = 102 (2 registro + 5 cluster_es_genero + 25
+  t1-5 + 40 ex1 + 20 ex2 + 5 refl_ex2 + 5 refl_final — coincidentally
+  matches nb5's total, not intentionally tuned to match), `_BONUS_MAX` =
+  10 (reto1). Same "showcase, not deep dive" trim below the nominal ~120
+  `WORKFORCE_CONTRACT.md` §2 figure as nb4/nb5's own trims.
+  **Theme**: "El Cartógrafo de Patrones" — forest-green/amber "map/
+  exploration" palette, distinct from nb3/4's warm sun and nb5's violet/
+  cyan mystic per `COURSE_TEMPLATE.md` §5's per-notebook theming
+  convention. Built by cloning `autograder_nb5.py`'s engine (registration
+  form, `_award`, `_check_achievements`, checkpoint/level-up rendering,
+  Supabase submit, theory/reflection/registro widgets — all reused
+  verbatim) via a scripted palette/text substitution pass (documented as
+  such rather than left implicit), then hand-writing the new predictor
+  menu, structural checks, `_TEORIA` dict, achievements, and every
+  `check_*` method fresh for k-means. One theming bug from nb5 was
+  deliberately NOT propagated: nb5's `_award()` success message read
+  "¡RAYO DE SOL COMPLETO!" ("ray of sunshine," a leftover from nb3/4's warm
+  palette that the nb5 reskin pass missed) — nb6 uses on-theme
+  "¡ZONA DEL MAPA COMPLETA!" instead. Not fixed in nb5 itself (out of
+  scope for this session) — flagging here so whoever next touches
+  `autograder_nb5.py` sees it instead of copying it forward again.
+  **Validated** (`Week 7/_test_nb6.py`, ATLAS-style throwaway script,
+  `COURSE_TEMPLATE.md` §3 pattern): 45/45 assertions — every `check_*`
+  tested against a real, correctly-scaled solution (fit fresh against the
+  actual CSV in the test script itself) and a realistic wrong case each
+  (predictor outside the menu, unscaled model, unfitted model, out-of-range
+  cluster index, interpretation treating a cluster as a fixed genre,
+  generic/placeholder text, `k_reto1` equal to 3). `_CORE_MAX`/`_BONUS_MAX`
+  arithmetic verified equal to the declared sums. Separately ran every real
+  guided/demo code cell from the built `.ipynb` itself end-to-end against
+  the actual CSV (non-interactive `MPLBACKEND=Agg` to avoid a GUI-backend
+  hang on `plt.show()` — noted here since it cost real debugging time),
+  then fed a fully-correct worked solution through the live `Autograder` to
+  a 100%-score `resumen()` with no exceptions.
+  **`supabase/functions/grade-reflexion/index.ts` updated *before* shipping
+  this time**: `"nb6"` added to `EXPECTED_NOTEBOOKS` and `nb6_ex2`/
+  `nb6_final` added to `GRADING_NOTES` (with real grounding numbers: ARI
+  ≈0.966 between the 2-feature and 3-feature scaled clusterings, since
+  corr(Ventas_Globales, Ventas_NA)≈0.941) — this exact allowlist bug hit
+  nb3/nb4 (2026-08-21), then nb5 (2026-09-13) before being caught; nb6 is
+  the first notebook in this course to get it right on the first pass.
+  Brace/paren balance-checked (still no Deno CLI in this session — same
+  caveat as nb5, flagging `deno check` as the one remaining pre-ship step
+  for whoever deploys it).
+  **Not yet done**: not pushed to `main`, so `build_nb6.py`'s `!wget` URLs
+  (`Week%207/autograder_nb6.py`, reusing `Weeks%201-2/vgsales_es.csv`)
+  won't resolve for real students until that happens. No `nb6.html` public
+  leaderboard page built (nb5 doesn't have one yet either as of this
+  writing). GAUSS dataset vetting for Week 7 (ticket #7) is ATLAS's own
+  empirical build-time check, not a formal GAUSS Dataset Vetting Report —
+  still open. Deadline set to 5 October 2026, 11:59 PM Peru (two weeks
+  after nb5's, same cadence nb5 used after nb4) — a placeholder pending the
+  user's actual class schedule confirmation, not verified against a real
+  syllabus.
 - 2026-09-14 — **Two more user-requested fixes to Week 6's nb5, on top of
   the 2026-09-13 pre-ship review below.**
   **(1) Registro widget for the "just write something" cells.** The two

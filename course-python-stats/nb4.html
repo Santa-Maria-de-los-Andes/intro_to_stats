@@ -768,8 +768,8 @@ async function loadLeaderboard() {
 
     // Excluir envios de prueba del autograder (dni/email 'TEST') del leaderboard publico
     const realData = (data || []).filter(row =>
-      (row.dni   || '').toString().trim().toUpperCase() !== 'TEST' &&
-      (row.email || '').toString().trim().toUpperCase() !== 'TEST'
+      !['TEST', 'INTEGRATION_TEST'].includes((row.dni   || '').toString().trim().toUpperCase()) &&
+      !['TEST', 'INTEGRATION_TEST'].includes((row.email || '').toString().trim().toUpperCase())
     );
 
     if (realData.length === 0) {
