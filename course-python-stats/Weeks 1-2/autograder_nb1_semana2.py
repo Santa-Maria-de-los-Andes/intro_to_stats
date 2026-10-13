@@ -74,7 +74,7 @@ NOTEBOOK_ID       = "nb1_semana2"
 
 # ─── Deadline: 23 agosto 2026, 11:59 PM Peru (UTC-5) = 24 agosto 04:59 UTC ────
 # (asumido por cadencia semanal — ver nota en el docstring del modulo)
-_DEADLINE_UTC   = _dt.datetime(2026, 8, 24, 4, 59, 0, tzinfo=_dt.timezone.utc)
+_DEADLINE_UTC   = _dt.datetime(2026, 10, 19, 4, 59, 0, tzinfo=_dt.timezone.utc)
 DEADLINE_PASSED = _dt.datetime.now(_dt.timezone.utc) >= _DEADLINE_UTC
 
 # ─── Scoring ─────────────────────────────────────────────────

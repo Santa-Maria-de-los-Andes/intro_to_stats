@@ -199,7 +199,7 @@ CURSO_ID          = "STAT_2026"
 NOTEBOOK_ID       = "nb6"
 
 # ─── Deadline: 5 octubre 2026, 11:59 PM Peru (UTC-5) = 6 oct 04:59 UTC ─
-_DEADLINE_UTC   = _dt.datetime(2026, 10, 6, 4, 59, 0, tzinfo=_dt.timezone.utc)
+_DEADLINE_UTC   = _dt.datetime(2026, 10, 19, 4, 59, 0, tzinfo=_dt.timezone.utc)
 DEADLINE_PASSED = _dt.datetime.now(_dt.timezone.utc) >= _DEADLINE_UTC
 
 # ─── Scoring ─────────────────────────────────────────────────
