@@ -1,0 +1,90 @@
+relationship rel_Envios_Tareas
+	fromColumn: Envios.TareaKey
+	toColumn: Tareas.TareaKey
+
+relationship rel_Envios_Alumnos
+	fromColumn: Envios.StudentKey
+	toColumn: Alumnos.StudentKey
+
+relationship rel_Alumnos_Cursos
+	fromColumn: Alumnos.Curso
+	toColumn: Cursos.Curso
+
+relationship rel_Envios_Calendario
+	fromColumn: Envios.Fecha
+	toColumn: Calendario.Fecha
+
+relationship rel_Items_Envios
+	fromColumn: Items.EnvioId
+	toColumn: Envios.EnvioId
+
+relationship rel_Logros_Envios
+	fromColumn: Logros.EnvioId
+	toColumn: Envios.EnvioId
+
+relationship 8090e032-ce05-4774-80bd-d42f7f92f159
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Envios.FechaHoraUTC
+	toColumn: LocalDateTable_85761651-1595-4c23-9603-c741afa3b2dd.Date
+
+relationship 1e4e3a69-920d-4600-a431-97c627928ffb
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Envios.FechaHora
+	toColumn: LocalDateTable_b9c37787-1f7e-4d5e-9219-f4c923760c65.Date
+
+relationship e49ec0f6-cc2b-41b1-b0fd-bf1ea935f1cd
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Alumnos.PrimerEnvio
+	toColumn: LocalDateTable_cd706a1c-6dc5-4e5c-b92a-0b2bfdff3879.Date
+
+relationship c9c203d7-b45f-4c90-90c5-017bb36cd248
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Alumnos.UltimoEnvio
+	toColumn: LocalDateTable_24f4d95a-2f90-49df-a1cf-1b9e2f48c450.Date
+
+relationship ab1fd196-6a1b-40b7-ba65-be70530064b8
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Tareas.FechaLimiteUTC
+	toColumn: LocalDateTable_fd5a1a0c-b01e-41ab-a42b-bd0e49157fc2.Date
+
+relationship cc7749da-948a-4037-9bf8-d96817a5fb28
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Tareas.FechaLimite
+	toColumn: LocalDateTable_182be48b-8d06-4c6e-a4d2-67a677b6d1fe.Date
+
+relationship rel_AlumnoTarea_Alumnos
+	fromColumn: AlumnoTarea.StudentKey
+	toColumn: Alumnos.StudentKey
+
+relationship rel_AlumnoTarea_Tareas
+	fromColumn: AlumnoTarea.TareaKey
+	toColumn: Tareas.TareaKey
+
+relationship rel_ItemResumen_Alumnos
+	fromColumn: ItemResumen.StudentKey
+	toColumn: Alumnos.StudentKey
+
+relationship rel_ItemResumen_Tareas
+	fromColumn: ItemResumen.TareaKey
+	toColumn: Tareas.TareaKey
+
+relationship rel_ItemIntentos_Alumnos
+	fromColumn: ItemIntentos.StudentKey
+	toColumn: Alumnos.StudentKey
+
+relationship rel_ItemIntentos_Tareas
+	fromColumn: ItemIntentos.TareaKey
+	toColumn: Tareas.TareaKey
+
+relationship rel_Indicadores_Tareas
+	fromColumn: Indicadores.TareaKey
+	toColumn: Tareas.TareaKey
+
+relationship rel_AlumnoIndicador_Alumnos
+	fromColumn: AlumnoIndicador.StudentKey
+	toColumn: Alumnos.StudentKey
+
+relationship rel_AlumnoIndicador_Indicadores
+	fromColumn: AlumnoIndicador.IndicadorKey
+	toColumn: Indicadores.IndicadorKey
+

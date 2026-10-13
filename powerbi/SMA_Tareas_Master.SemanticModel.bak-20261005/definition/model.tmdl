@@ -1,0 +1,37 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation PBI_QueryOrder = ["SupabaseUrl","SupabaseKey","CarpetaDatos","AliasDNI","SubmissionsRaw","Envios","Items","Logros","Alumnos","Tareas","Cursos","Horario","Etapas","ItemIntentos","ItemResumen"]
+
+annotation PBI_ProTooling = ["DevMode","MCP-PBIModeling"]
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+ref table _Medidas
+ref table Envios
+ref table Items
+ref table Logros
+ref table Alumnos
+ref table Tareas
+ref table Cursos
+ref table Calendario
+ref table DateTableTemplate_b68ff449-b83b-470f-b709-bb8db4494e73
+ref table LocalDateTable_85761651-1595-4c23-9603-c741afa3b2dd
+ref table LocalDateTable_b9c37787-1f7e-4d5e-9219-f4c923760c65
+ref table LocalDateTable_cd706a1c-6dc5-4e5c-b92a-0b2bfdff3879
+ref table LocalDateTable_24f4d95a-2f90-49df-a1cf-1b9e2f48c450
+ref table LocalDateTable_fd5a1a0c-b01e-41ab-a42b-bd0e49157fc2
+ref table LocalDateTable_182be48b-8d06-4c6e-a4d2-67a677b6d1fe
+ref table AlumnoTarea
+ref table ItemResumen
+ref table ItemIntentos
+ref table Horario
+ref table Etapas
+ref table AliasDNI
+

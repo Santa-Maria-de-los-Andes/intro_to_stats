@@ -1,0 +1,83 @@
+/// Desglose por ejercicio de cada envio (score_breakdown del autograder): un renglon por envio x item (ex1, debug2, t3, refl_..., reto1, ...).
+table Items
+	lineageTag: ff7a615b-3610-43d7-a89a-a6962b7c4dc5
+
+	column EnvioId
+		dataType: string
+		isHidden
+		lineageTag: bdd2ab82-cab8-4fea-85b0-23e5617e5b42
+		summarizeBy: none
+		sourceColumn: EnvioId
+
+	/// Clave del item en el autograder (check_ex1 -> ex1, check_t3 -> t3, ...)
+	column Item
+		dataType: string
+		lineageTag: 6909022a-de16-494c-b478-6df4ba045992
+		summarizeBy: none
+		sourceColumn: Item
+
+	/// Ejercicio, Debug, Teoria, Integracion, Reflexion, Reto (bonus), Registro, Checkpoint, Otro
+	column Tipo
+		dataType: string
+		lineageTag: f116cfdb-7ab1-4d23-8083-80b816666f79
+		summarizeBy: none
+		sourceColumn: Tipo
+
+	column Puntos
+		dataType: double
+		lineageTag: 6ba71435-83b5-424e-877e-3b2215f48fad
+		summarizeBy: sum
+		sourceColumn: Puntos
+
+	column PuntosPosibles
+		dataType: double
+		lineageTag: 9f07fa37-26a2-4dbe-8b88-1b21f98c41ab
+		summarizeBy: sum
+		sourceColumn: PuntosPosibles
+
+	partition Items = m
+		mode: import
+		source =
+				let
+				    Source = Table.SelectColumns(SubmissionsRaw, {"id", "score_breakdown"}),
+				    ToItems = Table.AddColumn(
+				        Source,
+				        "it",
+				        each
+				            let r = [score_breakdown]
+				            in
+				                if r = null or not (r is record) then {}
+				                else
+				                    List.Transform(
+				                        Record.FieldNames(r),
+				                        (k) =>
+				                            let v = Record.Field(r, k)
+				                            in [Item = k, Puntos = try v[e] otherwise null, PuntosPosibles = try v[p] otherwise null]
+				                    )
+				    ),
+				    Expanded = Table.ExpandListColumn(Table.RemoveColumns(ToItems, {"score_breakdown"}), "it"),
+				    NonEmpty = Table.SelectRows(Expanded, each [it] <> null),
+				    Fields = Table.ExpandRecordColumn(NonEmpty, "it", {"Item", "Puntos", "PuntosPosibles"}),
+				    Digits = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+				    AddTipo = Table.AddColumn(
+				        Fields,
+				        "Tipo",
+				        each
+				            let k = Text.Lower([Item])
+				            in
+				                if Text.StartsWith(k, "intex") then "Integracion"
+				                else if Text.StartsWith(k, "debug") then "Debug"
+				                else if Text.StartsWith(k, "ex") then "Ejercicio"
+				                else if Text.StartsWith(k, "reto") then "Reto (bonus)"
+				                else if Text.StartsWith(k, "refl") then "Reflexion"
+				                else if Text.StartsWith(k, "reg") then "Registro"
+				                else if Text.StartsWith(k, "mini") then "Checkpoint"
+				                else if Text.StartsWith(k, "t") and Text.Length(k) > 1 and List.Contains(Digits, Text.At(k, 1)) then "Teoria"
+				                else "Otro",
+				        type text
+				    ),
+				    Renamed = Table.RenameColumns(AddTipo, {{"id", "EnvioId"}}),
+				    Typed = Table.TransformColumnTypes(Renamed, {{"EnvioId", type text}, {"Item", type text}, {"Puntos", type number}, {"PuntosPosibles", type number}})
+				in
+				    Typed
+

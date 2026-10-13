@@ -1,0 +1,517 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "v005",
+  "position": {
+    "x": 19.45288753799392,
+    "y": 68.085106382978722,
+    "z": 5000,
+    "height": 400,
+    "width": 1260,
+    "tabOrder": 5000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Alumnos"
+                    }
+                  },
+                  "Property": "Nombre"
+                }
+              },
+              "queryRef": "Alumnos.Nombre",
+              "nativeQueryRef": "Nombre"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Alumnos"
+                    }
+                  },
+                  "Property": "Grado"
+                }
+              },
+              "queryRef": "Alumnos.Grado",
+              "nativeQueryRef": "Grado"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Entregas obligatorias"
+                }
+              },
+              "queryRef": "_Medidas.Entregas obligatorias",
+              "nativeQueryRef": "Entregas obligatorias"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Entregas esperadas"
+                }
+              },
+              "queryRef": "_Medidas.Entregas esperadas",
+              "nativeQueryRef": "Entregas esperadas"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Tasa de entrega"
+                }
+              },
+              "queryRef": "_Medidas.Tasa de entrega",
+              "nativeQueryRef": "Tasa de entrega"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Nota promedio"
+                }
+              },
+              "queryRef": "_Medidas.Nota promedio",
+              "nativeQueryRef": "Nota promedio"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Promedio con faltantes en 0"
+                }
+              },
+              "queryRef": "_Medidas.Promedio con faltantes en 0",
+              "nativeQueryRef": "Promedio con faltantes en 0"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Nota a tiempo"
+                }
+              },
+              "queryRef": "_Medidas.Nota a tiempo",
+              "nativeQueryRef": "Nota a tiempo"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Envios"
+                }
+              },
+              "queryRef": "_Medidas.Envios",
+              "nativeQueryRef": "Envios"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Intentos por entrega"
+                }
+              },
+              "queryRef": "_Medidas.Intentos por entrega",
+              "nativeQueryRef": "Intentos por entrega"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Logros promedio"
+                }
+              },
+              "queryRef": "_Medidas.Logros promedio",
+              "nativeQueryRef": "Logros promedio"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Racha maxima"
+                }
+              },
+              "queryRef": "_Medidas.Racha maxima",
+              "nativeQueryRef": "Racha maxima"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Ultimo envio"
+                }
+              },
+              "queryRef": "_Medidas.Ultimo envio",
+              "nativeQueryRef": "Ultimo envio"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "_Medidas"
+                  }
+                },
+                "Property": "Promedio con faltantes en 0"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "objects": {
+      "values": [
+        {
+          "properties": {
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "FillRule": {
+                      "Input": {
+                        "Measure": {
+                          "Expression": {
+                            "SourceRef": {
+                              "Entity": "_Medidas"
+                            }
+                          },
+                          "Property": "Promedio con faltantes en 0"
+                        }
+                      },
+                      "FillRule": {
+                        "linearGradient3": {
+                          "min": {
+                            "color": {
+                              "Literal": {
+                                "Value": "'#DB6C14'"
+                              }
+                            },
+                            "value": {
+                              "Literal": {
+                                "Value": "0D"
+                              }
+                            }
+                          },
+                          "mid": {
+                            "color": {
+                              "Literal": {
+                                "Value": "'#2A2A33'"
+                              }
+                            },
+                            "value": {
+                              "Literal": {
+                                "Value": "55D"
+                              }
+                            }
+                          },
+                          "max": {
+                            "color": {
+                              "Literal": {
+                                "Value": "'#7C3AED'"
+                              }
+                            },
+                            "value": {
+                              "Literal": {
+                                "Value": "100D"
+                              }
+                            }
+                          },
+                          "nullColoringStrategy": {
+                            "strategy": {
+                              "Literal": {
+                                "Value": "'noColor'"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "dataViewWildcard": {
+                  "matchingOption": 1
+                }
+              }
+            ],
+            "metadata": "_Medidas.Promedio con faltantes en 0"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Alumnos (ordenados por promedio con faltantes en 0)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "a7a58f46bf1e16563f72",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Alumnos"
+              }
+            },
+            "Property": "Nombre"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "cb985b4e84bce847bbc7",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Alumnos"
+              }
+            },
+            "Property": "Grado"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "78fb5591d01994c68124",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Medidas"
+              }
+            },
+            "Property": "Entregas obligatorias"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "7cfea057d909010d0f08",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Medidas"
+              }
+            },
+            "Property": "Entregas esperadas"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "ee7ee9fd1f02fde219f2",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Medidas"
+              }
+            },
+            "Property": "Tasa de entrega"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "309914b44e48e9fb8710",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Medidas"
+              }
+            },
+            "Property": "Nota promedio"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "e27f9ca7ac8ed38eb6ec",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Medidas"
+              }
+            },
+            "Property": "Promedio con faltantes en 0"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "4623e51117c895bfe42b",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Medidas"
+              }
+            },
+            "Property": "Nota a tiempo"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "2e310bc9b5558f5bcf07",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Medidas"
+              }
+            },
+            "Property": "Envios"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "34155f89733567ed9c19",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Medidas"
+              }
+            },
+            "Property": "Intentos por entrega"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "9c2c0fe93c0ce5ce5038",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Medidas"
+              }
+            },
+            "Property": "Logros promedio"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "cf11411367cf9d62e8be",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Medidas"
+              }
+            },
+            "Property": "Racha maxima"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "32ee68329959621e6a37",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "_Medidas"
+              }
+            },
+            "Property": "Ultimo envio"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
+  }
+}

@@ -1,0 +1,312 @@
+/// Un renglon por envio (intento) de cualquier tarea. EsMejorIntento marca el intento que cuenta: mayor Nota y, en empate, el mas reciente (mismo criterio que dedup() en los leaderboards).
+table Envios
+	lineageTag: a9744145-4231-45a7-93ce-7025cd5f5a1d
+
+	column EnvioId
+		dataType: string
+		isHidden
+		isKey
+		lineageTag: 41579592-90e1-4623-b8c2-388213c49587
+		summarizeBy: none
+		sourceColumn: EnvioId
+
+	column StudentKey
+		dataType: string
+		isHidden
+		lineageTag: 6b7df3a7-7390-4665-bdaa-6abf2710c022
+		summarizeBy: none
+		sourceColumn: StudentKey
+
+	column TareaKey
+		dataType: string
+		isHidden
+		lineageTag: c3b3fee4-275d-4a49-9aa2-e528368e3c82
+		summarizeBy: none
+		sourceColumn: TareaKey
+
+	/// DNI del alumno (o email en filas antiguas sin DNI)
+	column DNI
+		dataType: string
+		lineageTag: a5e60fed-12d6-43a0-9ea8-a3c8acdf42bf
+		summarizeBy: none
+		sourceColumn: DNI
+
+	/// Nombre tal como se escribio en ese envio (usar Alumnos[Nombre] para el nombre canonico)
+	column NombreEnEnvio
+		dataType: string
+		lineageTag: 45db1f46-2d77-496c-a4e3-64fa18a78b0c
+		summarizeBy: none
+		sourceColumn: NombreEnEnvio
+
+	/// Grado declarado en ese envio
+	column GradoEnEnvio
+		dataType: string
+		lineageTag: 59c56577-bfbc-45de-85b2-594067379dc4
+		summarizeBy: none
+		sourceColumn: GradoEnEnvio
+
+	column Curso
+		dataType: string
+		lineageTag: 877d54f2-b24f-4d69-b3a0-bded7957d34c
+		summarizeBy: none
+		sourceColumn: Curso
+
+	/// Id del notebook/tarea (nb1_semana1, nb3, nb5, ...)
+	column Tarea
+		dataType: string
+		lineageTag: 4c75f4e7-7771-4756-8f47-fa3242ffdf5a
+		summarizeBy: none
+		sourceColumn: Tarea
+
+	column Puntos
+		dataType: double
+		lineageTag: 7bdb9b39-72ae-4eb1-a2f3-6ebca2cd7fa0
+		summarizeBy: sum
+		sourceColumn: Puntos
+
+	column PuntosPosibles
+		dataType: double
+		lineageTag: e0114d3f-8a5e-4342-9567-045f59220a19
+		summarizeBy: sum
+		sourceColumn: PuntosPosibles
+
+	/// Porcentaje sobre el _CORE_MAX del notebook (0-100), el mismo % que muestran autograder y leaderboard
+	column Nota
+		dataType: double
+		lineageTag: 78c8b6b9-0bb7-4119-b612-393e568b1cb8
+		summarizeBy: sum
+		sourceColumn: Nota
+
+		annotation SummarizationSetBy = Automatic
+
+	column NivelNum
+		dataType: int64
+		lineageTag: 63b9bbc1-abcb-418d-a9d9-b131c4274dbb
+		summarizeBy: sum
+		sourceColumn: NivelNum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Nivel
+		dataType: string
+		lineageTag: 5d5cb676-af0f-48fc-be83-fe17791489ba
+		summarizeBy: none
+		sourceColumn: Nivel
+		sortByColumn: NivelNum
+
+	column Racha
+		dataType: int64
+		lineageTag: ed7d0621-980a-4e19-9f26-2a26b9676168
+		summarizeBy: sum
+		sourceColumn: Racha
+
+		annotation SummarizationSetBy = Automatic
+
+	column NumLogros
+		dataType: int64
+		lineageTag: d1ae9e17-1eaa-4051-ae53-dd9dfdfca27a
+		summarizeBy: sum
+		sourceColumn: NumLogros
+
+		annotation SummarizationSetBy = Automatic
+
+	column FechaHoraUTC
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		lineageTag: b290eba9-7e0e-43cf-af27-dcdad32a8513
+		summarizeBy: none
+		sourceColumn: FechaHoraUTC
+
+		variation Variation
+			isDefault
+			relationship: 8090e032-ce05-4774-80bd-d42f7f92f159
+			defaultHierarchy: LocalDateTable_85761651-1595-4c23-9603-c741afa3b2dd.'Date Hierarchy'
+
+	/// Hora local de Peru (UTC-5)
+	column FechaHora
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 5ad6ae57-d706-4f8f-b9b5-a055c135a45c
+		summarizeBy: none
+		sourceColumn: FechaHora
+
+		variation Variation
+			isDefault
+			relationship: 1e4e3a69-920d-4600-a431-97c627928ffb
+			defaultHierarchy: LocalDateTable_b9c37787-1f7e-4d5e-9219-f4c923760c65.'Date Hierarchy'
+
+	column Fecha
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: c79503c9-5c81-461b-b1c4-3e4ca3e93097
+		summarizeBy: none
+		sourceColumn: Fecha
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Hora del dia (0-23, hora Peru)
+	column Hora
+		dataType: int64
+		lineageTag: 6a78d675-6b58-4183-8abe-b1475d405c07
+		summarizeBy: sum
+		sourceColumn: Hora
+
+		annotation SummarizationSetBy = Automatic
+
+	/// 1 = primer intento del alumno en esa tarea
+	column Intento
+		dataType: int64
+		lineageTag: fb50d3b1-1d33-40d7-9b39-e440ccfbb48a
+		summarizeBy: sum
+		sourceColumn: Intento
+
+		annotation SummarizationSetBy = Automatic
+
+	column TotalIntentos
+		dataType: int64
+		lineageTag: f44f1502-7ff6-423d-a9f0-00b89d49d2a5
+		summarizeBy: sum
+		sourceColumn: TotalIntentos
+
+		annotation SummarizationSetBy = Automatic
+
+	column EsMejorIntento
+		dataType: boolean
+		lineageTag: 206f5d03-8ef0-41d0-97f7-3834fdfc6cd0
+		summarizeBy: none
+		sourceColumn: EsMejorIntento
+
+	/// Enviado despues de la fecha limite del autograder (vacio si la tarea no tiene fecha limite registrada)
+	column EsTardio =
+			VAR d = RELATED ( Tareas[FechaLimiteUTC] )
+			RETURN NOT ISBLANK ( d ) && Envios[FechaHoraUTC] > d
+		dataType: boolean
+		lineageTag: 7b955c20-78a8-4f05-853c-214bc35c31f8
+		summarizeBy: none
+
+	/// Horas entre el envio y la fecha limite (negativo = tarde)
+	column HorasAntesDelLimite =
+			VAR d = RELATED ( Tareas[FechaLimiteUTC] )
+			RETURN IF ( NOT ISBLANK ( d ), DATEDIFF ( Envios[FechaHoraUTC], d, MINUTE ) / 60 )
+		dataType: double
+		formatString: 0.0
+		lineageTag: 01014a93-a0b1-44a6-af12-f68bdb0506c5
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Anticipacion =
+			VAR h = Envios[HorasAntesDelLimite]
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        ISBLANK ( h ), "Sin fecha limite",
+			        h < 0, "1 · Tarde",
+			        h < 24, "2 · Ultimo dia",
+			        h < 72, "3 · 1-3 dias antes",
+			        "4 · Mas de 3 dias antes"
+			    )
+		dataType: string
+		lineageTag: 4a52846f-c192-488a-8390-963e205e705c
+		summarizeBy: none
+
+	/// Nota (%) sobre el puntaje maximo del notebook. `Nota` (pct del autograder) solo cuenta las secciones ya intentadas y queda inflada en notebooks incompletos. Sin PuntajeMaximo, usa Nota.
+	column NotaReal =
+			VAR m = RELATED ( Tareas[PuntajeMaximo] )
+			RETURN IF ( ISBLANK ( m ) || m = 0, Envios[Nota], MIN ( 100, Envios[Puntos] / m * 100 ) )
+		dataType: double
+		formatString: 0.0
+		lineageTag: 0d2f7b5e-6a1c-4f3e-9b8d-2c4e6a8f1b37
+		summarizeBy: none
+
+	/// El envio cae dentro del horario de clase (tabla Horario) del grado del alumno, en hora Peru
+	column EnClase =
+			VAR g = RELATED ( Alumnos[Grado] )
+			VAR dia = SWITCH ( WEEKDAY ( Envios[FechaHora], 2 ), 1, "Lunes", 2, "Martes", 3, "Miercoles", 4, "Jueves", 5, "Viernes", 6, "Sabado", "Domingo" )
+			VAR minuto = HOUR ( Envios[FechaHora] ) * 60 + MINUTE ( Envios[FechaHora] )
+			RETURN
+			    NOT ISEMPTY (
+			        FILTER (
+			            Horario,
+			            Horario[Grado] = g
+			                && Horario[DiaSemana] = dia
+			                && minuto >= HOUR ( Horario[HoraInicio] ) * 60 + MINUTE ( Horario[HoraInicio] ) - Horario[MargenAntesMin]
+			                && minuto <= HOUR ( Horario[HoraFin] ) * 60 + MINUTE ( Horario[HoraFin] )
+			        )
+			    )
+		dataType: boolean
+		lineageTag: 7a1e9c4d-3b6f-4d2a-8e5c-1f9b7d3a6c28
+		summarizeBy: none
+
+	/// Dias entre este envio y el primer envio en clase del alumno en esa tarea (o su primer envio, si nunca envio en clase). 0 = dia de clase
+	column DiasDesdeClase =
+			VAR f = Envios[Fecha]
+			VAR enClase = CALCULATE ( MIN ( Envios[Fecha] ), ALLEXCEPT ( Envios, Envios[StudentKey], Envios[TareaKey] ), Envios[EnClase] = TRUE () )
+			VAR primero = CALCULATE ( MIN ( Envios[Fecha] ), ALLEXCEPT ( Envios, Envios[StudentKey], Envios[TareaKey] ) )
+			RETURN MAX ( 0, INT ( f - COALESCE ( enClase, primero ) ) )
+		dataType: int64
+		formatString: 0
+		lineageTag: 4e8b2d6a-9c1f-4a7e-b3d5-6f2a8c4e9b13
+		summarizeBy: none
+
+	/// Eje de la pagina Seguimiento: "0" ... "6" y "7+"
+	column DiasDesdeClaseEje = IF ( Envios[DiasDesdeClase] >= 7, "7+", FORMAT ( Envios[DiasDesdeClase], "0" ) )
+		dataType: string
+		lineageTag: 9b3c5e7a-1d4f-4b8e-a2c6-8e1f3a5d7c49
+		summarizeBy: none
+		sortByColumn: DiasDesdeClase
+
+	partition Envios = m
+		mode: import
+		source =
+				let
+				    Source = SubmissionsRaw,
+				    Base = Table.SelectColumns(Source, {"id", "alumno", "nombre", "grado", "curso", "notebook", "earned", "possible", "pct", "level_num", "level_name", "streak", "achievements", "submitted_at"}),
+				    AddLogros = Table.AddColumn(Base, "NumLogros", each if [achievements] = null then 0 else List.Count([achievements]), Int64.Type),
+				    AddTs = Table.AddColumn(AddLogros, "ts", each DateTimeZone.FromText([submitted_at]), type datetimezone),
+				    AddUtc = Table.AddColumn(AddTs, "FechaHoraUTC", each DateTimeZone.RemoveZone(DateTimeZone.ToUtc([ts])), type datetime),
+				    AddPeru = Table.AddColumn(AddUtc, "FechaHora", each DateTimeZone.RemoveZone(DateTimeZone.SwitchZone([ts], -5)), type datetime),
+				    AddFecha = Table.AddColumn(AddPeru, "Fecha", each DateTime.Date([FechaHora]), type date),
+				    AddHora = Table.AddColumn(AddFecha, "Hora", each Time.Hour([FechaHora]), Int64.Type),
+				    AddStudent = Table.AddColumn(AddHora, "StudentKey", each [curso] & "|" & [alumno], type text),
+				    AddTarea = Table.AddColumn(AddStudent, "TareaKey", each [curso] & "|" & [notebook], type text),
+				    Slim = Table.RemoveColumns(AddTarea, {"achievements", "submitted_at", "ts"}),
+				    Grouped = Table.Group(
+				        Slim,
+				        {"StudentKey", "TareaKey"},
+				        {{"g", (t) =>
+				            let
+				                Ordered = Table.AddIndexColumn(Table.Sort(t, {{"FechaHoraUTC", Order.Ascending}, {"id", Order.Ascending}}), "Intento", 1, 1),
+				                BestId = Table.First(Table.Sort(Ordered, {{"pct", Order.Descending}, {"FechaHoraUTC", Order.Descending}}))[id],
+				                N = Table.RowCount(Ordered),
+				                WithBest = Table.AddColumn(Ordered, "EsMejorIntento", each [id] = BestId)
+				            in
+				                Table.AddColumn(WithBest, "TotalIntentos", each N)
+				        }}
+				    ),
+				    Combined = Table.Combine(Grouped[g]),
+				    Renamed = Table.RenameColumns(
+				        Combined,
+				        {
+				            {"id", "EnvioId"}, {"alumno", "DNI"}, {"nombre", "NombreEnEnvio"}, {"grado", "GradoEnEnvio"},
+				            {"curso", "Curso"}, {"notebook", "Tarea"}, {"earned", "Puntos"}, {"possible", "PuntosPosibles"},
+				            {"pct", "Nota"}, {"level_num", "NivelNum"}, {"level_name", "Nivel"}, {"streak", "Racha"}
+				        }
+				    ),
+				    Typed = Table.TransformColumnTypes(
+				        Renamed,
+				        {
+				            {"EnvioId", type text}, {"StudentKey", type text}, {"TareaKey", type text}, {"DNI", type text},
+				            {"NombreEnEnvio", type text}, {"GradoEnEnvio", type text}, {"Curso", type text}, {"Tarea", type text},
+				            {"Puntos", type number}, {"PuntosPosibles", type number}, {"Nota", type number},
+				            {"NivelNum", Int64.Type}, {"Nivel", type text}, {"Racha", Int64.Type}, {"NumLogros", Int64.Type},
+				            {"FechaHoraUTC", type datetime}, {"FechaHora", type datetime}, {"Fecha", type date}, {"Hora", Int64.Type},
+				            {"Intento", Int64.Type}, {"TotalIntentos", Int64.Type}, {"EsMejorIntento", type logical}
+				        }
+				    )
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,183 @@
+/// Lista de cotejo (CNB, area EPT): 5-6 indicadores por notebook y las preguntas del autograder que los evidencian. Para cambiar el mapeo, edita las filas de Catalogo (Items: "clave:puntos" separados por coma, * = bonus). AlumnoIndicador se recalcula al refrescar.
+table Indicadores
+	lineageTag: 6fb7122e-b663-418d-8f3d-511581ecb935
+
+	column IndicadorKey
+		dataType: string
+		isHidden
+		isKey
+		lineageTag: 19acec71-f262-4742-a48d-1abbf753c216
+		summarizeBy: none
+		sourceColumn: IndicadorKey
+
+	column TareaKey
+		dataType: string
+		isHidden
+		lineageTag: e6c5c83a-8069-4e8f-9a19-2ba5cb7ee93b
+		summarizeBy: none
+		sourceColumn: TareaKey
+
+	column Num
+		dataType: int64
+		isHidden
+		lineageTag: 59b1354f-0ce6-4934-ad36-a1ea6b39b0fd
+		summarizeBy: none
+		sourceColumn: Num
+
+	/// I1 ... I6 (numero dentro del notebook)
+	column Codigo
+		dataType: string
+		lineageTag: 4f894b84-fcfc-4840-bd4c-f26364e9c0ff
+		summarizeBy: none
+		sourceColumn: Codigo
+		sortByColumn: Num
+
+	column Indicador
+		dataType: string
+		lineageTag: 64802d03-6448-4468-9d9b-c1a3df507df1
+		summarizeBy: none
+		sourceColumn: Indicador
+
+	/// C1, C2, C3, C4 (capacidades de "Gestiona proyectos de emprendimiento"), AUT o TIC (transversales)
+	column CapacidadCodigo
+		dataType: string
+		isHidden
+		lineageTag: 326f6e1b-23d3-4825-8439-d526514eba3e
+		summarizeBy: none
+		sourceColumn: CapacidadCodigo
+
+	column Capacidad
+		dataType: string
+		lineageTag: ec31ab24-3e86-4932-850f-27f1c9dddd18
+		summarizeBy: none
+		sourceColumn: Capacidad
+		sortByColumn: CapacidadOrden
+
+	column CapacidadOrden
+		dataType: int64
+		isHidden
+		lineageTag: 1e75dcd8-e1cd-4602-8e12-cd1ae8f11a52
+		summarizeBy: none
+		sourceColumn: CapacidadOrden
+
+	/// Competencia del CNB: Gestiona proyectos de emprendimiento (EPT) o una transversal
+	column Competencia
+		dataType: string
+		lineageTag: e7c1a084-7318-4f1b-af7b-52a0aa870a5c
+		summarizeBy: none
+		sourceColumn: Competencia
+		sortByColumn: CompetenciaOrden
+
+	column CompetenciaOrden
+		dataType: int64
+		isHidden
+		lineageTag: ff58eedc-b538-41e0-9a12-4841bef6c181
+		summarizeBy: none
+		sourceColumn: CompetenciaOrden
+
+	/// FALSE si el vinculo indicador-capacidad no es claro (lista SinMapeoClaro): no cuenta para el nivel de logro
+	column MapeoClaro
+		dataType: boolean
+		lineageTag: 27a78e30-c1b5-49f1-b7d1-af2342bef1aa
+		summarizeBy: none
+		sourceColumn: MapeoClaro
+
+	column Cuenta = IF ( Indicadores[MapeoClaro], "✓ cuenta", "– excluido" )
+		dataType: string
+		lineageTag: 0e8b389e-c9a4-46f7-8523-d6879d23bdba
+		summarizeBy: none
+
+	/// Preguntas del notebook que evidencian el indicador (texto para el docente)
+	column Evidencias
+		dataType: string
+		lineageTag: 03bae752-da59-4468-bc6c-e35cba52ef63
+		summarizeBy: none
+		sourceColumn: Evidencias
+
+	/// Claves del autograder con sus puntos posibles ("ex1:8,t9:5"; * = bonus). IndicadorItems las separa
+	column Items
+		dataType: string
+		isHidden
+		lineageTag: 8fe7a6bf-c8c0-4a86-8a93-dae1a55a0ed6
+		summarizeBy: none
+		sourceColumn: Items
+
+	column Orden = RELATED ( Tareas[Orden] ) * 10 + Indicadores[Num]
+		dataType: int64
+		isHidden
+		lineageTag: d2584224-8914-4080-b33b-ddc4e202ef1b
+		summarizeBy: none
+
+	/// Encabezado de columna para la matriz: "NB3 · I4"
+	column Columna = RELATED ( Tareas[NombreCorto] ) & " · " & Indicadores[Codigo]
+		dataType: string
+		lineageTag: 0fb1ff8c-ae95-45fc-9279-4d561444d094
+		summarizeBy: none
+		sortByColumn: Orden
+
+	partition Indicadores = m
+		mode: import
+		source =
+				let
+				    Catalogo = #table(
+				        type table [TareaKey = text, Num = Int64.Type, Indicador = text, CapacidadCodigo = text, Evidencias = text, Items = text],
+				        {
+							{"STAT_2026|nb1_semana1", 1, "Carga el dataset y describe su estructura: filas, columnas y valores faltantes", "C2", "Ej 1, Ej 2, T9", "ex1:8,ex2:8,t9:5"},
+							{"STAT_2026|nb1_semana1", 2, "Calcula media, mediana y desviación estándar con pandas", "C2", "Ej 3, Ej 4, T8", "ex3:10,ex4:10,t8:5"},
+							{"STAT_2026|nb1_semana1", 3, "Elige la medida de tendencia central adecuada y explica por qué media y mediana difieren", "C1", "T4, T5, T6, T7", "t4:5,t5:5,t6:5,t7:5"},
+							{"STAT_2026|nb1_semana1", 4, "Detecta valores atípicos con un umbral (media + desviación estándar)", "C2", "Ej 5", "ex5:10"},
+							{"STAT_2026|nb1_semana1", 5, "Lee el mensaje de error y corrige el código", "AUT", "Debug 1", "debug1:10"},
+							{"STAT_2026|nb1_semana1", 6, "Distingue las ramas de la estadística (descriptiva y predictiva)", "C1", "T1, T2, T3", "t1:5,t2:5,t3:5"},
+							{"STAT_2026|nb1_semana2", 1, "Filtra datos con condiciones numéricas y categóricas", "C2", "Ej 1, Ej 2, T1, T2", "ex1:10,ex2:10,t1:5,t2:5"},
+							{"STAT_2026|nb1_semana2", 2, "Combina condiciones con & y |", "C2", "Ej 3, Debug 1", "ex3:12,debug1:10"},
+							{"STAT_2026|nb1_semana2", 3, "Compara grupos con .groupby() (promedio y dispersión)", "C2", "Ej 4, Ej 5, Ej 6, Int 4, T3", "ex4:12,ex5:11,ex6:12,intex4:7,t3:5"},
+							{"STAT_2026|nb1_semana2", 4, "Lee el mensaje de error, identifica su tipo y corrige el código", "AUT", "Debug 0, Debug 2, Debug 3", "debug0:10,debug2:10,debug3:10"},
+							{"STAT_2026|nb1_semana2", 5, "Redacta un hallazgo usando promedio y dispersión", "C1", "Ej 0, Int 0, Int 1, Int 2, Reto (bonus)", "ex0:10,intex0:8,intex1:8,intex2:7,reto1:10*"},
+							{"STAT_2026|nb1_semana2", 6, "Reconoce qué no se puede concluir de una comparación de grupos o de un atípico", "C4", "Int 3, T0, T4", "intex3:5,t0:5,t4:5"},
+							{"STAT_2026|nb3", 1, "Elabora un diagrama de dispersión y calcula r con .corr()", "C2", "Ej 1 a Ej 6", "ex1:20,ex2:20,ex3:20,ex4:20,ex5:20,ex6:20"},
+							{"STAT_2026|nb3", 2, "Interpreta la fuerza y la dirección de r (rango de -1 a 1)", "C1", "T1, T2, T3, T4, T8", "t1:5,t2:5,t3:5,t4:5,t8:5"},
+							{"STAT_2026|nb3", 3, "Predice el patrón a ojo y lo contrasta con el r calculado", "C1", "Reflexión Ronda 1, T7", "refl_ronda1:5,t7:5"},
+							{"STAT_2026|nb3", 4, "Reconoce que correlación no implica causalidad", "C4", "T5, T9, T10, Reflexión concepto", "t5:5,t9:5,t10:5,refl_concepto:5"},
+							{"STAT_2026|nb3", 5, "Propone explicaciones alternativas (tercera variable) para una correlación", "C4", "Reflexión Rondas 3, 5 y 6", "refl_ronda3:5,refl_pbi_apoyo:5,refl_generosidad_corrupcion:5"},
+							{"STAT_2026|nb3", 6, "Reconoce los límites de .corr() y de probar muchos pares al azar", "C4", "T6, T11", "t6:5,t11:5"},
+							{"STAT_2026|nb4", 1, "Corrige un error de nombre de columna leyendo el mensaje", "AUT", "Debug 1", "debug1:10"},
+							{"STAT_2026|nb4", 2, "Calcula todas las correlaciones con Puntaje e identifica la más fuerte", "C2", "Ej 7", "ex7:20"},
+							{"STAT_2026|nb4", 3, "Calcula r dentro de cada subgrupo (filtro + .corr())", "C2", "Ej 8", "ex8:20"},
+							{"STAT_2026|nb4", 4, "Reconoce que el patrón general puede ocultar o invertir lo que pasa en los subgrupos", "C4", "Reflexión subgrupos", "refl_subgrupos:5"},
+							{"STAT_2026|nb4", 5, "Desconfía de conclusiones basadas en subgrupos muy pequeños", "C4", "T10", "t10:5"},
+							{"STAT_2026|nb5", 1, "Construye un modelo: elige predictores, separa entrenamiento/prueba y ajusta LinearRegression", "C2", "Ej 1", "ex1:40"},
+							{"STAT_2026|nb5", 2, "Interpreta R² y compara entrenamiento vs. prueba (generaliza vs. memoriza)", "C4", "T1, T2", "t1:5,t2:5"},
+							{"STAT_2026|nb5", 3, "Compara combinaciones de predictores y justifica la mejor según el R² de prueba", "C4", "Ej 2, Reflexión Ej 2, T3", "ex2:20,refl_nb5_ex2:5,t3:5"},
+							{"STAT_2026|nb5", 4, "Interpreta los coeficientes en lenguaje cotidiano", "C1", "Reflexión interpretación, T5", "refl_nb5_interpretacion:5,t5:5"},
+							{"STAT_2026|nb5", 5, "Reconoce los límites del modelo (extrapolación)", "C4", "T4, Reto (bonus)", "t4:5,reto1:10*"},
+							{"STAT_2026|nb5", 6, "Explica cuándo usaría la regresión en una situación real", "C1", "Reflexión final", "refl_nb5_final:5"},
+							{"STAT_2026|nb6", 1, "Escala las variables y ajusta K-Means", "C2", "Ej 1, T2", "ex1:40,t2:5"},
+							{"STAT_2026|nb6", 2, "Explica cómo agrupa K-Means (centroides)", "C1", "T1, T5", "t1:5,t5:5"},
+							{"STAT_2026|nb6", 3, "Distingue un cluster de una etiqueta real (cluster ≠ género)", "C4", "¿Clusters = géneros?, T3", "cluster_es_genero:5,t3:5"},
+							{"STAT_2026|nb6", 4, "Compara agrupamientos al cambiar las variables o k", "C2", "Reflexión Ej 2, T4, Reto (bonus)", "refl_nb6_ex2:5,t4:5,reto1:10*"},
+							{"STAT_2026|nb6", 5, "Evalúa si el agrupamiento generaliza para un uso real (recomendación, segmentación)", "C4", "Reflexión generalización", "refl_nb6_generalizacion:5"},
+							{"STAT_2026|nb6", 6, "Explica para qué usaría el clustering", "C1", "Reflexión final", "refl_nb6_final:5"}
+				        }
+				    ),
+				    // Capacidades y competencias del CNB (EPT + transversales). Orden = orden de columnas en el reporte
+				    Capacidades = [
+				        C1 = [Capacidad = "C1 · Crea propuestas de valor", Competencia = "Gestiona proyectos de emprendimiento económico o social", CapOrden = 1, CompOrden = 1],
+				        C2 = [Capacidad = "C2 · Aplica habilidades técnicas", Competencia = "Gestiona proyectos de emprendimiento económico o social", CapOrden = 2, CompOrden = 1],
+				        C3 = [Capacidad = "C3 · Trabaja cooperativamente para lograr objetivos y metas", Competencia = "Gestiona proyectos de emprendimiento económico o social", CapOrden = 3, CompOrden = 1],
+				        C4 = [Capacidad = "C4 · Evalúa los resultados del proyecto de emprendimiento", Competencia = "Gestiona proyectos de emprendimiento económico o social", CapOrden = 4, CompOrden = 1],
+				        AUT = [Capacidad = "Monitorea y ajusta su desempeño durante el proceso de aprendizaje", Competencia = "Gestiona su aprendizaje de manera autónoma", CapOrden = 5, CompOrden = 2],
+				        TIC = [Capacidad = "Gestiona información del entorno virtual", Competencia = "Se desenvuelve en los entornos virtuales generados por las TIC", CapOrden = 6, CompOrden = 3]
+				    ],
+				    // Indicadores cuyo vinculo con su capacidad no es claro: salen en la lista de cotejo, pero no cuentan para el nivel de logro
+				    SinMapeoClaro = {"STAT_2026|nb1_semana1|I6", "STAT_2026|nb6|I2"},
+				    Claves = Table.AddColumn(Catalogo, "IndicadorKey", each [TareaKey] & "|I" & Text.From([Num]), type text),
+				    Cod = Table.AddColumn(Claves, "Codigo", each "I" & Text.From([Num]), type text),
+				    Cap = Table.AddColumn(Cod, "C", each Record.Field(Capacidades, [CapacidadCodigo])),
+				    Exp = Table.ExpandRecordColumn(Cap, "C", {"Capacidad", "Competencia", "CapOrden", "CompOrden"}, {"Capacidad", "Competencia", "CapacidadOrden", "CompetenciaOrden"}),
+				    Claro = Table.AddColumn(Exp, "MapeoClaro", each not List.Contains(SinMapeoClaro, [IndicadorKey]), type logical),
+				    Typed = Table.TransformColumnTypes(Claro, {{"Capacidad", type text}, {"Competencia", type text}, {"CapacidadOrden", Int64.Type}, {"CompetenciaOrden", Int64.Type}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
+

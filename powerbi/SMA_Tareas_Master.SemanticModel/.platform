@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "SMA_Tareas_Master"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "dfc1551c-6c0b-4ca4-b56a-9711403a4a09"
+  }
+}

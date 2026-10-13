@@ -1,0 +1,59 @@
+/// Horario de clase por grado (hora Peru). Define Envios[EnClase]. Deducido de las horas de los primeros envios (REPORT_SPEC §2.1, decision D2): editalo aqui si cambia. MargenAntesMin cuenta como clase los envios hechos unos minutos antes de la hora de inicio (5to empieza a enviar a las 13:55).
+table Horario
+	lineageTag: 5c5d9937-02d2-49a3-8574-a8a41a47b00d
+
+	column Grado
+		dataType: string
+		lineageTag: 89b30b85-dac9-4e1f-b783-9847bfcce7ee
+		summarizeBy: none
+		sourceColumn: Grado
+
+	/// Lunes, Martes, Miercoles, Jueves, Viernes, Sabado, Domingo (sin tildes)
+	column DiaSemana
+		dataType: string
+		lineageTag: 290f7800-b1e4-48c4-bf20-cc0d9f9bed22
+		summarizeBy: none
+		sourceColumn: DiaSemana
+
+	column HoraInicio
+		dataType: dateTime
+		formatString: hh:mm
+		lineageTag: b581392b-9a22-486b-8e72-172b6d7eac21
+		summarizeBy: none
+		sourceColumn: HoraInicio
+
+		annotation UnderlyingDateTimeDataType = Time
+
+	/// Ultimo minuto de clase (inclusive)
+	column HoraFin
+		dataType: dateTime
+		formatString: hh:mm
+		lineageTag: 18413964-7044-47ed-b208-644d4c205f63
+		summarizeBy: none
+		sourceColumn: HoraFin
+
+		annotation UnderlyingDateTimeDataType = Time
+
+	column MargenAntesMin
+		dataType: int64
+		lineageTag: f1a18ee4-2989-421e-be87-29d2a40dfdee
+		summarizeBy: none
+		sourceColumn: MargenAntesMin
+
+	partition Horario = m
+		mode: import
+		source =
+				let
+				    Source = #table(
+				        type table [Grado = text, DiaSemana = text, HoraInicio = time, HoraFin = time, MargenAntesMin = Int64.Type],
+				        {
+				            {"3ro", "Lunes", #time(12, 0, 0), #time(13, 59, 0), 10},
+				            {"4to", "Lunes", #time(10, 0, 0), #time(11, 59, 0), 10},
+				            {"5to", "Lunes", #time(14, 0, 0), #time(15, 59, 0), 10}
+				        }
+				    )
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

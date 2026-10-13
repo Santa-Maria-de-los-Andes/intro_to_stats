@@ -1,0 +1,33 @@
+table Cursos
+	lineageTag: 7312571a-74ca-4a34-844b-2bfc74317a05
+
+	column Curso
+		dataType: string
+		isHidden
+		isKey
+		lineageTag: 5eaf2a33-3880-49a2-90cf-041780f69956
+		summarizeBy: none
+		sourceColumn: Curso
+
+	column NombreCurso
+		dataType: string
+		lineageTag: b5f25cfa-2c72-4085-89ae-285dc4c4a3ef
+		summarizeBy: none
+		sourceColumn: NombreCurso
+
+	partition Cursos = m
+		mode: import
+		source =
+				let
+				    Keys = Table.Distinct(Table.SelectColumns(Envios, {"Curso"})),
+				    Named = Table.AddColumn(
+				        Keys,
+				        "NombreCurso",
+				        each if [Curso] = "STAT_2026" then "Estadistica · Bimestre 3"
+				            else if [Curso] = "CS_2026" then "Computer Science · Bimestre 2"
+				            else [Curso],
+				        type text
+				    )
+				in
+				    Named
+

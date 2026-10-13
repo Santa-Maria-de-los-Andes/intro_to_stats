@@ -1,0 +1,189 @@
+/// Catalogo de tareas (notebooks). Se arma con las tareas que aparecen en Supabase + metadatos fijos tomados de cada autograder (_DEADLINE_UTC, _CORE_MAX, _BONUS_MAX, y si los mensajes de error muestran el valor esperado). Una tarea nueva (ej. nb7) aparece sola con valores por defecto; agregale una fila a Meta para darle nombre y fecha limite.
+table Tareas
+	lineageTag: 49e8c989-c4c8-45a7-9f10-6edd881be198
+
+	column TareaKey
+		dataType: string
+		isHidden
+		isKey
+		lineageTag: e54de535-dd54-445b-9cae-0c446facccdd
+		summarizeBy: none
+		sourceColumn: TareaKey
+
+	column Curso
+		dataType: string
+		isHidden
+		lineageTag: 648b1ffd-5d37-406e-9dc4-7714d2252f33
+		summarizeBy: none
+		sourceColumn: Curso
+
+	/// Id del notebook (nb1_semana1, nb3, ...)
+	column Tarea
+		dataType: string
+		lineageTag: 2e912625-7aee-424c-bfda-19bc13cefd77
+		summarizeBy: none
+		sourceColumn: Tarea
+
+	column NombreTarea
+		dataType: string
+		lineageTag: e0985977-160a-4733-a609-96834ec753d3
+		summarizeBy: none
+		sourceColumn: NombreTarea
+		sortByColumn: Orden
+
+	column Mision
+		dataType: string
+		lineageTag: 8f5caa01-5a1b-4548-ba81-68cb4aad4a4c
+		summarizeBy: none
+		sourceColumn: Mision
+
+	column Semana
+		dataType: int64
+		lineageTag: abc8b4f3-cc44-4f23-89c9-774e83c1302e
+		summarizeBy: sum
+		sourceColumn: Semana
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Python, Python Lite (ruta de interpretacion), Sheets, Python (CS)
+	column Ruta
+		dataType: string
+		lineageTag: 9e262b69-a1a6-4930-a971-eef7ff72dfd1
+		summarizeBy: none
+		sourceColumn: Ruta
+
+	/// Banda de grados a la que va dirigida (1ro-2do, 3ro-5to, Todas)
+	column Banda
+		dataType: string
+		isHidden
+		lineageTag: c72683f2-95e5-4cb8-93bc-e2d03277b9cb
+		summarizeBy: none
+		sourceColumn: Banda
+
+	/// FALSE para rutas opcionales (Lite): no se cuentan como entrega esperada
+	column CuentaParaEntrega
+		dataType: boolean
+		lineageTag: f5757458-90c1-48e3-9a05-39339bbc5faf
+		summarizeBy: none
+		sourceColumn: CuentaParaEntrega
+
+	column Orden
+		dataType: int64
+		isHidden
+		lineageTag: 0ad8c942-1011-4549-b967-a29957199d1b
+		summarizeBy: sum
+		sourceColumn: Orden
+
+		annotation SummarizationSetBy = Automatic
+
+	column FechaLimiteUTC
+		dataType: dateTime
+		isHidden
+		formatString: General Date
+		lineageTag: 99c2f070-388c-4e5d-8a37-d59ce1e22b20
+		summarizeBy: none
+		sourceColumn: FechaLimiteUTC
+
+		variation Variation
+			isDefault
+			relationship: ab1fd196-6a1b-40b7-ba65-be70530064b8
+			defaultHierarchy: LocalDateTable_fd5a1a0c-b01e-41ab-a42b-bd0e49157fc2.'Date Hierarchy'
+
+	/// Fecha limite en hora Peru (11:59 PM)
+	column FechaLimite
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 41ede118-b458-4c7e-bcbf-9c96cbd042c1
+		summarizeBy: none
+		sourceColumn: FechaLimite
+
+		variation Variation
+			isDefault
+			relationship: cc7749da-948a-4037-9bf8-d96817a5fb28
+			defaultHierarchy: LocalDateTable_182be48b-8d06-4c6e-a4d2-67a677b6d1fe.'Date Hierarchy'
+
+	/// _CORE_MAX del autograder (la Nota % se calcula sobre este total)
+	column PuntajeMaximo
+		dataType: double
+		lineageTag: d8d43504-b294-4188-b252-6e695024e06e
+		summarizeBy: sum
+		sourceColumn: PuntajeMaximo
+
+		annotation SummarizationSetBy = Automatic
+
+	column BonusMaximo
+		dataType: double
+		lineageTag: 5d0d0967-326b-4fbb-997b-01dda52cd2a9
+		summarizeBy: sum
+		sourceColumn: BonusMaximo
+
+		annotation SummarizationSetBy = Automatic
+
+	/// TRUE si los mensajes de error del autograder muestran el valor esperado (entonces "corregir rapido" mide copiar el numero, no entender el error)
+	column MuestraEsperado
+		dataType: boolean
+		lineageTag: 2b7d4f9a-6e1c-4a3b-8d5f-9c2e7a4b1d63
+		summarizeBy: none
+		sourceColumn: MuestraEsperado
+
+	column MuestraEsperadoTexto = IF ( Tareas[MuestraEsperado], "Muestra el valor esperado", "No lo muestra" )
+		dataType: string
+		lineageTag: 6c1a8e3f-4b9d-4e2a-a7f5-3d8b1c6e9a24
+		summarizeBy: none
+
+	/// La fecha limite ya paso al refrescar (las tareas sin fecha limite cuentan como vencidas). Solo las vencidas cuentan como entrega esperada.
+	column YaVencio = ISBLANK ( Tareas[FechaLimiteUTC] ) || Tareas[FechaLimiteUTC] <= UTCNOW ()
+		dataType: boolean
+		lineageTag: 8f4b2a6d-1c7e-4d9a-b5e3-7a2c9f1d4b86
+		summarizeBy: none
+
+	partition Tareas = m
+		mode: import
+		source =
+				let
+				    Meta = #table(
+				        type table [TareaKey = text, NombreTarea = text, Mision = text, Semana = nullable number, Ruta = text, Banda = text, CuentaParaEntrega = logical, Orden = number, FechaLimiteUTC = nullable datetime, PuntajeMaximo = nullable number, BonusMaximo = nullable number, MuestraEsperado = nullable logical],
+				        {
+				            {"CS_2026|nb1", "CS · NB1", "Computer Science", null, "Python (CS)", "Todas", true, 1, null, null, null, null},
+				            {"CS_2026|nb2", "CS · NB2", "Computer Science", null, "Python (CS)", "Todas", true, 2, #datetime(2026, 6, 15, 4, 59, 0), 124, 12, null},
+				            {"CS_2026|nb3", "CS · NB3", "Computer Science", null, "Python (CS)", "Todas", true, 3, null, null, null, null},
+				            {"STAT_2026|sheets_caso1_semana1", "Sheets · Caso 1 (S1)", "Caso 1: Abriendo el Caso", 1, "Sheets", "1ro-2do", true, 10, null, 95, 10, null},
+				            {"STAT_2026|nb1_semana1", "M1 · Recuperacion de Datos (S1)", "Mision 1: Recuperacion de Datos", 1, "Python", "3ro-5to", true, 11, #datetime(2026, 8, 17, 4, 59, 0), 101, 0, true},
+				            {"STAT_2026|nb1_semana2", "M1 · Recuperacion de Datos (S2)", "Mision 1: Recuperacion de Datos", 2, "Python", "3ro-5to", true, 12, #datetime(2026, 8, 24, 4, 59, 0), 177, 10, true},
+				            {"STAT_2026|nb3", "M2 · Correlacion (S3)", "Mision 2: Buscando Patrones", 3, "Python", "3ro-5to", true, 13, #datetime(2026, 8, 31, 4, 59, 0), 200, null, false},
+				            {"STAT_2026|nb3_lite", "M2 · Correlacion Lite (S3)", "Mision 2: Buscando Patrones", 3, "Python Lite", "3ro-5to", false, 14, #datetime(2026, 8, 31, 4, 59, 0), 70, 0, null},
+				            {"STAT_2026|nb4", "M2 · Correlacion (S4)", "Mision 2: Buscando Patrones", 4, "Python", "3ro-5to", true, 15, #datetime(2026, 9, 7, 4, 59, 0), 60, null, true},
+				            {"STAT_2026|nb4_lite", "M2 · Correlacion Lite (S4)", "Mision 2: Buscando Patrones", 4, "Python Lite", "3ro-5to", false, 16, #datetime(2026, 9, 7, 4, 59, 0), 55, 0, null},
+				            {"STAT_2026|nb5", "M3 · Regresion (S6)", "Mision 3: El Oraculo de Datos", 6, "Python", "3ro-5to", true, 17, #datetime(2026, 9, 22, 4, 59, 0), 102, 10, true},
+				            {"STAT_2026|nb6", "M4 · Clustering (S7)", "Mision 4: El Cartografo de Patrones", 7, "Python", "3ro-5to", true, 18, #datetime(2026, 10, 6, 4, 59, 0), 87, 10, false}
+				        }
+				    ),
+				    // Tareas con envios + tareas de Meta aun sin envios (ej. un notebook que todavia no abre nadie)
+				    MetaKeys = Table.FromRecords(List.Transform(Meta[TareaKey], each [TareaKey = _, Curso = Text.BeforeDelimiter(_, "|"), Tarea = Text.AfterDelimiter(_, "|")])),
+				    Keys = Table.Distinct(Table.Combine({Table.SelectColumns(Envios, {"TareaKey", "Curso", "Tarea"}), MetaKeys}), {"TareaKey"}),
+				    Joined = Table.NestedJoin(Keys, {"TareaKey"}, Meta, {"TareaKey"}, "M", JoinKind.LeftOuter),
+				    Expanded = Table.ExpandTableColumn(Joined, "M", {"NombreTarea", "Mision", "Semana", "Ruta", "Banda", "CuentaParaEntrega", "Orden", "FechaLimiteUTC", "PuntajeMaximo", "BonusMaximo", "MuestraEsperado"}),
+				    Defaults = Table.TransformRows(
+				        Expanded,
+				        each _ & [
+				            NombreTarea = if [NombreTarea] = null then [Curso] & " · " & [Tarea] else [NombreTarea],
+				            Mision = if [Mision] = null then "Sin clasificar" else [Mision],
+				            Ruta = if [Ruta] = null then "Sin clasificar" else [Ruta],
+				            Banda = if [Banda] = null then "Todas" else [Banda],
+				            CuentaParaEntrega = if [CuentaParaEntrega] = null then true else [CuentaParaEntrega],
+				            Orden = if [Orden] = null then 99 else [Orden],
+				            FechaLimite = if [FechaLimiteUTC] = null then null else [FechaLimiteUTC] - #duration(0, 5, 0, 0)
+				        ]
+				    ),
+				    AsTable = Table.FromRecords(Defaults),
+				    Typed = Table.TransformColumnTypes(
+				        AsTable,
+				        {
+				            {"TareaKey", type text}, {"Curso", type text}, {"Tarea", type text}, {"NombreTarea", type text}, {"Mision", type text},
+				            {"Semana", Int64.Type}, {"Ruta", type text}, {"Banda", type text}, {"CuentaParaEntrega", type logical}, {"Orden", Int64.Type},
+				            {"FechaLimiteUTC", type datetime}, {"FechaLimite", type datetime}, {"PuntajeMaximo", type number}, {"BonusMaximo", type number}, {"MuestraEsperado", type logical}
+				        }
+				    )
+				in
+				    Typed
+

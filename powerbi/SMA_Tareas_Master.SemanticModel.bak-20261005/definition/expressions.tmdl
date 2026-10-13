@@ -1,0 +1,78 @@
+/// Proyecto Supabase compartido por todos los autograders (ver shared/supabase_schema.sql).
+expression SupabaseUrl = "https://uwykikwutjtkpffwmdiq.supabase.co/" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: eb22e499-a23a-4dce-bd51-9c5db18f0642
+
+	annotation PBI_ResultType = Text
+
+/// Clave publica de solo lectura (la misma que usan los leaderboards nbN.html). La politica RLS anon_select solo permite SELECT.
+expression SupabaseKey = "sb_publishable_aBG6GD4wn9CgpSE-47fagQ_sNhnzznu" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: c0a8f222-1f7f-4010-8eff-a80c4541889c
+
+	annotation PBI_ResultType = Text
+
+/// Todas las filas de public.submissions, paginadas de 1000 en 1000 (limite de PostgREST), sin envios de prueba (TEST / INTEGRATION_TEST / SCRATCH) y con los DNI mal tipeados fusionados (AliasDNI).
+expression SubmissionsRaw =
+		let
+		    PageSize = 1000,
+		    Columns = {"id", "dni", "email", "nombre", "grado", "curso", "notebook", "earned", "possible", "pct", "level_num", "level_name", "achievements", "streak", "score_breakdown", "submitted_at"},
+		    GetPage = (offset as number) as list =>
+		        Json.Document(
+		            Web.Contents(
+		                SupabaseUrl,
+		                [
+		                    RelativePath = "rest/v1/submissions",
+		                    Query = [
+		                        select = Text.Combine(Columns, ","),
+		                        order = "submitted_at.asc,id.asc",
+		                        offset = Text.From(offset),
+		                        limit = Text.From(PageSize)
+		                    ],
+		                    Headers = [apikey = SupabaseKey, Accept = "application/json"]
+		                ]
+		            )
+		        ),
+		    Pages = List.Generate(
+		        () => [Offset = 0, Data = GetPage(0)],
+		        each List.Count([Data]) > 0,
+		        each [
+		            Offset = [Offset] + PageSize,
+		            Data = if List.Count([Data]) < PageSize then {} else GetPage([Offset] + PageSize)
+		        ],
+		        each [Data]
+		    ),
+		    Records = List.Combine(Pages),
+		    AsTable = Table.FromRecords(Records, Columns, MissingField.UseNull),
+		    Trimmed = Table.TransformColumns(
+		        AsTable,
+		        {
+		            {"dni", each if _ = null then null else Text.Trim(Text.From(_)), type nullable text},
+		            {"email", each if _ = null then null else Text.Trim(Text.From(_)), type nullable text}
+		        }
+		    ),
+		    // DNI mal tipeados -> DNI canonico (tabla AliasDNI). Mantener igual en item_intentos.py
+		    AliasMap = Record.FromList(AliasDNI[DNICanonico], AliasDNI[DNIOrigen]),
+		    Aliased = Table.TransformColumns(Trimmed, {{"dni", each if _ = null then null else Record.FieldOrDefault(AliasMap, _, _), type nullable text}}),
+		    WithAlumno = Table.AddColumn(Aliased, "alumno", each if [dni] <> null and [dni] <> "" then [dni] else [email], type text),
+		    // SCRATCH = "Estudiante de Prueba". Mantener igual en item_intentos.py
+		    TestIds = {"TEST", "INTEGRATION_TEST", "SCRATCH"},
+		    NoTests = Table.SelectRows(
+		        WithAlumno,
+		        each not List.Contains(TestIds, Text.Upper(if [dni] = null then "" else [dni]))
+		            and not List.Contains(TestIds, Text.Upper(if [email] = null then "" else [email]))
+		            and [alumno] <> null and [alumno] <> ""
+		    ),
+		    // Filas antiguas sin `curso` son de CS (DEFAULT 'CS_2026' en el esquema)
+		    WithCurso = Table.TransformColumns(NoTests, {{"curso", each if _ = null or _ = "" then "CS_2026" else _, type text}}),
+		    WithGrado = Table.TransformColumns(WithCurso, {{"grado", each if _ = null or _ = "" then "Sin grado" else _, type text}})
+		in
+		    WithGrado
+	lineageTag: 0f143a46-e774-40d5-8fd6-b83a2065568c
+
+	annotation PBI_ResultType = Table
+
+/// Carpeta con los CSV que genera powerbi/item_intentos.py (ItemIntentos, ItemResumen). Cambiala si el repo esta en otra ruta.
+expression CarpetaDatos = "C:\Users\jp_ms\OneDrive\JP DIGITAL VENTURES\SMA\SCRIPTS\SMA - Intro_Stats\powerbi\data\" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 3f6c2d1e-8a4b-4c7e-9d2f-5b1a6e8c4d01
+
+	annotation PBI_ResultType = Text
+

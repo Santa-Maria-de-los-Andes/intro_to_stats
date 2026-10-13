@@ -1,0 +1,36 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.4.0/schema.json",
+  "name": "v005",
+  "position": {
+    "x": 10,
+    "y": 62,
+    "z": 5000,
+    "width": 1260,
+    "height": 40,
+    "tabOrder": 5000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Los ítems donde los alumnos se quedan atascados, y quién lleva más de una semana sin actividad",
+                    "textStyle": {
+                      "fontSize": "13pt",
+                      "color": "#9A9AA5"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

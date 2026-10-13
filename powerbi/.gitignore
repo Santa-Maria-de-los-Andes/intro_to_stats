@@ -1,0 +1,5 @@
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+
+# Salida de item_intentos.py (tiene DNIs de alumnos)
+data/

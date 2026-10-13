@@ -1,0 +1,36 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/1.4.0/schema.json",
+  "name": "v008",
+  "position": {
+    "x": 520,
+    "y": 674,
+    "z": 8000,
+    "width": 370,
+    "height": 36,
+    "tabOrder": 8000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Asociación, no causa: los más motivados trabajan más días y también aprueban más.",
+                    "textStyle": {
+                      "fontSize": "9pt",
+                      "color": "#9A9AA5"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

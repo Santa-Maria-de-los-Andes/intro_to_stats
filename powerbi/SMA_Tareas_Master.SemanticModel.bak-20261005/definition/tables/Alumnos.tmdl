@@ -1,0 +1,89 @@
+/// Un renglon por alumno y curso. Nombre y grado salen del envio mas reciente (no hay roster: la tabla students de Supabase esta vacia, asi que el "curso" son los alumnos que enviaron algo al menos una vez).
+table Alumnos
+	lineageTag: 2a0d568f-33af-46bd-9469-c628327c8ea2
+
+	column StudentKey
+		dataType: string
+		isHidden
+		isKey
+		lineageTag: 53d43f6b-0edf-4ff0-aaab-47bd8da59065
+		summarizeBy: none
+		sourceColumn: StudentKey
+
+	column DNI
+		dataType: string
+		lineageTag: c131b8f9-8239-4a73-a0a0-4999518020ea
+		summarizeBy: none
+		sourceColumn: DNI
+
+	column Nombre
+		dataType: string
+		lineageTag: 1b113601-80e0-4be4-a9de-2ad8d3ff163b
+		summarizeBy: none
+		sourceColumn: Nombre
+
+	column Grado
+		dataType: string
+		lineageTag: 8296ffe6-712b-4dff-80c7-9175d5704d9f
+		summarizeBy: none
+		sourceColumn: Grado
+
+	column Curso
+		dataType: string
+		isHidden
+		lineageTag: 9962724e-322f-42e1-ba14-a46f08c2a7e3
+		summarizeBy: none
+		sourceColumn: Curso
+
+	/// 1ro-2do (ruta Sheets) o 3ro-5to (ruta Python)
+	column Banda
+		dataType: string
+		lineageTag: cb87a543-3c98-4899-ab82-31f4fd924867
+		summarizeBy: none
+		sourceColumn: Banda
+
+	column PrimerEnvio
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 50d2075e-dc6b-4848-8b61-3705e7d17e7f
+		summarizeBy: none
+		sourceColumn: PrimerEnvio
+
+		variation Variation
+			isDefault
+			relationship: e49ec0f6-cc2b-41b1-b0fd-bf1ea935f1cd
+			defaultHierarchy: LocalDateTable_cd706a1c-6dc5-4e5c-b92a-0b2bfdff3879.'Date Hierarchy'
+
+	column UltimoEnvio
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: de5e3860-dc67-4573-8d70-9232e2ae839a
+		summarizeBy: none
+		sourceColumn: UltimoEnvio
+
+		variation Variation
+			isDefault
+			relationship: c9c203d7-b45f-4c90-90c5-017bb36cd248
+			defaultHierarchy: LocalDateTable_24f4d95a-2f90-49df-a1cf-1b9e2f48c450.'Date Hierarchy'
+
+	partition Alumnos = m
+		mode: import
+		source =
+				let
+				    Source = Table.Buffer(Table.Sort(Envios, {{"FechaHoraUTC", Order.Descending}})),
+				    Grouped = Table.Group(
+				        Source,
+				        {"StudentKey"},
+				        {
+				            {"DNI", each [DNI]{0}, type text},
+				            {"Nombre", each [NombreEnEnvio]{0}, type text},
+				            {"Grado", each [GradoEnEnvio]{0}, type text},
+				            {"Curso", each [Curso]{0}, type text},
+				            {"PrimerEnvio", each List.Min([FechaHora]), type datetime},
+				            {"UltimoEnvio", each List.Max([FechaHora]), type datetime}
+				        }
+				    ),
+				    AddBanda = Table.AddColumn(Grouped, "Banda", each if List.Contains({"1ro", "2do"}, [Grado]) then "1ro-2do" else "3ro-5to", type text)
+				in
+				    AddBanda
+

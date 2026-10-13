@@ -1,0 +1,274 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 1254.2182029388091,
+            "y": 327.56264706003128
+          },
+          "nodeIndex": "_Medidas",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 334.193599391643,
+            "y": 126.99588257431685
+          },
+          "nodeIndex": "Alumnos",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 336.26491474769637,
+            "y": 657.12529412006256
+          },
+          "nodeIndex": "Calendario",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": -0.31468783925515709
+          },
+          "nodeIndex": "Cursos",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 621.26818099476282,
+            "y": 303.71117973821924
+          },
+          "nodeIndex": "Envios",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1020.218202938809,
+            "y": 303.20874113656413
+          },
+          "nodeIndex": "Items",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 755.08451304952166,
+            "y": 656.57596885074736
+          },
+          "nodeIndex": "Logros",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 806.46742032816985,
+            "y": -50
+          },
+          "nodeIndex": "Tareas",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1488.2182029388091,
+            "y": 413.56264706003128
+          },
+          "nodeIndex": "AliasDNI",
+          "nodeLineageTag": "41b3cc88-0307-4bdd-92b0-203c3fee5c04",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1772.2182029388091,
+            "y": 327.56264706003128
+          },
+          "nodeIndex": "AlumnoTarea",
+          "nodeLineageTag": "e8032055-4edd-42a5-aa20-db0ffce98915",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2056.2182029388091,
+            "y": 413.56264706003128
+          },
+          "nodeIndex": "Etapas",
+          "nodeLineageTag": "db2f1c5d-0224-4e8f-9085-e39977984cb8",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2340.2182029388091,
+            "y": 377.56264706003128
+          },
+          "nodeIndex": "Horario",
+          "nodeLineageTag": "5c5d9937-02d2-49a3-8574-a8a41a47b00d",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2624.2182029388091,
+            "y": 341.56264706003128
+          },
+          "nodeIndex": "ItemIntentos",
+          "nodeLineageTag": "fef3dad5-9ca6-43b0-95dc-cb16bcbe6e72",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2908.2182029388091,
+            "y": 341.56264706003128
+          },
+          "nodeIndex": "ItemResumen",
+          "nodeLineageTag": "0135658e-aaa7-4ce1-a4c9-2c8914bb8d1a",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3142.2182029388091,
+            "y": 413.56264706003128
+          },
+          "nodeIndex": "Metrica",
+          "nodeLineageTag": "c1ccf9f4-eb67-4685-8f16-2c78b0d8cd20",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3426.2182029388091,
+            "y": 377.56264706003128
+          },
+          "nodeIndex": "Padron",
+          "nodeLineageTag": "e9d3844d-bf64-4dc8-b3d6-9e9759f5286b",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3994.2182029388091,
+            "y": 315.56264706003128
+          },
+          "nodeIndex": "AlumnoIndicador",
+          "nodeLineageTag": "01046993-0475-4992-a1ed-57ad32fc6176",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 3710.2182029388091,
+            "y": 277.56264706003128
+          },
+          "nodeIndex": "Indicadores",
+          "nodeLineageTag": "6fb7122e-b663-418d-8f3d-511581ecb935",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 4228.21820293881,
+            "y": 389.56264706003128
+          },
+          "nodeIndex": "IndicadorItems",
+          "nodeLineageTag": "b4e24819-69fe-4fd9-bd8c-b6002439339c",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 4512.21820293881,
+            "y": 389.56264706003128
+          },
+          "nodeIndex": "Niveles",
+          "nodeLineageTag": "8ca66a7e-b666-4511-9c94-a237f12ed51e",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

@@ -1,0 +1,67 @@
+/// Un renglon por StudentKey x TareaKey x Item (sin Teoria ni Registro): si acerto al primer intento, si llego al puntaje maximo y cuanto tardo en corregir. Lo genera powerbi/item_intentos.py.
+table ItemResumen
+	lineageTag: 0135658e-aaa7-4ce1-a4c9-2c8914bb8d1a
+
+	column StudentKey
+		dataType: string
+		isHidden
+		lineageTag: 16fa9ab9-2e5a-4118-97d7-1b3b0e68341a
+		summarizeBy: none
+		sourceColumn: StudentKey
+
+	column TareaKey
+		dataType: string
+		isHidden
+		lineageTag: ea45c5f3-9863-4f42-95f0-18d1f2dd9690
+		summarizeBy: none
+		sourceColumn: TareaKey
+
+	column Item
+		dataType: string
+		lineageTag: e7d5ccd1-d235-418e-97a6-ce5a93c6863a
+		summarizeBy: none
+		sourceColumn: Item
+
+	column Tipo
+		dataType: string
+		lineageTag: 571706d7-da34-406b-aaf5-e86d8f9d4e5f
+		summarizeBy: none
+		sourceColumn: Tipo
+
+	column Intentos
+		dataType: int64
+		lineageTag: f40c3cb5-1045-4a4d-a7fa-784be7149918
+		summarizeBy: sum
+		sourceColumn: Intentos
+
+	column PrimerIntentoOK
+		dataType: boolean
+		lineageTag: 82979faf-baa9-44b1-b1ac-afcc0a896179
+		summarizeBy: none
+		sourceColumn: PrimerIntentoOK
+
+	column ResueltoFinal
+		dataType: boolean
+		lineageTag: ebb7967f-b367-4b12-b002-5d623388a6d6
+		summarizeBy: none
+		sourceColumn: ResueltoFinal
+
+	/// Segundos entre el ultimo intento fallido y el primero con puntaje maximo. Vacio si acerto al primer intento o nunca llego al maximo
+	column SegundosCorreccion
+		dataType: double
+		lineageTag: ad38a7db-e909-4bfa-907a-0e0c2397333d
+		summarizeBy: none
+		sourceColumn: SegundosCorreccion
+
+	partition ItemResumen = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(CarpetaDatos & "item_resumen.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"Intentos", Int64.Type}, {"PrimerIntentoOK", type logical}, {"ResueltoFinal", type logical}, {"SegundosCorreccion", type number}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
+

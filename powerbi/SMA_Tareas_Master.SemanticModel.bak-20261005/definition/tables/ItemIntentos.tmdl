@@ -1,0 +1,68 @@
+/// Un renglon por intento de cada item (StudentKey x TareaKey x Item x NumIntento), sin Teoria ni Registro. Lo genera powerbi/item_intentos.py (REPORT_SPEC §2.4): correlo antes de refrescar.
+table ItemIntentos
+	isHidden
+	lineageTag: fef3dad5-9ca6-43b0-95dc-cb16bcbe6e72
+
+	column StudentKey
+		dataType: string
+		isHidden
+		lineageTag: b5d22c4d-3851-40fb-9773-36e39c41865b
+		summarizeBy: none
+		sourceColumn: StudentKey
+
+	column TareaKey
+		dataType: string
+		isHidden
+		lineageTag: 597f69ca-8aa3-4029-ba59-aa2d085b7694
+		summarizeBy: none
+		sourceColumn: TareaKey
+
+	column Item
+		dataType: string
+		lineageTag: 5792503a-ff35-443c-97f6-cf931f49d02a
+		summarizeBy: none
+		sourceColumn: Item
+
+	column Tipo
+		dataType: string
+		lineageTag: aeef843f-a024-48a1-939a-afc075928d7f
+		summarizeBy: none
+		sourceColumn: Tipo
+
+	column NumIntento
+		dataType: int64
+		lineageTag: 1b076460-4ef1-4533-b31f-5eab42e6b094
+		summarizeBy: none
+		sourceColumn: NumIntento
+
+	column FechaHoraUTC
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 85243195-f01c-4b5a-ad6c-bbd1e2ee071d
+		summarizeBy: none
+		sourceColumn: FechaHoraUTC
+
+	column Puntos
+		dataType: double
+		lineageTag: 6eac847e-e42f-4e8b-be4b-4bc93144f5da
+		summarizeBy: sum
+		sourceColumn: Puntos
+
+	column PuntosPosibles
+		dataType: double
+		lineageTag: d1fc644c-3028-4dad-803a-cc8a430e3873
+		summarizeBy: sum
+		sourceColumn: PuntosPosibles
+
+	partition ItemIntentos = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(CarpetaDatos & "item_intentos.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    Typed = Table.TransformColumnTypes(Headers, {{"NumIntento", Int64.Type}, {"FechaHoraUTC", type datetime}, {"Puntos", type number}, {"PuntosPosibles", type number}}, "en-US")
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,110 @@
+/// Lista de cotejo: un renglon por alumno del padron (STAT 3ro-5to) x indicador. Logro = mejor puntaje de cada item que evidencia el indicador (cualquier envio) / puntos posibles; los bonus solo cuentan si los intento. Cotejo: Si (Logro >= 60%), No, No entrego (tarea vencida sin envio), Pendiente (aun no vence), Sin desglose (envio sin score_breakdown, ej. revision manual).
+table AlumnoIndicador
+	lineageTag: 01046993-0475-4992-a1ed-57ad32fc6176
+
+	column StudentKey
+		dataType: string
+		isHidden
+		lineageTag: af528c2c-1cbf-4d95-bc8d-0d040c945753
+		summarizeBy: none
+		sourceColumn: [StudentKey]
+
+	column IndicadorKey
+		dataType: string
+		isHidden
+		lineageTag: ab51a1d4-9eae-46e2-aabc-bf83dcb5c20a
+		summarizeBy: none
+		sourceColumn: [IndicadorKey]
+
+	column Puntos
+		dataType: double
+		lineageTag: 71697b86-abe7-4fa8-b68d-32198e881623
+		summarizeBy: none
+		sourceColumn: [Puntos]
+
+	column PuntosPosibles
+		dataType: double
+		lineageTag: f3603980-ec1c-49f8-93ef-de0a1b78cb8a
+		summarizeBy: none
+		sourceColumn: [PuntosPosibles]
+
+	/// Puntos / PuntosPosibles. Vacio si no entrego o si el envio no tiene desglose
+	column Logro
+		dataType: double
+		formatString: 0%
+		lineageTag: 409b82e3-c0cf-4a75-8026-d2243aa3c0e1
+		summarizeBy: none
+		sourceColumn: [Logro]
+
+	column Cotejo
+		dataType: string
+		lineageTag: e7ed6a74-1c89-4405-b6ce-b891da28591b
+		summarizeBy: none
+		sourceColumn: [Cotejo]
+
+	partition AlumnoIndicador = calculated
+		mode: import
+		source =
+				VAR Umbral = 0.6
+				VAR Base =
+				    CROSSJOIN (
+				        SELECTCOLUMNS (
+				            FILTER ( Alumnos, Alumnos[Curso] = "STAT_2026" && Alumnos[Banda] = "3ro-5to" ),
+				            "StudentKey", Alumnos[StudentKey]
+				        ),
+				        SELECTCOLUMNS ( Indicadores, "IndicadorKey", Indicadores[IndicadorKey], "TareaKey", Indicadores[TareaKey] )
+				    )
+				VAR Calc =
+				    ADDCOLUMNS (
+				        Base,
+				        "@Envios",
+				            VAR sk = [StudentKey]
+				            VAR tk = [TareaKey]
+				            RETURN CALCULATE ( COUNTROWS ( Envios ), Envios[StudentKey] = sk, Envios[TareaKey] = tk ) + 0,
+				        "@ConItems",
+				            VAR sk = [StudentKey]
+				            VAR tk = [TareaKey]
+				            RETURN CALCULATE ( COUNTROWS ( Items ), Envios[StudentKey] = sk, Envios[TareaKey] = tk ) + 0,
+				        "@Pts",
+				            VAR sk = [StudentKey]
+				            VAR tk = [TareaKey]
+				            VAR ik = [IndicadorKey]
+				            RETURN
+				                SUMX (
+				                    FILTER ( IndicadorItems, IndicadorItems[IndicadorKey] = ik ),
+				                    VAR it = IndicadorItems[Item]
+				                    VAR p = IndicadorItems[Posibles]
+				                    VAR b = CALCULATE ( MAX ( Items[Puntos] ), Items[Item] = it, Items[PuntosPosibles] = p, Envios[StudentKey] = sk, Envios[TareaKey] = tk )
+				                    RETURN IF ( ISBLANK ( b ), 0, MIN ( b, p ) )
+				                ),
+				        "@Pos",
+				            VAR sk = [StudentKey]
+				            VAR tk = [TareaKey]
+				            VAR ik = [IndicadorKey]
+				            RETURN
+				                SUMX (
+				                    FILTER ( IndicadorItems, IndicadorItems[IndicadorKey] = ik ),
+				                    VAR it = IndicadorItems[Item]
+				                    VAR p = IndicadorItems[Posibles]
+				                    VAR intento = NOT ISBLANK ( CALCULATE ( MAX ( Items[Puntos] ), Items[Item] = it, Items[PuntosPosibles] = p, Envios[StudentKey] = sk, Envios[TareaKey] = tk ) )
+				                    RETURN IF ( IndicadorItems[EsBonus] && NOT intento, 0, p )
+				                )
+				    )
+				RETURN
+				    SELECTCOLUMNS (
+				        Calc,
+				        "StudentKey", [StudentKey],
+				        "IndicadorKey", [IndicadorKey],
+				        "Puntos", [@Pts],
+				        "PuntosPosibles", [@Pos],
+				        "Logro", IF ( [@ConItems] > 0, DIVIDE ( [@Pts], [@Pos] ) ),
+				        "Cotejo",
+				            SWITCH (
+				                TRUE (),
+				                [@Envios] = 0, IF ( LOOKUPVALUE ( Tareas[YaVencio], Tareas[TareaKey], [TareaKey] ), "No entregó", "Pendiente" ),
+				                [@ConItems] = 0, "Sin desglose",
+				                DIVIDE ( [@Pts], [@Pos] ) >= Umbral, "Sí",
+				                "No"
+				            )
+				    )
+

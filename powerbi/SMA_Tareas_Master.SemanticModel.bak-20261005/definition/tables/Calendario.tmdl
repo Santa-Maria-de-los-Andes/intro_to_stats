@@ -1,0 +1,65 @@
+table Calendario
+	lineageTag: fd2389af-9883-4923-9f5c-aa5c95427ba3
+	dataCategory: Time
+
+	column Fecha
+		dataType: dateTime
+		isKey
+		formatString: Short Date
+		lineageTag: c25f5200-35a9-4aed-906f-f7cd77d4c481
+		summarizeBy: none
+		sourceColumn: [Date]
+
+	column Anio
+		dataType: int64
+		lineageTag: 290f7b62-2883-4c29-8ece-3dbc83c96dce
+		summarizeBy: none
+		sourceColumn: [Anio]
+
+	column MesNum
+		dataType: int64
+		isHidden
+		lineageTag: d71073b1-2f0a-4f7f-a183-1d50ce62ffa7
+		summarizeBy: none
+		sourceColumn: [MesNum]
+
+	column Mes
+		dataType: string
+		lineageTag: 42bad178-f1d4-4475-8a6c-85c8eb84d87a
+		summarizeBy: none
+		sourceColumn: [Mes]
+		sortByColumn: MesNum
+
+	column SemanaDelAnio
+		dataType: int64
+		lineageTag: 9359949b-fccc-40a1-98d7-39c4d44e72fb
+		summarizeBy: none
+		sourceColumn: [SemanaDelAnio]
+
+	column DiaSemanaNum
+		dataType: int64
+		isHidden
+		lineageTag: 4858c874-8521-429b-96d2-c6d62574ddb1
+		summarizeBy: none
+		sourceColumn: [DiaSemanaNum]
+
+	column DiaSemana
+		dataType: string
+		lineageTag: a6a73a89-0222-44e9-b850-2833b523de37
+		summarizeBy: none
+		sourceColumn: [DiaSemana]
+		sortByColumn: DiaSemanaNum
+
+	partition Calendario = calculated
+		mode: import
+		source =
+				ADDCOLUMNS (
+				    CALENDAR ( MIN ( Envios[Fecha] ), MAX ( Envios[Fecha] ) ),
+				    "Anio", YEAR ( [Date] ),
+				    "MesNum", MONTH ( [Date] ),
+				    "Mes", SWITCH ( MONTH ( [Date] ), 1, "Ene", 2, "Feb", 3, "Mar", 4, "Abr", 5, "May", 6, "Jun", 7, "Jul", 8, "Ago", 9, "Sep", 10, "Oct", 11, "Nov", 12, "Dic" ),
+				    "SemanaDelAnio", WEEKNUM ( [Date], 2 ),
+				    "DiaSemanaNum", WEEKDAY ( [Date], 2 ),
+				    "DiaSemana", SWITCH ( WEEKDAY ( [Date], 2 ), 1, "Lun", 2, "Mar", 3, "Mie", 4, "Jue", 5, "Vie", 6, "Sab", 7, "Dom" )
+				)
+

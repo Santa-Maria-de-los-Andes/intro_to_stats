@@ -1,0 +1,31 @@
+/// Tabla desconectada: selector de metrica de la pagina Inicio (medida Valor metrica)
+table Metrica
+	lineageTag: c1ccf9f4-eb67-4685-8f16-2c78b0d8cd20
+
+	column Metrica
+		dataType: string
+		lineageTag: 8ed3829d-599a-4c6a-b117-fae1a9bf87db
+		summarizeBy: none
+		sourceColumn: Metrica
+		sortByColumn: Orden
+
+	column Orden
+		dataType: int64
+		isHidden
+		lineageTag: 5df7e62c-5b82-4489-8bd3-67c6820bad0b
+		summarizeBy: none
+		sourceColumn: Orden
+
+	partition Metrica = m
+		mode: import
+		source =
+				let
+				    Source = #table(
+				        type table [Orden = Int64.Type, Metrica = text],
+				        {{1, "Aprobado %"}, {2, "Nota (mejor)"}, {3, "Entrega %"}, {4, "Envíos / alumno"}, {5, "Min. entre envíos"}, {6, "Sesiones"}}
+				    )
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

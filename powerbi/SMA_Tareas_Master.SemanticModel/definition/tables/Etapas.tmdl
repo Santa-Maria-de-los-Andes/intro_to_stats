@@ -1,0 +1,31 @@
+/// Tabla desconectada para el embudo de la Vista general (medida Etapa valor).
+table Etapas
+	lineageTag: db2f1c5d-0224-4e8f-9085-e39977984cb8
+
+	column Etapa
+		dataType: string
+		lineageTag: f060bc4c-037c-4fe3-a857-61b49717d664
+		summarizeBy: none
+		sourceColumn: Etapa
+		sortByColumn: Orden
+
+	column Orden
+		dataType: int64
+		isHidden
+		lineageTag: 612f3652-6d10-40cf-a62b-0b7d896a9e6d
+		summarizeBy: none
+		sourceColumn: Orden
+
+	partition Etapas = m
+		mode: import
+		source =
+				let
+				    Source = #table(
+				        type table [Orden = Int64.Type, Etapa = text],
+				        {{1, "Esperados"}, {2, "Empezo en clase"}, {3, "Volvio despues de clase"}, {4, "Aprobo"}}
+				    )
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

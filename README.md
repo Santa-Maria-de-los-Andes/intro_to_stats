@@ -12,7 +12,52 @@ course-sheets-stats/    CS2 — Estadística en Google Sheets ("El Caso de los D
 shared/                 Cross-course architecture, DB schema, branding asset
 WORKFORCE/              The agent team building both courses: roles, contract, ticket tracker
 reference/              Prior/prerequisite-course material kept for context, not part of either course
+powerbi/                Master Power BI report over every Supabase submission (both courses)
 ```
+
+### `powerbi/`
+
+- `SMA_Tareas_Master.pbip` — open in Power BI Desktop. Pulls `public.submissions` live from Supabase
+  (paged; `TEST`/`INTEGRATION_TEST`/`SCRATCH` test rows excluded); first refresh asks for
+  credentials on the Supabase URL — choose **Anonymous**.
+- `SMA_Tareas_Master.SemanticModel/` — TMDL model. Notebook deadlines / `_CORE_MAX` live in the
+  `Meta` table inside `tables/Tareas.tmdl` — add a row there when a new notebook ships.
+- `build_report.py` — generates the report pages; edit it and rerun instead of hand-editing `visual.json`.
+  Pages: Vista general · Seguimiento · Libro · Lista de cotejo · Alumnos · Estudiante (hidden, drill-through on a student name)
+  · Actividad · Ejercicios. Design rationale and reference numbers: `REPORT_SPEC.md`.
+- `item_intentos.py` — rebuilds the per-item attempt sequence and writes `data/item_intentos.csv` and
+  `data/item_resumen.csv` (git-ignored, they contain DNIs). **Run it before each refresh**; the
+  `ItemIntentos` / `ItemResumen` tables read those CSVs from the `CarpetaDatos` parameter.
+- `notas_manuales.py` — loads manual-review grades for students whose submission never reached Supabase.
+  Fill `data/notas_manuales.csv` (`dni,notebook,puntos`, `puntos` may be `85%`) or pass one student on
+  the command line (`python notas_manuales.py 71234567 nb6 72`); it previews by default, `--enviar` inserts.
+  Rows are tagged `email = 'revision_manual'`. Keep its `TAREAS` table in sync with `Meta` when a notebook ships.
+- Tables added for the teacher redesign (all in `SemanticModel/definition/tables/`):
+  - `Horario` — class schedule per grade (Peru time). Defines `Envios[EnClase]` and everything
+    "in class / after class". To change it, edit the rows in the `#table(...)` of `Horario.tmdl`
+    (or *Transform data → Horario* in Desktop): `Grado`, `DiaSemana` (no accents: Lunes…Domingo),
+    `HoraInicio`, `HoraFin` (last minute, inclusive), `MargenAntesMin` (minutes before start that
+    still count as class). Add one row per extra class block.
+  - `AliasDNI` — mistyped DNI → canonical DNI (the one in the roster). Mirror any new row in `item_intentos.py`.
+  - `Padron` — official STAT 3ro–5to roster, read from `data/padron.csv` (`Grado,DNI,Nombre`; git-ignored
+    because it has DNIs). `Alumnos` takes STAT students, names and grades from it, so students who never
+    submitted still count as expected. Add or fix a student there and refresh; if they typed a different
+    DNI in the notebook, add an `AliasDNI` row.
+  - `AlumnoTarea` — one row per student × notebook (best `NotaReal`, grade when leaving class,
+    worked outside class, days worked). Expected-but-missing pairs have no row; the `Estado`
+    measure reports them as "No entregó".
+  - `ItemIntentos` / `ItemResumen` — from the CSVs above. `Etapas` — disconnected table for the funnel.
+  - `Indicadores` / `IndicadorItems` / `AlumnoIndicador` — the **Lista de cotejo** page (CNB, área EPT).
+    `Indicadores.tmdl` holds the catalog: 5–6 indicators per notebook, their capacidad (C1–C4, AUT, TIC),
+    and the autograder items that evidence each one (`Items` = `"ex1:8,t9:5,reto1:10*"`, `*` = bonus,
+    which only counts if attempted). `AlumnoIndicador` is a calculated table, padrón × indicator: **Sí** when
+    the best score over those items is ≥ 60% (`Umbral` in its DAX), otherwise No / No entregó / Pendiente /
+    Sin desglose. Add the rows for every new notebook.
+  - **Nivel de logro** page: pools every cotejo check (student × indicator, all due notebooks, no entregó = No)
+    per CNB capacidad / competencia and grades the % Sí: C < 50%, B 50–69%, A 70–89%, AD ≥ 90% (`Niveles` table,
+    measure `Nivel de logro`). Indicators in `SinMapeoClaro` (in `Indicadores.tmdl`) show in the cotejo but don't count.
+  - `Meta` (in `Tareas.tmdl`) gained `MuestraEsperado`: TRUE when the autograder's error message
+    shows the expected value. Set it for every new notebook.
 
 ### `course-python-stats/` — Statistics in Python (3°–5° secundaria)
 

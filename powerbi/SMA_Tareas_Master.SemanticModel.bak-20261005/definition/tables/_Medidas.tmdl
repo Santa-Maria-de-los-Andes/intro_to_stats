@@ -1,0 +1,594 @@
+table _Medidas
+	lineageTag: 2ee4d4ef-68d6-41a5-a9c8-c2b5a4ff1d64
+
+	/// Numero de envios (intentos) en el contexto
+	measure Envios = COUNTROWS ( Envios )
+		formatString: #,0
+		displayFolder: 1 Actividad
+		lineageTag: 36af4af1-22f4-40e8-be20-8aeaaf621c71
+
+	measure 'Alumnos activos' = DISTINCTCOUNT ( Envios[StudentKey] )
+		formatString: #,0
+		displayFolder: 1 Actividad
+		lineageTag: 56008e4b-4e50-4643-aa22-2c78d425c56e
+
+	/// Pares alumno-tarea con al menos un envio (un renglon por mejor intento)
+	measure Entregas = CALCULATE ( COUNTROWS ( Envios ), Envios[EsMejorIntento] = TRUE () )
+		formatString: #,0
+		displayFolder: 2 Entregas
+		lineageTag: 257e38bf-57ee-43b6-b6c6-5cf240136b4f
+
+	measure 'Intentos por entrega' = DIVIDE ( [Envios], [Entregas] )
+		formatString: 0.0
+		displayFolder: 1 Actividad
+		lineageTag: fb6292e1-c7ed-4738-8024-5290b9cba535
+
+	/// Entregas de tareas obligatorias ya vencidas (excluye rutas opcionales Lite y tareas cuya fecha limite no llego)
+	measure 'Entregas obligatorias' =
+			CALCULATE (
+			    COUNTROWS ( Envios ),
+			    Envios[EsMejorIntento] = TRUE (),
+			    KEEPFILTERS ( Tareas[CuentaParaEntrega] = TRUE () ),
+			    KEEPFILTERS ( Tareas[YaVencio] = TRUE () )
+			)
+		formatString: #,0
+		displayFolder: 2 Entregas
+		lineageTag: b0e02d14-0bcc-4509-881b-081843228e13
+
+	/// Alumnos x tareas obligatorias ya vencidas que les corresponden (por curso y banda de grado). No hay roster, asi que "alumno" = quien envio algo en ese curso alguna vez.
+	measure 'Entregas esperadas' = CALCULATE ( [Pares esperados], KEEPFILTERS ( Tareas[YaVencio] = TRUE () ) )
+		formatString: #,0
+		displayFolder: 2 Entregas
+		lineageTag: 9eb6157b-57ca-431f-938a-fc05c2237ebd
+
+	measure 'Tasa de entrega' = DIVIDE ( [Entregas obligatorias], [Entregas esperadas] )
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 2 Entregas
+		lineageTag: 1efc0157-b3fa-4504-888b-a22a3eff0c9f
+
+	measure 'Entregas faltantes' = MAX ( 0, [Entregas esperadas] - [Entregas obligatorias] )
+		formatString: #,0
+		displayFolder: 2 Entregas
+		lineageTag: 51e0d566-4385-43a0-aace-f67107c43cc6
+
+	/// Promedio de la mejor NotaReal de cada alumno en cada tarea entregada
+	measure 'Nota promedio' = AVERAGE ( AlumnoTarea[MejorNotaReal] )
+		formatString: 0.0
+		displayFolder: 3 Notas
+		lineageTag: b6df9547-a6f0-4426-9719-9348b83cb4b0
+
+	measure 'Nota mediana' = MEDIAN ( AlumnoTarea[MejorNotaReal] )
+		formatString: 0.0
+		displayFolder: 3 Notas
+		lineageTag: 3b17268d-8b61-4636-9db8-85926aabd128
+
+	/// Mejor NotaReal (%) — usar en el libro de notas (alumno x tarea)
+	measure 'Mejor nota' = MAX ( AlumnoTarea[MejorNotaReal] )
+		formatString: 0
+		displayFolder: 3 Notas
+		lineageTag: 62e0c776-5695-4e3d-af45-e565bd6423c0
+
+	/// Nota promedio en escala vigesimal (0-20)
+	measure 'Nota vigesimal' = DIVIDE ( [Nota promedio], 5 )
+		formatString: 0.0
+		displayFolder: 3 Notas
+		lineageTag: d5dabaa5-30cf-4763-b9a0-8b52c8e806d1
+
+	/// Promedio de la mejor nota obtenida ANTES de la fecha limite (tareas sin fecha limite cuentan todos los envios)
+	measure 'Nota a tiempo' =
+			AVERAGEX (
+			    SUMMARIZE ( Envios, Envios[StudentKey], Envios[TareaKey] ),
+			    CALCULATE ( MAX ( Envios[Nota] ), Envios[EsTardio] = FALSE () )
+			)
+		formatString: 0.0
+		displayFolder: 3 Notas
+		lineageTag: 9873d5b3-4bc4-4bdf-af31-aa3dc610c66b
+
+	/// Suma de mejores NotaReal en tareas obligatorias vencidas / entregas esperadas: las tareas no entregadas cuentan como 0
+	measure 'Promedio con faltantes en 0' =
+			DIVIDE (
+			    CALCULATE (
+			        SUM ( AlumnoTarea[MejorNotaReal] ),
+			        KEEPFILTERS ( Tareas[CuentaParaEntrega] = TRUE () ),
+			        KEEPFILTERS ( Tareas[YaVencio] = TRUE () )
+			    ),
+			    [Entregas esperadas]
+			)
+		formatString: 0.0
+		displayFolder: 3 Notas
+		lineageTag: b36ca9cc-a62f-4af6-bdb1-f969ebdbeea9
+
+	/// % de entregas cuyo mejor intento llega a 55% (= 11/20)
+	measure 'Aprobados %' =
+			DIVIDE (
+			    CALCULATE ( COUNTROWS ( Envios ), Envios[EsMejorIntento] = TRUE (), Envios[Nota] >= 55 ),
+			    [Entregas]
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 3 Notas
+		lineageTag: 807c418c-9f45-4c2b-94a1-877234723681
+
+	measure 'Envios tardios' = CALCULATE ( COUNTROWS ( Envios ), Envios[EsTardio] = TRUE () )
+		formatString: #,0
+		displayFolder: 4 Puntualidad
+		lineageTag: 26418448-f6bb-4366-8794-add077d82a56
+
+	/// % de entregas (alumno-tarea) con al menos un envio antes de la fecha limite
+	measure 'Entregas a tiempo %' =
+			DIVIDE (
+			    COUNTROWS (
+			        FILTER (
+			            SUMMARIZE ( Envios, Envios[StudentKey], Envios[TareaKey] ),
+			            CALCULATE ( COUNTROWS ( Envios ), Envios[EsTardio] = FALSE () ) > 0
+			        )
+			    ),
+			    [Entregas]
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 4 Puntualidad
+		lineageTag: 081e3982-2818-4ca7-b46b-940f42b8169d
+
+	measure 'Horas antes del limite (prom.)' = CALCULATE ( AVERAGE ( Envios[HorasAntesDelLimite] ), Envios[EsMejorIntento] = TRUE () )
+		formatString: 0.0
+		displayFolder: 4 Puntualidad
+		lineageTag: 2b7f99c2-da35-4329-8753-7f66f33153e9
+
+	/// Puntos ganados / puntos posibles en cada item, solo mejores intentos
+	measure 'Exito por item %' =
+			CALCULATE (
+			    DIVIDE ( SUM ( Items[Puntos] ), SUM ( Items[PuntosPosibles] ) ),
+			    Envios[EsMejorIntento] = TRUE ()
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 5 Ejercicios
+		lineageTag: a90264ef-1b8c-48cd-998a-534bcb7d4089
+
+	/// Alumnos que registraron el item en su mejor intento
+	measure 'Alumnos que intentaron' = CALCULATE ( COUNTROWS ( Items ), Envios[EsMejorIntento] = TRUE () )
+		formatString: #,0
+		displayFolder: 5 Ejercicios
+		lineageTag: 17748716-2d56-46ee-889f-08c05bd7e729
+
+	measure 'Puntaje perfecto %' =
+			DIVIDE (
+			    CALCULATE (
+			        COUNTROWS ( Items ),
+			        Envios[EsMejorIntento] = TRUE (),
+			        FILTER ( Items, Items[Puntos] >= Items[PuntosPosibles] )
+			    ),
+			    [Alumnos que intentaron]
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		displayFolder: 5 Ejercicios
+		lineageTag: 38157215-5db7-4932-a941-69206d93011a
+
+	measure 'Logros promedio' = CALCULATE ( AVERAGE ( Envios[NumLogros] ), Envios[EsMejorIntento] = TRUE () )
+		formatString: 0.0
+		displayFolder: 6 Gamificacion
+		lineageTag: 2be63786-65b2-47e4-b889-dc5e29711949
+
+	measure 'Racha maxima' = MAX ( Envios[Racha] )
+		formatString: #,0
+		displayFolder: 6 Gamificacion
+		lineageTag: cf1fd068-79a8-48d3-99f4-8aaa84ec7c80
+
+	measure 'Logros desbloqueados' = COUNTROWS ( Logros )
+		formatString: #,0
+		displayFolder: 6 Gamificacion
+		lineageTag: 5f730c85-8b12-4b09-803a-77977c119894
+
+	/// Alumnos con promedio (faltantes en 0) menor a 55 o con menos de la mitad de las tareas entregadas
+	measure 'Alumnos en riesgo' =
+			COUNTROWS (
+			    FILTER (
+			        Alumnos,
+			        VAR p = [Promedio con faltantes en 0]
+			        VAR t = [Tasa de entrega]
+			        RETURN NOT ISBLANK ( [Entregas esperadas] ) && ( p < 55 || t < 0.5 )
+			    )
+			)
+		formatString: #,0
+		displayFolder: 3 Notas
+		lineageTag: 87b0e68c-b492-4f7b-bda5-5fbeb1342852
+
+	measure 'Ultimo envio' = MAX ( Envios[FechaHora] )
+		formatString: General Date
+		displayFolder: 1 Actividad
+		lineageTag: c739cff0-8490-4fd6-b5bb-04dce8226e87
+
+	/// Alumnos x tareas obligatorias que les corresponden, vencidas o no. Base de [Entregas esperadas]
+	measure 'Pares esperados' =
+			SUMX (
+			    FILTER (
+			        SUMMARIZE ( Tareas, Tareas[TareaKey], Tareas[Curso], Tareas[Banda], Tareas[CuentaParaEntrega] ),
+			        Tareas[CuentaParaEntrega] = TRUE ()
+			    ),
+			    VAR c = Tareas[Curso]
+			    VAR b = Tareas[Banda]
+			    RETURN
+			        CALCULATE (
+			            COUNTROWS ( Alumnos ),
+			            KEEPFILTERS ( Alumnos[Curso] = c ),
+			            KEEPFILTERS ( b = "Todas" || Alumnos[Banda] = b )
+			        )
+			)
+		formatString: #,0
+		isHidden
+		displayFolder: 2 Entregas
+		lineageTag: 9f374959-9d12-4054-9221-c15e95ba34a5
+
+	/// Pares alumno x tarea (obligatoria y vencida) con al menos un envio
+	measure 'Pares entregados' =
+			CALCULATE (
+			    COUNTROWS ( AlumnoTarea ),
+			    KEEPFILTERS ( Tareas[CuentaParaEntrega] = TRUE () ),
+			    KEEPFILTERS ( Tareas[YaVencio] = TRUE () )
+			)
+		formatString: #,0
+		displayFolder: 2 Entregas
+		lineageTag: 26616eea-cf46-4949-9b3e-36290bcc009f
+
+	measure 'Pares aprobados' = CALCULATE ( [Pares entregados], AlumnoTarea[Estado] = "Aprobó" )
+		formatString: #,0
+		displayFolder: 2 Entregas
+		lineageTag: 66f487c9-bb72-4339-bc01-eac85f812cb5
+
+	/// Pares que aprobaron (mejor NotaReal >= 55) / entregas esperadas. Los que no entregaron cuentan como no aprobados
+	measure 'Aprobado s/ esperado %' = DIVIDE ( [Pares aprobados], [Entregas esperadas] )
+		formatString: 0%;-0%;0%
+		displayFolder: 2 Entregas
+		lineageTag: 4abfea2b-8448-430e-a40e-1189a5614cdf
+
+	/// Pares que ya estaban aprobados con los envios hechos en clase / entregas esperadas
+	measure 'Aprobado al salir de clase %' = DIVIDE ( CALCULATE ( [Pares entregados], AlumnoTarea[NotaAlSalirDeClase] >= 55 ), [Entregas esperadas] )
+		formatString: 0%;-0%;0%
+		displayFolder: 2 Entregas
+		lineageTag: d9e6f1df-92ef-4b8d-a3aa-4ec12e029ca2
+
+	measure 'Aprobado % (entregados)' = DIVIDE ( [Pares aprobados], [Pares entregados] )
+		formatString: 0%;-0%;0%
+		displayFolder: 2 Entregas
+		lineageTag: cb891ee4-5b3a-414e-99c9-1db5cb9ad5aa
+
+	/// Pares entregados con al menos un envio fuera del horario de clase / pares entregados
+	measure 'Trabajó fuera de clase %' = DIVIDE ( CALCULATE ( [Pares entregados], AlumnoTarea[TrabajoFueraDeClase] = TRUE () ), [Pares entregados] )
+		formatString: 0%;-0%;0%
+		displayFolder: 7 Seguimiento
+		lineageTag: b6307e4c-4243-4fcd-b9e5-cc69140a3487
+
+	/// Mismo valor sin el filtro de grado (linea de referencia)
+	measure 'Trabajó fuera de clase % (curso)' = CALCULATE ( [Trabajó fuera de clase %], REMOVEFILTERS ( Alumnos[Grado] ) )
+		formatString: 0%;-0%;0%
+		displayFolder: 7 Seguimiento
+		lineageTag: e1ef8f67-833e-40ff-9549-726119192ef5
+
+	/// Pares (tarea obligatoria vencida) que aprobaron y tienen envios en el contexto (p. ej. en ese dia desde la clase)
+	measure 'Pares que aprobaron' =
+			CALCULATE (
+			    COUNTROWS (
+			        FILTER (
+			            SUMMARIZE ( Envios, Envios[StudentKey], Envios[TareaKey] ),
+			            LOOKUPVALUE ( AlumnoTarea[Estado], AlumnoTarea[StudentKey], Envios[StudentKey], AlumnoTarea[TareaKey], Envios[TareaKey] ) = "Aprobó"
+			        )
+			    ),
+			    KEEPFILTERS ( Tareas[CuentaParaEntrega] = TRUE () ),
+			    KEEPFILTERS ( Tareas[YaVencio] = TRUE () )
+			)
+		formatString: #,0
+		displayFolder: 7 Seguimiento
+		lineageTag: 37a561f0-be9b-4741-8edd-acb30fea4882
+
+	measure 'Pares que desaprobaron' =
+			CALCULATE (
+			    COUNTROWS (
+			        FILTER (
+			            SUMMARIZE ( Envios, Envios[StudentKey], Envios[TareaKey] ),
+			            LOOKUPVALUE ( AlumnoTarea[Estado], AlumnoTarea[StudentKey], Envios[StudentKey], AlumnoTarea[TareaKey], Envios[TareaKey] ) = "Desaprobó"
+			        )
+			    ),
+			    KEEPFILTERS ( Tareas[CuentaParaEntrega] = TRUE () ),
+			    KEEPFILTERS ( Tareas[YaVencio] = TRUE () )
+			)
+		formatString: #,0
+		displayFolder: 7 Seguimiento
+		lineageTag: 249a3b02-dc5f-415d-957c-013b1ccde5d0
+
+	measure 'n por dias trabajados' =
+			"n (pares entregados): "
+			    & CONCATENATEX (
+			        VALUES ( AlumnoTarea[DiasTrabajadosBanda] ),
+			        AlumnoTarea[DiasTrabajadosBanda] & IF ( AlumnoTarea[DiasTrabajadosBanda] = "1", " dia = ", " dias = " ) & [Pares entregados],
+			        " · ",
+			        AlumnoTarea[DiasTrabajadosBanda], ASC
+			    )
+		displayFolder: 9 Titulos
+		lineageTag: 7e5f0a66-efeb-4da3-aa5a-2e9081472b8b
+
+	/// La tarea elegida en el filtro; si no hay una sola, la proxima que vence (o, si no queda ninguna, la ultima vencida)
+	measure 'Tarea actual key' =
+			VAR sel = SELECTEDVALUE ( Tareas[TareaKey] )
+			VAR ahora = UTCNOW ()
+			VAR cand =
+			    CALCULATETABLE (
+			        SUMMARIZE ( Tareas, Tareas[TareaKey], Tareas[FechaLimiteUTC] ),
+			        REMOVEFILTERS ( Tareas ),
+			        Tareas[CuentaParaEntrega] = TRUE (),
+			        NOT ISBLANK ( Tareas[FechaLimiteUTC] ),
+			        TREATAS ( VALUES ( Cursos[Curso] ), Tareas[Curso] )
+			    )
+			VAR prox = MAXX ( TOPN ( 1, FILTER ( cand, Tareas[FechaLimiteUTC] > ahora ), Tareas[FechaLimiteUTC], ASC ), Tareas[TareaKey] )
+			VAR ult = MAXX ( TOPN ( 1, FILTER ( cand, Tareas[FechaLimiteUTC] <= ahora ), Tareas[FechaLimiteUTC], DESC ), Tareas[TareaKey] )
+			RETURN COALESCE ( sel, prox, ult )
+		isHidden
+		displayFolder: 7 Seguimiento
+		lineageTag: 84d2feb6-6839-402c-9781-48eb898cae21
+
+	/// La tarea elegida en el filtro; si no hay una sola, la ultima vencida
+	measure 'Tarea resumen key' =
+			VAR sel = SELECTEDVALUE ( Tareas[TareaKey] )
+			VAR ult =
+			    MAXX (
+			        TOPN (
+			            1,
+			            CALCULATETABLE (
+			                SUMMARIZE ( Tareas, Tareas[TareaKey], Tareas[FechaLimiteUTC] ),
+			                REMOVEFILTERS ( Tareas ),
+			                Tareas[CuentaParaEntrega] = TRUE (),
+			                Tareas[YaVencio] = TRUE (),
+			                NOT ISBLANK ( Tareas[FechaLimiteUTC] ),
+			                TREATAS ( VALUES ( Cursos[Curso] ), Tareas[Curso] )
+			            ),
+			            Tareas[FechaLimiteUTC], DESC
+			        ),
+			        Tareas[TareaKey]
+			    )
+			RETURN COALESCE ( sel, ult )
+		isHidden
+		displayFolder: 9 Titulos
+		lineageTag: 3480c5b6-75e7-4bac-b624-0d0c9a1a3bcb
+
+	measure 'Alumnos esperados (tarea actual)' =
+			VAR tk = [Tarea actual key]
+			VAR c = CALCULATE ( SELECTEDVALUE ( Tareas[Curso] ), REMOVEFILTERS ( Tareas ), Tareas[TareaKey] = tk )
+			VAR b = CALCULATE ( SELECTEDVALUE ( Tareas[Banda] ), REMOVEFILTERS ( Tareas ), Tareas[TareaKey] = tk )
+			RETURN COUNTROWS ( FILTER ( Alumnos, Alumnos[Curso] = c && ( b = "Todas" || Alumnos[Banda] = b ) ) )
+		formatString: #,0
+		displayFolder: 7 Seguimiento
+		lineageTag: 6bd7e585-3713-423c-8477-8c070bb9b084
+
+	/// Alumnos esperados en la tarea actual sin ningun envio fuera de clase (incluye a quienes no entregaron). En una fila de alumno vale 1 o 0
+	measure 'No volvieron' =
+			VAR tk = [Tarea actual key]
+			VAR c = CALCULATE ( SELECTEDVALUE ( Tareas[Curso] ), REMOVEFILTERS ( Tareas ), Tareas[TareaKey] = tk )
+			VAR b = CALCULATE ( SELECTEDVALUE ( Tareas[Banda] ), REMOVEFILTERS ( Tareas ), Tareas[TareaKey] = tk )
+			VAR volvieron =
+			    CALCULATETABLE (
+			        VALUES ( AlumnoTarea[StudentKey] ),
+			        REMOVEFILTERS ( Tareas ),
+			        AlumnoTarea[TareaKey] = tk,
+			        AlumnoTarea[TrabajoFueraDeClase] = TRUE ()
+			    )
+			RETURN
+			    COUNTROWS (
+			        FILTER (
+			            Alumnos,
+			            Alumnos[Curso] = c
+			                && ( b = "Todas" || Alumnos[Banda] = b )
+			                && NOT ( Alumnos[StudentKey] IN volvieron )
+			        )
+			    ) + 0
+		formatString: #,0
+		displayFolder: 7 Seguimiento
+		lineageTag: cc873c42-4eec-4f18-8a7d-578383d8187a
+
+	measure Volvieron = [Alumnos esperados (tarea actual)] - [No volvieron]
+		formatString: #,0
+		displayFolder: 7 Seguimiento
+		lineageTag: 4d49c931-df61-4cc0-a024-ca48327dba49
+
+	/// NotaAlSalirDeClase del alumno en la tarea actual (vacio = no envio nada en clase)
+	measure 'Nota en clase (tarea actual)' =
+			VAR tk = [Tarea actual key]
+			RETURN CALCULATE ( MAX ( AlumnoTarea[NotaAlSalirDeClase] ), REMOVEFILTERS ( Tareas ), AlumnoTarea[TareaKey] = tk )
+		formatString: 0
+		displayFolder: 7 Seguimiento
+		lineageTag: aef675ca-7fdb-4a44-8d64-a38acafd40b3
+
+	/// Dias (calendario Peru) hasta la fecha limite de la tarea actual. Vacio si ya cerro
+	measure 'Dias para cierre' =
+			VAR tk = [Tarea actual key]
+			VAR d = CALCULATE ( MAX ( Tareas[FechaLimiteUTC] ), REMOVEFILTERS ( Tareas ), Tareas[TareaKey] = tk )
+			VAR ahora = UTCNOW ()
+			RETURN IF ( d > ahora, INT ( d - 5 / 24 ) - INT ( ahora - 5 / 24 ) )
+		formatString: 0
+		displayFolder: 7 Seguimiento
+		lineageTag: 45dfae4c-bc73-4ca0-a64c-4b68110c922e
+
+	/// Dias desde el ultimo envio del alumno a cualquier tarea (hoy en hora Peru)
+	measure 'Dias desde ultimo envio' =
+			VAR u = CALCULATE ( MAX ( Envios[Fecha] ), REMOVEFILTERS ( Tareas ) )
+			RETURN IF ( NOT ISBLANK ( u ), INT ( UTCNOW () - 5 / 24 ) - INT ( u ) )
+		formatString: 0
+		displayFolder: 8 Estudiante
+		lineageTag: 59550687-1756-4546-8791-1351318aa547
+
+	/// Tarea del ultimo envio del alumno
+	measure 'Ultima tarea' =
+			MAXX (
+			    TOPN ( 1, CALCULATETABLE ( Envios, REMOVEFILTERS ( Tareas ) ), Envios[FechaHoraUTC], DESC ),
+			    RELATED ( Tareas[NombreTarea] )
+			)
+		displayFolder: 8 Estudiante
+		lineageTag: b58d3bff-a1aa-4e36-a96e-172af93b2414
+
+	measure 'Alerta inactividad' = IF ( [Dias desde ultimo envio] > 7, "⚠ mas de 7 dias", "" )
+		displayFolder: 8 Estudiante
+		lineageTag: 9287d2f2-d1fe-4153-b8be-82ebb182901a
+
+	/// Aprobó / Desaprobó / No entregó para un alumno y una tarea (vacio si la tarea no le corresponde o aun no vence sin envio)
+	measure Estado =
+			VAR tk = SELECTEDVALUE ( Tareas[TareaKey] )
+			VAR sk = SELECTEDVALUE ( Alumnos[StudentKey] )
+			VAR n = MAX ( AlumnoTarea[MejorNotaReal] )
+			VAR esperado =
+			    SELECTEDVALUE ( Tareas[CuentaParaEntrega] ) = TRUE ()
+			        && SELECTEDVALUE ( Tareas[YaVencio] ) = TRUE ()
+			        && SELECTEDVALUE ( Alumnos[Curso] ) = SELECTEDVALUE ( Tareas[Curso] )
+			        && ( SELECTEDVALUE ( Tareas[Banda] ) = "Todas" || SELECTEDVALUE ( Alumnos[Banda] ) = SELECTEDVALUE ( Tareas[Banda] ) )
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        ISBLANK ( tk ) || ISBLANK ( sk ), BLANK (),
+			        NOT ISBLANK ( n ), IF ( n >= 55, "Aprobó", "Desaprobó" ),
+			        esperado, "No entregó"
+			    )
+		displayFolder: 8 Estudiante
+		lineageTag: 947908a9-d25d-447f-adf5-ee1067ff644f
+
+	measure 'Estado icono' = SWITCH ( [Estado], "Aprobó", "✓", "Desaprobó", "✗", "No entregó", "–" )
+		displayFolder: 8 Estudiante
+		lineageTag: 3d54c2a6-ea97-411b-ad0d-9c4206d6ab6c
+
+	measure 'Estado con icono' = VAR e = [Estado] RETURN IF ( NOT ISBLANK ( e ), [Estado icono] & " " & e )
+		displayFolder: 8 Estudiante
+		lineageTag: ca75f821-d421-40dd-82cc-fe466849fce6
+
+	/// Color de fondo del estado (siempre junto al icono)
+	measure 'Estado color' = SWITCH ( [Estado], "Aprobó", "#8B5CF6", "Desaprobó", "#DB6C14", "No entregó", "#6B6B76" )
+		isHidden
+		displayFolder: 8 Estudiante
+		lineageTag: 5b8bcd3e-b7c5-4e1d-8149-fee4c32cd411
+
+	measure 'Mejor nota real' = MAX ( AlumnoTarea[MejorNotaReal] )
+		formatString: 0
+		displayFolder: 8 Estudiante
+		lineageTag: 588fddb5-524c-4e9b-85a4-be25143f5d24
+
+	/// Mediana de la mejor NotaReal de los alumnos del mismo grado en la misma tarea (solo quienes entregaron)
+	measure 'Mediana del grado' =
+			VAR g = SELECTEDVALUE ( Alumnos[Grado] )
+			RETURN IF ( NOT ISBLANK ( g ), CALCULATE ( MEDIAN ( AlumnoTarea[MejorNotaReal] ), REMOVEFILTERS ( Alumnos ), Alumnos[Grado] = g ) )
+		formatString: 0
+		displayFolder: 8 Estudiante
+		lineageTag: c4001982-422a-4dc5-bc8b-798175ed4ab3
+
+	/// Por item: puntos posibles - mejor puntaje obtenido en cualquier envio
+	measure 'Puntos perdidos' =
+			SUMX (
+			    SUMMARIZE ( Items, Envios[StudentKey], Envios[TareaKey], Items[Item] ),
+			    CALCULATE ( MAX ( Items[PuntosPosibles] ) - MAX ( Items[Puntos] ) )
+			)
+		formatString: 0
+		displayFolder: 8 Estudiante
+		lineageTag: 6b3a515b-4445-464e-aade-b4b213422dce
+
+	/// Items (alumno x tarea x item) con puntaje maximo en el primer intento
+	measure '% al primer intento' = DIVIDE ( CALCULATE ( COUNTROWS ( ItemResumen ), ItemResumen[PrimerIntentoOK] = TRUE () ), COUNTROWS ( ItemResumen ) )
+		formatString: 0%;-0%;0%
+		displayFolder: 5 Ejercicios
+		lineageTag: 507cdcfd-f6c1-484d-bcbb-5cd22f4be2b6
+
+	/// Items (alumno x tarea x item) que llegaron al puntaje maximo en algun intento
+	measure '% resuelto final' = DIVIDE ( CALCULATE ( COUNTROWS ( ItemResumen ), ItemResumen[ResueltoFinal] = TRUE () ), COUNTROWS ( ItemResumen ) )
+		formatString: 0%;-0%;0%
+		displayFolder: 5 Ejercicios
+		lineageTag: 6a0453a7-5118-45e7-99ca-cbc8ae11db46
+
+	/// Alumnos x item en el contexto
+	measure 'Items n' = COUNTROWS ( ItemResumen )
+		formatString: #,0
+		displayFolder: 5 Ejercicios
+		lineageTag: 5abe5f99-788a-49d7-a4ef-627b410e40ca
+
+	/// Mediana de minutos entre el ultimo intento fallido y el primero con puntaje maximo
+	measure 'Minutos para corregir (mediana)' = DIVIDE ( MEDIAN ( ItemResumen[SegundosCorreccion] ), 60 )
+		formatString: 0.0
+		displayFolder: 5 Ejercicios
+		lineageTag: 56aa1330-b45f-4916-a0c8-f3d2b2422ba7
+
+	/// Embudo: esperados / empezo en clase / volvio despues de clase / aprobo
+	measure 'Etapa valor' =
+			SWITCH (
+			    SELECTEDVALUE ( Etapas[Orden] ),
+			    1, [Entregas esperadas],
+			    2, CALCULATE ( [Pares entregados], NOT ISBLANK ( AlumnoTarea[NotaAlSalirDeClase] ) ),
+			    3, CALCULATE ( [Pares entregados], AlumnoTarea[TrabajoFueraDeClase] = TRUE () ),
+			    4, [Pares aprobados]
+			)
+		formatString: #,0
+		displayFolder: 2 Entregas
+		lineageTag: 1db62c17-dd03-4c97-a902-94baf81c4437
+
+	measure 'Titulo resumen' =
+			VAR tk = [Tarea resumen key]
+			VAR nombre = CALCULATE ( SELECTEDVALUE ( Tareas[NombreTarea] ), REMOVEFILTERS ( Tareas ), Tareas[TareaKey] = tk )
+			VAR n = CALCULATE ( [Alumnos esperados (tarea actual)], REMOVEFILTERS ( Tareas ), Tareas[TareaKey] = tk )
+			VAR x = CALCULATE ( COUNTROWS ( AlumnoTarea ) + 0, REMOVEFILTERS ( Tareas ), AlumnoTarea[TareaKey] = tk, AlumnoTarea[Estado] = "Aprobó" )
+			VAR nv = CALCULATE ( [No volvieron], REMOVEFILTERS ( Tareas ), Tareas[TareaKey] = tk )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( tk ),
+			        nombre & ": " & x & " de " & n & " aprobaron (" & FORMAT ( DIVIDE ( x, n ), "0%" ) & "). "
+			            & nv & IF ( nv = 1, " no volvio", " no volvieron" ) & " despues de clase."
+			    )
+		displayFolder: 9 Titulos
+		lineageTag: da1329da-9125-42c1-9e77-0b886e09c97a
+
+	measure 'Titulo countdown' =
+			VAR tk = [Tarea actual key]
+			VAR nombre = CALCULATE ( SELECTEDVALUE ( Tareas[NombreTarea] ), REMOVEFILTERS ( Tareas ), Tareas[TareaKey] = tk )
+			VAR d = [Dias para cierre]
+			VAR nv = [No volvieron]
+			RETURN
+			    IF (
+			        NOT ISBLANK ( tk ),
+			        IF (
+			            ISBLANK ( d ),
+			            nombre & " ya cerro · " & nv & " no volvieron despues de clase",
+			            nombre & " cierra en " & d & IF ( d = 1, " dia", " dias" ) & " · " & nv & " sin volver"
+			        )
+			    )
+		displayFolder: 9 Titulos
+		lineageTag: a346adfd-ece7-42d6-8643-dc8abfa50f74
+
+	measure 'Titulo estudiante' =
+			VAR nombre = SELECTEDVALUE ( Alumnos[Nombre], "Elige un alumno" )
+			VAR a = [Pares aprobados] + 0
+			VAR n = [Entregas esperadas] + 0
+			VAR d = [Dias desde ultimo envio]
+			RETURN nombre & ": aprobo " & a & " de " & n & IF ( NOT ISBLANK ( d ), " · ultima actividad hace " & d & IF ( d = 1, " dia", " dias" ) )
+		displayFolder: 9 Titulos
+		lineageTag: 15201bf5-1da5-41c8-9bc9-504169e064ca
+
+	/// Aviso de grupos con menos de 15 alumnos (REPORT_SPEC §4)
+	measure 'Nota grupos chicos' =
+			VAR chicos =
+			    FILTER (
+			        ADDCOLUMNS ( VALUES ( Alumnos[Grado] ), "@n", CALCULATE ( COUNTROWS ( Alumnos ) ) ),
+			        [@n] < 15
+			    )
+			RETURN
+			    IF (
+			        NOT ISEMPTY ( chicos ),
+			        "Grupo chico (lee con cuidado): " & CONCATENATEX ( chicos, Alumnos[Grado] & ": n=" & [@n], " · ", Alumnos[Grado], ASC )
+			    )
+		displayFolder: 9 Titulos
+		lineageTag: 11b4f492-9567-48d3-ae63-1010aae7143d
+
+	/// Color de barra de la pagina Actividad: gris si el autograder muestra el valor esperado, morado si no
+	measure 'Color muestra esperado' = IF ( SELECTEDVALUE ( Tareas[MuestraEsperado] ) = TRUE (), "#6B6B76", "#8B5CF6" )
+		isHidden
+		displayFolder: 5 Ejercicios
+		lineageTag: 72a7733c-9b4b-47aa-9110-53eaa054d878
+
+	column _
+		dataType: string
+		isHidden
+		lineageTag: 1e669d49-12ae-4338-9937-4bc704e6d17b
+		summarizeBy: none
+		sourceColumn: [_]
+
+	partition _Medidas = calculated
+		mode: import
+		source = ROW ( "_", "" )
+

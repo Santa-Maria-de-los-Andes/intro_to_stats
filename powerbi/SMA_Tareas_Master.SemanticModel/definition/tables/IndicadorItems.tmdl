@@ -1,0 +1,50 @@
+/// Un renglon por indicador x item del autograder (sale de Indicadores[Items]). Solo la usa AlumnoIndicador.
+table IndicadorItems
+	isHidden
+	lineageTag: b4e24819-69fe-4fd9-bd8c-b6002439339c
+
+	column IndicadorKey
+		dataType: string
+		isHidden
+		lineageTag: 5c2b839d-fb60-4a39-a5a1-0e8dbbe36393
+		summarizeBy: none
+		sourceColumn: IndicadorKey
+
+	column Item
+		dataType: string
+		isHidden
+		lineageTag: aa3ff98d-4a39-4635-a955-2269593329e1
+		summarizeBy: none
+		sourceColumn: Item
+
+	/// Puntos posibles del item en la version actual del notebook (filtra claves viejas con el mismo nombre)
+	column Posibles
+		dataType: double
+		isHidden
+		lineageTag: 5c4b3b79-fdae-4694-8abb-fb569a52d01c
+		summarizeBy: none
+		sourceColumn: Posibles
+
+	/// Bonus: solo cuenta si el alumno lo intento
+	column EsBonus
+		dataType: boolean
+		isHidden
+		lineageTag: 9786efba-cb94-4a98-8cd4-136d664ef46a
+		summarizeBy: none
+		sourceColumn: EsBonus
+
+	partition IndicadorItems = m
+		mode: import
+		source =
+				let
+				    Source = Table.SelectColumns(Indicadores, {"IndicadorKey", "Items"}),
+				    Partes = Table.AddColumn(Source, "Parte", each List.Transform(Text.Split([Items], ","), Text.Trim)),
+				    Filas = Table.ExpandListColumn(Table.RemoveColumns(Partes, {"Items"}), "Parte"),
+				    Bonus = Table.AddColumn(Filas, "EsBonus", each Text.EndsWith([Parte], "*"), type logical),
+				    Item = Table.AddColumn(Bonus, "Item", each Text.BeforeDelimiter([Parte], ":"), type text),
+				    Pos = Table.AddColumn(Item, "Posibles", each Number.From(Text.TrimEnd(Text.AfterDelimiter([Parte], ":"), "*"), "en-US"), type number)
+				in
+				    Table.SelectColumns(Pos, {"IndicadorKey", "Item", "Posibles", "EsBonus"})
+
+	annotation PBI_ResultType = Table
+

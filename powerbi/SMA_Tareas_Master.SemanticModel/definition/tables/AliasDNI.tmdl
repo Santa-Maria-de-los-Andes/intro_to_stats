@@ -1,0 +1,39 @@
+/// DNI mal tipeados por el alumno -> DNI canonico. SubmissionsRaw lo aplica antes de armar StudentKey. Para fusionar otro par, agrega una fila (y repitela en item_intentos.py).
+table AliasDNI
+	isHidden
+	lineageTag: 41b3cc88-0307-4bdd-92b0-203c3fee5c04
+
+	column DNIOrigen
+		dataType: string
+		lineageTag: 1a7ea58c-dadb-43e5-aed7-cc886a317319
+		summarizeBy: none
+		sourceColumn: DNIOrigen
+
+	column DNICanonico
+		dataType: string
+		lineageTag: 8d7844da-b139-432a-aff5-246fef86f5bb
+		summarizeBy: none
+		sourceColumn: DNICanonico
+
+	partition AliasDNI = m
+		mode: import
+		source =
+				let
+				    Source = #table(
+				        type table [DNIOrigen = text, DNICanonico = text],
+				        {
+				            // Canonico = DNI del padron oficial (data/padron.csv)
+				            {"7725963", "77257963"},     // 3ro Murillo Vizcarra
+				            {"12345", "63074377"},       // 3ro Duran Somocurcio
+				            {"C74HY1XKH", "00000002"},   // 4to Arndt (sin DNI peruano)
+				            {"216362172", "00000001"},   // 4to Andersen (sin DNI peruano)
+				            {"62482920", "62483930"},    // 4to Apaza Regano
+				            {"74771144", "74114477"},    // 5to Santa Cruz Juarez
+				            {"00910804", "9108094"}      // 5to Spice, River
+				        }
+				    )
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

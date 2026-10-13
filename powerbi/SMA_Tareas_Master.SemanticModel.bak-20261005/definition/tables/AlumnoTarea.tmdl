@@ -1,0 +1,101 @@
+/// Un renglon por alumno x tarea con al menos un envio (REPORT_SPEC §2.3). Es tabla calculada sobre Envios (no Power Query) porque EnClase depende del grado del alumno, que sale de Alumnos.
+table AlumnoTarea
+	lineageTag: e8032055-4edd-42a5-aa20-db0ffce98915
+
+	column StudentKey
+		dataType: string
+		isHidden
+		lineageTag: 7aa8d7a6-b891-47a2-99d2-d67d71df3c10
+		summarizeBy: none
+		sourceColumn: [StudentKey]
+
+	column TareaKey
+		dataType: string
+		isHidden
+		lineageTag: 3c10ccc7-bf8a-4207-b00a-b305a7c97ff0
+		summarizeBy: none
+		sourceColumn: [TareaKey]
+
+	column MejorNotaReal
+		dataType: double
+		formatString: 0
+		lineageTag: dd997867-1d35-48b2-be45-6b3be7662ae7
+		summarizeBy: none
+		sourceColumn: [MejorNotaReal]
+
+	/// Mejor NotaReal entre los envios en clase. Vacio si no envio nada en clase
+	column NotaAlSalirDeClase
+		dataType: double
+		formatString: 0
+		lineageTag: 0bbed2bc-8611-4cee-81b0-520259547be5
+		summarizeBy: none
+		sourceColumn: [NotaAlSalirDeClase]
+
+	/// Tiene al menos un envio fuera del horario de clase
+	column TrabajoFueraDeClase
+		dataType: boolean
+		lineageTag: ff87078c-a26c-48e8-8955-414aa7f96603
+		summarizeBy: none
+		sourceColumn: [TrabajoFueraDeClase]
+
+	/// Fechas distintas (hora Peru) con envios
+	column DiasTrabajados
+		dataType: int64
+		lineageTag: cf43639d-195a-4c8d-b08c-1803e7dde104
+		summarizeBy: none
+		sourceColumn: [DiasTrabajados]
+
+	column Intentos
+		dataType: int64
+		lineageTag: 4881c293-b400-4e5b-8c5e-d9ef9374a0dc
+		summarizeBy: none
+		sourceColumn: [Intentos]
+
+	/// Minutos entre el primer y el ultimo envio
+	column MinutosTotales
+		dataType: double
+		formatString: 0
+		lineageTag: 296779c3-37fe-4520-b8be-4dd5d8d47e5e
+		summarizeBy: none
+		sourceColumn: [MinutosTotales]
+
+	column DiasTrabajadosBanda = SWITCH ( TRUE (), AlumnoTarea[DiasTrabajados] <= 1, "1", AlumnoTarea[DiasTrabajados] = 2, "2", "3+" )
+		dataType: string
+		lineageTag: 31c1fb71-76ac-4506-b434-749267b1ffa1
+		summarizeBy: none
+
+	/// Aprobó / Desaprobó. Los pares esperados sin envio no tienen fila: la medida [Estado] devuelve "No entregó"
+	column Estado = IF ( AlumnoTarea[MejorNotaReal] >= 55, "Aprobó", "Desaprobó" )
+		dataType: string
+		lineageTag: d696e64f-b03d-452d-9b33-f20c73799f4d
+		summarizeBy: none
+
+	/// Icono + texto para tablas (los estados nunca dependen solo del color)
+	column FueraDeClaseIcono = IF ( AlumnoTarea[TrabajoFueraDeClase], "✓ si", "– no" )
+		dataType: string
+		lineageTag: 831ddf00-afbc-4f52-86fc-02a62af19416
+		summarizeBy: none
+
+	partition AlumnoTarea = calculated
+		mode: import
+		source =
+				SELECTCOLUMNS (
+				    ADDCOLUMNS (
+				        SUMMARIZE ( Envios, Envios[StudentKey], Envios[TareaKey] ),
+				        "@Mejor", CALCULATE ( MAX ( Envios[NotaReal] ) ),
+				        "@EnClase", CALCULATE ( MAX ( Envios[NotaReal] ), Envios[EnClase] = TRUE () ),
+				        "@Fuera", CALCULATE ( COUNTROWS ( Envios ), Envios[EnClase] = FALSE () ) > 0,
+				        "@Dias", CALCULATE ( DISTINCTCOUNT ( Envios[Fecha] ) ),
+				        "@Intentos", CALCULATE ( COUNTROWS ( Envios ) ),
+				        "@Minutos", CALCULATE ( DATEDIFF ( MIN ( Envios[FechaHoraUTC] ), MAX ( Envios[FechaHoraUTC] ), SECOND ) ) / 60
+				    ),
+				    "StudentKey", Envios[StudentKey],
+				    "TareaKey", Envios[TareaKey],
+				    "MejorNotaReal", [@Mejor],
+				    "NotaAlSalirDeClase", [@EnClase],
+				    "TrabajoFueraDeClase", [@Fuera],
+				    "DiasTrabajados", [@Dias],
+				    "Intentos", [@Intentos],
+				    "MinutosTotales", [@Minutos]
+				)
+

@@ -1,0 +1,45 @@
+/// Escala de calificacion del CNB para el nivel de logro por capacidad / competencia (medida Nivel de logro). Tabla desconectada.
+table Niveles
+	lineageTag: 8ca66a7e-b666-4511-9c94-a237f12ed51e
+
+	column Nivel
+		dataType: string
+		lineageTag: 842debd3-7e0d-47e3-9c35-4e5e615f9d1c
+		summarizeBy: none
+		sourceColumn: Nivel
+		sortByColumn: Orden
+
+	column Orden
+		dataType: int64
+		isHidden
+		lineageTag: 5697e814-1c06-49ce-849d-5b5f23062c67
+		summarizeBy: none
+		sourceColumn: Orden
+
+	column Descripcion
+		dataType: string
+		lineageTag: 1ec32857-c73e-44eb-a995-50cebb8cd0b9
+		summarizeBy: none
+		sourceColumn: Descripcion
+
+	/// % Si minimo (incluido) para el nivel
+	column Desde
+		dataType: double
+		formatString: 0%
+		lineageTag: d436927b-c946-4d01-b203-e2ca80f461d2
+		summarizeBy: none
+		sourceColumn: Desde
+
+	partition Niveles = m
+		mode: import
+		source =
+				let
+				    Source = #table(
+				        type table [Orden = Int64.Type, Nivel = text, Descripcion = text, Desde = number],
+				        {{1, "C", "En inicio (< 50% Sí)", 0}, {2, "B", "En proceso (50% a < 70%)", 0.5}, {3, "A", "Logro esperado (70% a < 90%)", 0.7}, {4, "AD", "Logro destacado (90% a 100%)", 0.9}}
+				    )
+				in
+				    Source
+
+	annotation PBI_ResultType = Table
+

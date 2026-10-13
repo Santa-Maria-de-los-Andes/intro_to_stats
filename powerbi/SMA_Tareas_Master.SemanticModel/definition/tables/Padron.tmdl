@@ -1,0 +1,56 @@
+/// Padron oficial de Estadistica 3ro-5to (data/padron.csv; columnas Grado, DNI, Nombre). Alumnos lo usa para contar como esperados tambien a quienes nunca enviaron. Para agregar o corregir un alumno, edita el CSV y refresca.
+table Padron
+	isHidden
+	lineageTag: e9d3844d-bf64-4dc8-b3d6-9e9759f5286b
+
+	column Curso
+		dataType: string
+		isHidden
+		lineageTag: ce7483bd-d5dc-49d0-9ee5-2a43346acc38
+		summarizeBy: none
+		sourceColumn: Curso
+
+	column Grado
+		dataType: string
+		isHidden
+		lineageTag: aa8eaadc-85ae-4b5e-9aa9-548db64e5082
+		summarizeBy: none
+		sourceColumn: Grado
+
+	column DNI
+		dataType: string
+		isHidden
+		lineageTag: 50fe8708-53ac-436c-b6b2-de6aa45d6331
+		summarizeBy: none
+		sourceColumn: DNI
+
+	column Nombre
+		dataType: string
+		isHidden
+		lineageTag: a20634e2-121e-444c-a332-fbabf2d66970
+		summarizeBy: none
+		sourceColumn: Nombre
+
+	column StudentKey
+		dataType: string
+		isHidden
+		lineageTag: 0d5be5c7-4c3a-46da-b1c5-34426d8cf885
+		summarizeBy: none
+		sourceColumn: StudentKey
+
+	partition Padron = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(CarpetaDatos & "padron.csv"), [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    // DNI como texto: 00000001 / 00000002 son alumnos sin DNI peruano
+				    Clean = Table.TransformColumns(Headers, {{"Grado", Text.Trim, type text}, {"DNI", Text.Trim, type text}, {"Nombre", each Text.Proper(Text.Trim(_)), type text}}),
+				    Rows = Table.SelectRows(Clean, each [DNI] <> null and [DNI] <> ""),
+				    AddCurso = Table.AddColumn(Rows, "Curso", each "STAT_2026", type text),
+				    AddKey = Table.AddColumn(AddCurso, "StudentKey", each [Curso] & "|" & [DNI], type text)
+				in
+				    Table.SelectColumns(AddKey, {"Curso", "Grado", "DNI", "Nombre", "StudentKey"})
+
+	annotation PBI_ResultType = Exception
+

@@ -1,0 +1,196 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 1254.2182029388091,
+            "y": 327.56264706003128
+          },
+          "nodeIndex": "_Medidas",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 334.193599391643,
+            "y": 126.99588257431685
+          },
+          "nodeIndex": "Alumnos",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 336.26491474769637,
+            "y": 657.12529412006256
+          },
+          "nodeIndex": "Calendario",
+          "size": {
+            "height": 248,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": -0.31468783925515709
+          },
+          "nodeIndex": "Cursos",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 621.26818099476282,
+            "y": 303.71117973821924
+          },
+          "nodeIndex": "Envios",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1020.218202938809,
+            "y": 303.20874113656413
+          },
+          "nodeIndex": "Items",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 755.08451304952166,
+            "y": 656.57596885074736
+          },
+          "nodeIndex": "Logros",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 806.46742032816985,
+            "y": -50
+          },
+          "nodeIndex": "Tareas",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1488.2182029388091,
+            "y": 413.56264706003128
+          },
+          "nodeIndex": "AliasDNI",
+          "nodeLineageTag": "41b3cc88-0307-4bdd-92b0-203c3fee5c04",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1772.2182029388091,
+            "y": 327.56264706003128
+          },
+          "nodeIndex": "AlumnoTarea",
+          "nodeLineageTag": "e8032055-4edd-42a5-aa20-db0ffce98915",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2056.2182029388091,
+            "y": 413.56264706003128
+          },
+          "nodeIndex": "Etapas",
+          "nodeLineageTag": "db2f1c5d-0224-4e8f-9085-e39977984cb8",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2340.2182029388091,
+            "y": 377.56264706003128
+          },
+          "nodeIndex": "Horario",
+          "nodeLineageTag": "5c5d9937-02d2-49a3-8574-a8a41a47b00d",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2624.2182029388091,
+            "y": 341.56264706003128
+          },
+          "nodeIndex": "ItemIntentos",
+          "nodeLineageTag": "fef3dad5-9ca6-43b0-95dc-cb16bcbe6e72",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2908.2182029388091,
+            "y": 341.56264706003128
+          },
+          "nodeIndex": "ItemResumen",
+          "nodeLineageTag": "0135658e-aaa7-4ce1-a4c9-2c8914bb8d1a",
+          "size": {
+            "height": 272,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

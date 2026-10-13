@@ -1,0 +1,30 @@
+/// Logros (achievements) desbloqueados en cada envio.
+table Logros
+	lineageTag: 189deed6-b201-4bd0-a89f-a04ea015a38d
+
+	column EnvioId
+		dataType: string
+		isHidden
+		lineageTag: 2a35c160-af4b-4485-a0a1-214e9040867b
+		summarizeBy: none
+		sourceColumn: EnvioId
+
+	column Logro
+		dataType: string
+		lineageTag: c9065647-5558-4919-9b2a-c7cbad905ab1
+		summarizeBy: none
+		sourceColumn: Logro
+
+	partition Logros = m
+		mode: import
+		source =
+				let
+				    Source = Table.SelectColumns(SubmissionsRaw, {"id", "achievements"}),
+				    NoNulls = Table.TransformColumns(Source, {{"achievements", each if _ = null then {} else _}}),
+				    Expanded = Table.ExpandListColumn(NoNulls, "achievements"),
+				    NonEmpty = Table.SelectRows(Expanded, each [achievements] <> null and [achievements] <> ""),
+				    Renamed = Table.RenameColumns(NonEmpty, {{"id", "EnvioId"}, {"achievements", "Logro"}}),
+				    Typed = Table.TransformColumnTypes(Renamed, {{"EnvioId", type text}, {"Logro", type text}})
+				in
+				    Typed
+
